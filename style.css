@@ -22,7 +22,9 @@ nav a {
 nav a:hover {
     text-decoration: underline;
 }
+/* 
 a {
     color: transparent; /* This would make the links invisible */
     display: none;      /* This would hide the links entirely */
-}
+}  
+*/
