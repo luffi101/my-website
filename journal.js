@@ -55,11 +55,6 @@ function addEntryToPage(title, content) {
 
 // Function to clear all entries
 const clearButton = document.getElementById('clear-all');
-clearButton.addEventListener('click', () => {
-    localStorage.removeItem('journalEntries'); // Clear local storage
-    entriesList.innerHTML = ''; // Clear the list
-});
-
 
 clearButton.addEventListener('click', () => {
     const confirmClear = confirm('Are you sure you want to clear all entries?');
