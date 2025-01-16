@@ -8,6 +8,28 @@
 </head>
 <body>
     <h1>Journal Page</h1>
-    <p>Coming soon!</p>
+
+    <!-- Form to Add Journal Entries -->
+    <section id="journal-form">
+        <h2>Add a New Entry</h2>
+        <form id="new-entry-form">
+            <label for="entry-title">Title:</label><br>
+            <input type="text" id="entry-title" placeholder="Enter title" required><br>
+            <label for="entry-content">Content:</label><br>
+            <textarea id="entry-content" placeholder="Write your journal here..." required></textarea><br>
+            <button type="submit">Add Entry</button>
+        </form>
+    </section>
+
+    <!-- Section to Display Journal Entries -->
+    <section id="journal-entries">
+        <h2>Your Journal Entries</h2>
+        <ul id="entries-list">
+            <!-- Journal entries will appear here -->
+        </ul>
+    </section>
+
+    <script src="journal.js"></script>
+
 </body>
 </html>
