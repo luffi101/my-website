@@ -46,3 +46,12 @@ clearButton.addEventListener('click', () => {
     localStorage.removeItem('journalEntries'); // Clear local storage
     entriesList.innerHTML = ''; // Clear the list
 });
+
+
+clearButton.addEventListener('click', () => {
+    const confirmClear = confirm('Are you sure you want to clear all entries?');
+    if (confirmClear) {
+        localStorage.removeItem('journalEntries'); // Clear local storage
+        entriesList.innerHTML = ''; // Clear the list
+    }
+});
