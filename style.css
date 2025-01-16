@@ -57,3 +57,17 @@ h3 {
     margin: 0;
     color: #0073e6;
 }
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+form label, form input, form textarea, form button {
+    font-size: 1rem;
+}
+textarea {
+    resize: vertical; /* Allow resizing only vertically */
+}

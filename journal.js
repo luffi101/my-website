@@ -35,6 +35,14 @@ form.addEventListener('submit', (e) => {
 // Function to add a journal entry to the page
 function addEntryToPage(title, content) {
     const entryItem = document.createElement('li');
-    entryItem.innerHTML = `<h3>${title}</h3><p>${content}</p>`;
+    const date = new Date().toLocaleString(); // Get current date and time
+    entryItem.innerHTML = `<h3>${title}</h3><p>${content}</p><small>${date}</small>`;
     entriesList.appendChild(entryItem);
 }
+
+// Function to clear all entries
+const clearButton = document.getElementById('clear-all');
+clearButton.addEventListener('click', () => {
+    localStorage.removeItem('journalEntries'); // Clear local storage
+    entriesList.innerHTML = ''; // Clear the list
+});
