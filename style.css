@@ -24,7 +24,8 @@ nav a:hover {
 }
 /* 
 a {
-    color: transparent; /* This would make the links invisible */
-    display: none;      /* This would hide the links entirely */
+    color: transparent; 
+    display: none;      
+    these above two lines would make links invisible
 }  
 */
