@@ -34,23 +34,20 @@ form.addEventListener('submit', (e) => {
 
 // Function to add a journal entry to the page
 function addEntryToPage(title, content) {
-    function addEntryToPage(title, content) {
-        const entryItem = document.createElement('li');
-        const date = new Date().toLocaleString();
-        entryItem.innerHTML = `<h3>${title}</h3><p>${content}</p><small>${date}</small> 
-        <button class="delete-entry">Delete</button>`;
-        entriesList.appendChild(entryItem);
-    
-        // Add delete functionality
-        entryItem.querySelector('.delete-entry').addEventListener('click', () => {
-            entryItem.remove();
-            // Update local storage
-            const savedEntries = JSON.parse(localStorage.getItem('journalEntries')) || [];
-            const updatedEntries = savedEntries.filter(entry => !(entry.title === title && entry.content === content));
-            localStorage.setItem('journalEntries', JSON.stringify(updatedEntries));
-        });
-    }
-    
+    const entryItem = document.createElement('li');
+    const date = new Date().toLocaleString();
+    entryItem.innerHTML = `<h3>${title}</h3><p>${content}</p><small>${date}</small> 
+    <button class="delete-entry">Delete</button>`;
+    entriesList.appendChild(entryItem);
+
+    // Add delete functionality
+    entryItem.querySelector('.delete-entry').addEventListener('click', () => {
+        entryItem.remove();
+        // Update local storage
+        const savedEntries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+        const updatedEntries = savedEntries.filter(entry => !(entry.title === title && entry.content === content));
+        localStorage.setItem('journalEntries', JSON.stringify(updatedEntries));
+    });
 }
 
 // Function to clear all entries
