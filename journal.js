@@ -1,4 +1,4 @@
-// Import Firebase
+// Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
@@ -24,12 +24,13 @@ const form = document.getElementById('new-entry-form');
 const titleInput = document.getElementById('entry-title');
 const contentInput = document.getElementById('entry-content');
 const privateInput = document.getElementById('entry-private');
-const showPrivateToggle = document.getElementById('show-private'); 
 const entriesList = document.getElementById('entries-list');
 const loginButton = document.getElementById('login-button');
 const logoutButton = document.getElementById('logout-button');
+const welcomeMessage = document.getElementById('welcome-message');
+const journalForm = document.getElementById('journal-form');
 
-// Handle login
+// Handle Google Login
 loginButton.addEventListener("click", async () => {
     try {
         const result = await signInWithPopup(auth, provider);
@@ -40,19 +41,20 @@ loginButton.addEventListener("click", async () => {
     }
 });
 
-// Handle logout
+// Handle Logout
 logoutButton.addEventListener("click", async () => {
     await signOut(auth);
     alert("Logged out");
     entriesList.innerHTML = ""; // Clear UI
 });
 
-// Function to load journal entries
+// Function to load journal entries from Firestore
 async function loadEntries() {
     entriesList.innerHTML = "";
     const user = auth.currentUser;
-    const querySnapshot = await getDocs(collection(db, "journals"));
+    const q = query(collection(db, "journals"));
 
+    const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
         const entry = doc.data();
         if (!entry.isPrivate || (user && entry.userId === user.uid)) {
@@ -114,10 +116,15 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         loginButton.style.display = "none";
         logoutButton.style.display = "block";
+        welcomeMessage.innerText = `Welcome, ${user.displayName}!`;
+        welcomeMessage.style.display = "block";
+        journalForm.style.display = "block"; // Show journal form
         loadEntries();
     } else {
         loginButton.style.display = "block";
         logoutButton.style.display = "none";
+        welcomeMessage.style.display = "none";
+        journalForm.style.display = "none"; // Hide journal form
         entriesList.innerHTML = "";
     }
 });

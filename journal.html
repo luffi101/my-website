@@ -9,11 +9,15 @@
 <body>
     <h1>Journal Page</h1>
 
+    <!-- Authentication Buttons -->
     <button id="login-button">Login with Google</button>
     <button id="logout-button" style="display:none;">Logout</button>
-        
-    <!-- Form to Add Journal Entries -->
-    <section id="journal-form">
+
+    <!-- Welcome Message for Logged-in User -->
+    <p id="welcome-message" style="display:none;"></p>
+
+    <!-- Form to Add Journal Entries (Only for Logged-in Users) -->
+    <section id="journal-form" style="display:none;">
         <h2>Add a New Entry</h2>
         <form id="new-entry-form">
             <label for="entry-title">Title:</label><br>
@@ -31,8 +35,6 @@
 
     <!-- Section to Display Journal Entries -->
     <section id="journal-entries">
-        <label for="show-private">Show Private Entries</label>
-        <input type="checkbox" id="show-private">
         <h2>Your Journal Entries</h2>
         <ul id="entries-list">
             <!-- Journal entries will appear here -->
