@@ -5,22 +5,39 @@ body {
     padding: 0;
     background-color: #f4f4f4;
     color: #333;
+    text-align: center; /* Center all content */
 }
+
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
 h1 {
-    text-align: center;
     color: #0073e6;
 }
+
 nav {
-    text-align: center;
     margin: 20px 0;
 }
+
 nav a {
     text-decoration: none;
     color: #0073e6;
     margin: 0 10px;
 }
+
 nav a:hover {
     text-decoration: underline;
+}
+
+.intro-text {
+    font-size: 1.2em;
+    font-weight: bold;
 }
 /* 
 a {
