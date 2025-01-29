@@ -1,3 +1,5 @@
+console.log("Firebase SDK Loaded:", firebase);
+
 // Get Firebase authentication and Firestore instances
 const auth = firebase.auth();
 const db = firebase.firestore();
