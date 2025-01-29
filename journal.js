@@ -84,5 +84,6 @@ clearButton.addEventListener('click', () => {
     if (confirmClear) {
         localStorage.removeItem('journalEntries'); // Clear local storage
         entriesList.innerHTML = ''; // Clear the list
+        displayEntries(); // Ensure the UI updates properly
     }
 });
