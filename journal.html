@@ -3,8 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Journal</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
+    <!-- Initialize Firebase (Important!) -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6H6PO-d3u8INKpRTu6HwjkZWsCtaH4dU",
+            authDomain: "personal-website-73f1a.firebaseapp.com",
+            projectId: "personal-website-73f1a",
+            storageBucket: "personal-website-73f1a.firebasestorage.app",
+            messagingSenderId: "509418834116",
+            appId: "1:509418834116:web:a51aed5c1750ade077a191"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+
 </head>
 <body>
     <h1>Journal Page</h1>
