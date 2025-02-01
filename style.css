@@ -59,6 +59,10 @@ a {
     margin: 20px;
     padding: 20px;
 }
+#journal-entries p, .journal-entry-text {
+    text-align: left;
+}
+
 #journal-entries ul {
     list-style-type: none;
     padding: 0;
@@ -85,6 +89,44 @@ form {
 form label, form input, form textarea, form button {
     font-size: 1rem;
 }
+
+form input, form textarea {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+form input:focus, form textarea:focus {
+    border-color: #0073e6;
+    outline: none;
+}
+
 textarea {
     resize: vertical; /* Allow resizing only vertically */
+}
+
+button {
+    background-color: #0073e6;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #005bb5;
+}
+
+
+@media (max-width: 600px) {
+    .container {
+        margin: 20px;
+        padding: 15px;
+    }
+    
+    body {
+        text-align: left; /* For better readability on mobile */
+    }
 }

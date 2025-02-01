@@ -29,3 +29,34 @@ document.getElementById('logout-button').addEventListener('click', () => {
         document.getElementById('welcome-message').style.display = 'none';
     });
 });
+
+auth.onAuthStateChanged(user => {
+    if (user) {
+        document.getElementById('login-button').style.display = 'none';
+        document.getElementById('logout-button').style.display = 'block';
+        document.getElementById('journal-form').style.display = 'block';
+        document.getElementById('welcome-message').innerText = `Welcome, ${user.displayName}`;
+        document.getElementById('welcome-message').style.display = 'block';
+    } else {
+        document.getElementById('login-button').style.display = 'block';
+        document.getElementById('logout-button').style.display = 'none';
+        document.getElementById('journal-form').style.display = 'none';
+        document.getElementById('welcome-message').style.display = 'none';
+    }
+});
+
+
+function setLoggedInState(user) {
+    document.getElementById('login-button').style.display = 'none';
+    document.getElementById('logout-button').style.display = 'block';
+    document.getElementById('journal-form').style.display = 'block';
+    document.getElementById('welcome-message').innerText = `Welcome, ${user.displayName}`;
+    document.getElementById('welcome-message').style.display = 'block';
+}
+
+function setLoggedOutState() {
+    document.getElementById('login-button').style.display = 'block';
+    document.getElementById('logout-button').style.display = 'none';
+    document.getElementById('journal-form').style.display = 'none';
+    document.getElementById('welcome-message').style.display = 'none';
+}
