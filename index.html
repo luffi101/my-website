@@ -6,15 +6,38 @@
     <title>My Website</title>
     <link rel="stylesheet" href="style.css">
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6H6PO-d3u8INKpRTu6HwjkZWsCtaH4dU",
+            authDomain: "personal-website-73f1a.firebaseapp.com",
+            projectId: "personal-website-73f1a",
+            storageBucket: "personal-website-73f1a.firebasestorage.app",
+            messagingSenderId: "509418834116",
+            appId: "1:509418834116:web:a51aed5c1750ade077a191"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
 </head>
 <body>
     <div class="container">
         <h1>Welcome to My Website</h1>
         <nav>
-            <a href="index.html">Home</a> |
+            <a href="index.html">Home</a>
             <a href="journal.html">Journal</a>
         </nav>
         <p class="intro-text">This is a simple page hosted on GitHub Pages!</p>
+
+        <!-- Authentication Buttons -->
+        <button id="login-button">Login with Google</button>
+        <button id="logout-button" style="display:none;">Logout</button>
+        <p id="welcome-message" style="display:none;"></p>
     </div>
+
+    <script src="auth.js"></script>
 </body>
 </html>

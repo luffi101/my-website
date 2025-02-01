@@ -1,62 +1,55 @@
-console.log("Firebase SDK Loaded:", firebase);
-
-// Get Firebase authentication and Firestore instances
-const auth = firebase.auth();
 const db = firebase.firestore();
-const provider = new firebase.auth.GoogleAuthProvider();
 
-// Login Button
-document.getElementById('login-button').addEventListener('click', () => {
-    auth.signInWithPopup(provider)
-        .then(result => {
-            console.log('User signed in:', result.user);
-            document.getElementById('login-button').style.display = 'none';
-            document.getElementById('logout-button').style.display = 'block';
-            document.getElementById('journal-form').style.display = 'block';
-            document.getElementById('welcome-message').innerText = `Welcome, ${result.user.displayName}`;
-            document.getElementById('welcome-message').style.display = 'block';
-        })
-        .catch(error => console.error('Login failed:', error));
-});
-
-// Logout Button
-document.getElementById('logout-button').addEventListener('click', () => {
-    auth.signOut().then(() => {
-        console.log('User signed out');
-        document.getElementById('login-button').style.display = 'block';
-        document.getElementById('logout-button').style.display = 'none';
-        document.getElementById('journal-form').style.display = 'none';
-        document.getElementById('welcome-message').style.display = 'none';
-    });
-});
-
-auth.onAuthStateChanged(user => {
+// Check if user is logged in before showing the form
+firebase.auth().onAuthStateChanged(user => {
     if (user) {
-        document.getElementById('login-button').style.display = 'none';
-        document.getElementById('logout-button').style.display = 'block';
         document.getElementById('journal-form').style.display = 'block';
-        document.getElementById('welcome-message').innerText = `Welcome, ${user.displayName}`;
-        document.getElementById('welcome-message').style.display = 'block';
+        loadJournalEntries(user.uid); // Load user-specific entries
     } else {
-        document.getElementById('login-button').style.display = 'block';
-        document.getElementById('logout-button').style.display = 'none';
-        document.getElementById('journal-form').style.display = 'none';
-        document.getElementById('welcome-message').style.display = 'none';
+        loadJournalEntries(null); // Load only public entries
     }
 });
 
+// Load journal entries
+function loadJournalEntries(userId) {
+    db.collection('journalEntries').get().then(snapshot => {
+        const entriesList = document.getElementById('entries-list');
+        entriesList.innerHTML = '';
 
-function setLoggedInState(user) {
-    document.getElementById('login-button').style.display = 'none';
-    document.getElementById('logout-button').style.display = 'block';
-    document.getElementById('journal-form').style.display = 'block';
-    document.getElementById('welcome-message').innerText = `Welcome, ${user.displayName}`;
-    document.getElementById('welcome-message').style.display = 'block';
+        snapshot.forEach(doc => {
+            const entry = doc.data();
+
+            // Show only public entries OR the user's private entries
+            if (!entry.private || (userId && entry.userId === userId)) {
+                const entryItem = document.createElement('li');
+                entryItem.innerHTML = `<h3>${entry.title}</h3><p>${entry.content}</p>`;
+                entriesList.appendChild(entryItem);
+            }
+        });
+    });
 }
 
-function setLoggedOutState() {
-    document.getElementById('login-button').style.display = 'block';
-    document.getElementById('logout-button').style.display = 'none';
-    document.getElementById('journal-form').style.display = 'none';
-    document.getElementById('welcome-message').style.display = 'none';
-}
+// Add new entry
+document.getElementById('new-entry-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const user = firebase.auth().currentUser;
+    if (!user) return alert('You must be logged in to add an entry');
+
+    const title = document.getElementById('entry-title').value.trim();
+    const content = document.getElementById('entry-content').value.trim();
+    const isPrivate = document.getElementById('entry-private').checked;
+
+    if (title && content) {
+        db.collection('journalEntries').add({
+            title,
+            content,
+            private: isPrivate,
+            userId: user.uid,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            document.getElementById('new-entry-form').reset();
+            loadJournalEntries(user.uid);
+        });
+    }
+});
