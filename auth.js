@@ -1,35 +1,45 @@
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
+// auth.js
 
-// Login
-document.getElementById('login-button').addEventListener('click', () => {
-    auth.signInWithPopup(provider)
-        .then(result => {
-            console.log('User signed in:', result.user);
-            localStorage.setItem('user', JSON.stringify(result.user)); // Store user data
-            window.location.href = "journal.html"; // Redirect after login
-        })
-        .catch(error => console.error('Login failed:', error));
-});
-
-// Logout
-document.getElementById('logout-button').addEventListener('click', () => {
-    auth.signOut().then(() => {
-        localStorage.removeItem('user');
-        window.location.href = "index.html"; // Redirect after logout
-    });
-});
-
-// Check if user is logged in
-auth.onAuthStateChanged(user => {
+// Monitor authentication state:
+firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        document.getElementById('login-button').style.display = 'none';
-        document.getElementById('logout-button').style.display = 'block';
-        document.getElementById('welcome-message').innerText = `Welcome, ${user.displayName}`;
-        document.getElementById('welcome-message').style.display = 'block';
+        console.log("User signed in:", user.uid);
+        // Update UI elements if needed. For example, show a welcome message:
+        document.getElementById("welcome-message").innerText = `Welcome, ${user.displayName}!`;
+        document.getElementById("welcome-message").style.display = "block";
+        document.getElementById("logout-button").style.display = "inline-block";
     } else {
-        document.getElementById('login-button').style.display = 'block';
-        document.getElementById('logout-button').style.display = 'none';
-        document.getElementById('welcome-message').style.display = 'none';
+        console.log("No user signed in");
+        document.getElementById("welcome-message").style.display = "none";
+        document.getElementById("logout-button").style.display = "none";
     }
 });
+  
+// Function to sign in with Google:
+function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider)
+      .then((result) => {
+          console.log("Signed in as:", result.user.displayName);
+          // Optionally update user document in Firestore here.
+      })
+      .catch((error) => {
+          console.error("Error during Google sign-in:", error);
+      });
+}
+  
+// Expose the function to the global scope so you can call it from your HTML:
+window.signInWithGoogle = signInWithGoogle;
+
+// Optionally, add a logout function:
+function signOut() {
+    firebase.auth().signOut().then(() => {
+        console.log("User signed out");
+    }).catch((error) => {
+        console.error("Sign out error:", error);
+    });
+}
+window.signOut = signOut;
+
+// Attach logout functionality to the logout button if present:
+document.getElementById("logout-button")?.addEventListener("click", signOut);
