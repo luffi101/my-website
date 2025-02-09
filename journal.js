@@ -12,26 +12,34 @@ document.addEventListener('DOMContentLoaded', function() {
       }
   });
 
-  // Load journal entries from the "journals" collection.
   function loadJournalEntries(userId) {
-      firebase.firestore().collection('journals').get().then(snapshot => {
-          const entriesList = document.getElementById('entries-list');
-          entriesList.innerHTML = '';
+    firebase.firestore().collection('journals').get().then(snapshot => {
+        const entriesList = document.getElementById('entries-list');
+        const countElement = document.getElementById('journal-count');
+        entriesList.innerHTML = '';
+        let count = 0;
 
-          snapshot.forEach(doc => {
-              const entry = doc.data();
+        snapshot.forEach(doc => {
+            const entry = doc.data();
+            // Display entry if it is public or belongs to the logged-in user.
+            if (!entry.isPrivate || (userId && entry.uid === userId)) {
+                count++;
+                const entryItem = document.createElement('li');
+                entryItem.innerHTML = `<h3>${entry.title}</h3><p>${entry.content}</p>`;
+                entriesList.appendChild(entryItem);
+            }
+        });
 
-              // Display entry if it is public or if it belongs to the logged-in user.
-              if (!entry.isPrivate || (userId && entry.uid === userId)) {
-                  const entryItem = document.createElement('li');
-                  entryItem.innerHTML = `<h3>${entry.title}</h3><p>${entry.content}</p>`;
-                  entriesList.appendChild(entryItem);
-              }
-          });
-      }).catch((error) => {
-          console.error("Error loading journal entries:", error);
-      });
-  }
+        if (countElement) {
+            countElement.innerText = `Total Journal Entries: ${count}`;
+        }
+    }).catch((error) => {
+        console.error("Error loading journal entries:", error);
+    });
+}
+
+
+
 
   // Handle the submission of a new journal entry.
   const journalForm = document.getElementById("journalForm");
