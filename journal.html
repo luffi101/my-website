@@ -36,13 +36,13 @@
     <section id="journal-form" style="display:none;">
       <h2>Add a New Entry</h2>
       <form id="journalForm">
-        <label>Title:</label>
-        <input type="text" id="entryTitle" required>
+        <label for="entryTitle">Title:</label>
+        <input type="text" id="entryTitle" placeholder="Enter title" required>
         <br>
-        <label>Content:</label>
-        <textarea id="entryContent" required></textarea>
+        <label for="entryContent">Content:</label>
+        <textarea id="entryContent" placeholder="Enter your content" required></textarea>
         <br>
-        <label>
+        <label for="isPrivate">
           <input type="checkbox" id="isPrivate">
           Private
         </label>
