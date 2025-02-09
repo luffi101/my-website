@@ -36,10 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }).catch((error) => {
         console.error("Error loading journal entries:", error);
     });
-}
-
-
-
+  }
 
   // Handle the submission of a new journal entry.
   const journalForm = document.getElementById("journalForm");
