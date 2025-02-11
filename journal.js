@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Function to load journal entries, ordered by timestamp (newest first)
   function loadJournalEntries(userId) {
     firebase.firestore().collection('journals')
-      .orderBy('timestamp', 'desc')  // Order chronologically by timestamp
+      .orderBy('timestamp', 'desc')
       .get()
       .then(snapshot => {
           const entriesList = document.getElementById('entries-list');
@@ -40,9 +40,10 @@ document.addEventListener('DOMContentLoaded', function() {
                       displayDate = dateObj.toLocaleString(); // e.g., "2/9/2025, 5:05:57 PM"
                   }
                   
-                  entryItem.innerHTML = `<h3>${entry.title}</h3>
-                                           <p>${entry.content}</p>
-                                           <small>${displayDate}</small>`;
+                  // Display date at the top
+                  entryItem.innerHTML = `<small>${displayDate}</small>
+                                           <h3>${entry.title}</h3>
+                                           <p>${entry.content}</p>`;
                   entriesList.appendChild(entryItem);
               }
           });
@@ -66,35 +67,35 @@ document.addEventListener('DOMContentLoaded', function() {
           const title = document.getElementById("entryTitle").value.trim();
           const content = document.getElementById("entryContent").value.trim();
           const isPrivate = document.getElementById("isPrivate").checked;
-          
+
           // Check that the user is authenticated.
           const user = firebase.auth().currentUser;
           if (!user) {
-              document.getElementById("feedback").innerText = "Please sign in to save your journal.";
-              return;
+            document.getElementById("feedback").innerText = "Please sign in to save your journal.";
+            return;
           }
 
           // Prepare the journal entry object.
           const entry = {
-              title: title,
-              content: content,
-              isPrivate: isPrivate,
-              uid: user.uid,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            title: title,
+            content: content,
+            isPrivate: isPrivate,
+            uid: user.uid,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
           };
 
           // Save to Firestore in the "journals" collection.
           firebase.firestore().collection("journals").add(entry)
-              .then(() => {
-                  document.getElementById("feedback").innerText = "Journal entry saved successfully!";
-                  journalForm.reset();
-                  // Reload entries after saving.
-                  loadJournalEntries(user.uid);
-              })
-              .catch((error) => {
-                  console.error("Error saving journal entry:", error);
-                  document.getElementById("feedback").innerText = "Error saving entry: " + error.message;
-              });
+            .then(() => {
+              document.getElementById("feedback").innerText = "Journal entry saved successfully!";
+              journalForm.reset();
+              // Reload entries after saving.
+              loadJournalEntries(user.uid);
+            })
+            .catch((error) => {
+              console.error("Error saving journal entry:", error);
+              document.getElementById("feedback").innerText = "Error saving entry: " + error.message;
+            });
       });
   }
 });
