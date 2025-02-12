@@ -60,8 +60,26 @@ document.addEventListener('DOMContentLoaded', function() {
                                 console.error("Error updating entry:", error);
                             });
                       });
-                      // Append the button (if you want it on top, you can prepend it instead)
                       entryItem.appendChild(makePublicBtn);
+                  }
+                  
+                  // If the entry belongs to the logged-in user, add a "Delete" button.
+                  if (userId && entry.uid === userId) {
+                      const deleteBtn = document.createElement('button');
+                      deleteBtn.innerText = "Delete";
+                      deleteBtn.addEventListener("click", function() {
+                          if (confirm("Are you sure you want to delete this entry?")) {
+                              firebase.firestore().collection("journals").doc(doc.id).delete()
+                                .then(() => {
+                                    console.log("Entry deleted.");
+                                    loadJournalEntries(userId);
+                                })
+                                .catch(error => {
+                                    console.error("Error deleting entry:", error);
+                                });
+                          }
+                      });
+                      entryItem.appendChild(deleteBtn);
                   }
                   
                   entriesList.appendChild(entryItem);
@@ -92,17 +110,17 @@ document.addEventListener('DOMContentLoaded', function() {
           // Check that the user is authenticated.
           const user = firebase.auth().currentUser;
           if (!user) {
-              document.getElementById("feedback").innerText = "Please sign in to save your journal.";
-              return;
+            document.getElementById("feedback").innerText = "Please sign in to save your journal.";
+            return;
           }
 
           // Prepare the journal entry object.
           const entry = {
-              title: title,
-              content: content,
-              isPrivate: isPrivate,
-              uid: user.uid,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            title: title,
+            content: content,
+            isPrivate: isPrivate,
+            uid: user.uid,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
           };
 
           // Save to Firestore in the "journals" collection.
