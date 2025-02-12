@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function() {
           authInfo.innerHTML = `<span>Not logged in</span>`;
         }
       }
-      // If there's a central login button, hide it when logged in, show when not.
+      // Toggle central login button on index page.
       if (centerLogin) {
         centerLogin.style.display = user ? "none" : "block";
       }
@@ -43,6 +43,10 @@ document.addEventListener("DOMContentLoaded", function() {
         firebase.auth().signOut().then(() => {
             console.log("User signed out");
             updateAuthUI(null);
+            // If on journal.html, redirect to index.html.
+            if (window.location.pathname.indexOf("journal.html") !== -1) {
+                window.location.href = "index.html";
+            }
         }).catch((error) => {
             console.error("Sign out error:", error);
         });
