@@ -40,10 +40,30 @@ document.addEventListener('DOMContentLoaded', function() {
                       displayDate = dateObj.toLocaleString(); // e.g., "2/9/2025, 5:05:57 PM"
                   }
                   
-                  // Display date at the top
+                  // Display date at the top, then title and content.
                   entryItem.innerHTML = `<small>${displayDate}</small>
                                            <h3>${entry.title}</h3>
                                            <p>${entry.content}</p>`;
+                  
+                  // If the entry is private and belongs to the logged-in user, add a "Make Public" button.
+                  if (entry.isPrivate && userId && entry.uid === userId) {
+                      const makePublicBtn = document.createElement('button');
+                      makePublicBtn.innerText = "Make Public";
+                      makePublicBtn.addEventListener("click", function() {
+                          firebase.firestore().collection("journals").doc(doc.id)
+                            .update({ isPrivate: false })
+                            .then(() => {
+                                console.log("Entry updated to public.");
+                                loadJournalEntries(userId);
+                            })
+                            .catch((error) => {
+                                console.error("Error updating entry:", error);
+                            });
+                      });
+                      // Append the button (if you want it on top, you can prepend it instead)
+                      entryItem.appendChild(makePublicBtn);
+                  }
+                  
                   entriesList.appendChild(entryItem);
               }
           });
@@ -66,22 +86,23 @@ document.addEventListener('DOMContentLoaded', function() {
           // Get values from the form.
           const title = document.getElementById("entryTitle").value.trim();
           const content = document.getElementById("entryContent").value.trim();
-          const isPrivate = document.getElementById("isPrivate").checked;
+          // New entries are private by default.
+          const isPrivate = true;
 
           // Check that the user is authenticated.
           const user = firebase.auth().currentUser;
           if (!user) {
-            document.getElementById("feedback").innerText = "Please sign in to save your journal.";
-            return;
+              document.getElementById("feedback").innerText = "Please sign in to save your journal.";
+              return;
           }
 
           // Prepare the journal entry object.
           const entry = {
-            title: title,
-            content: content,
-            isPrivate: isPrivate,
-            uid: user.uid,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+              title: title,
+              content: content,
+              isPrivate: isPrivate,
+              uid: user.uid,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
           };
 
           // Save to Firestore in the "journals" collection.
