@@ -22,10 +22,15 @@
         <a href="index.html">Home</a>
         <a href="journal.html">Journal</a>
       </nav>
-      <!-- Authentication info displayed at top-right -->
+      <!-- Top-right authentication info -->
       <div id="auth-info"></div>
     </header>
     <p class="intro-text">This is a simple page hosted on GitHub Pages!</p>
+    
+    <!-- Central login button, shown only when not logged in -->
+    <div id="center-login">
+      <button onclick="signInWithGoogle()">Login with Google</button>
+    </div>
   </div>
   
   <script src="auth.js"></script>

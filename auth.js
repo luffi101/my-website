@@ -2,13 +2,20 @@ document.addEventListener("DOMContentLoaded", function() {
     // Function to update the authentication UI.
     function updateAuthUI(user) {
       const authInfo = document.getElementById("auth-info");
-      if (!authInfo) return;
-      if (user) {
-        authInfo.innerHTML = `<span>Welcome, ${user.displayName}</span>
-                              <button id="logout-button">Logout</button>`;
-        document.getElementById("logout-button").addEventListener("click", signOut);
-      } else {
-        authInfo.innerHTML = `<button id="login-button" onclick="signInWithGoogle()">Login with Google</button>`;
+      const centerLogin = document.getElementById("center-login");
+      
+      if (authInfo) {
+        if (user) {
+          authInfo.innerHTML = `<span>Welcome, ${user.displayName}</span>
+                                <button id="logout-button">Logout</button>`;
+          document.getElementById("logout-button").addEventListener("click", signOut);
+        } else {
+          authInfo.innerHTML = `<span>Not logged in</span>`;
+        }
+      }
+      // If there's a central login button, hide it when logged in, show when not.
+      if (centerLogin) {
+        centerLogin.style.display = user ? "none" : "block";
       }
     }
   
