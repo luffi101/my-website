@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", function() {
     // Function to sign in with Google.
     function signInWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
+        // Force account selection prompt every time.
+        provider.setCustomParameters({ prompt: 'select_account' });
         firebase.auth().signInWithPopup(provider)
           .then((result) => {
               console.log("Signed in as:", result.user.displayName);
@@ -40,16 +42,18 @@ document.addEventListener("DOMContentLoaded", function() {
   
     // Function to sign out.
     function signOut() {
-        firebase.auth().signOut().then(() => {
-            console.log("User signed out");
-            updateAuthUI(null);
-            // If on journal.html, redirect to index.html.
-            if (window.location.pathname.indexOf("journal.html") !== -1) {
-                window.location.href = "index.html";
-            }
-        }).catch((error) => {
-            console.error("Sign out error:", error);
-        });
+        firebase.auth().signOut()
+          .then(() => {
+              console.log("User signed out");
+              updateAuthUI(null);
+              // If on journal.html, redirect to index.html.
+              if (window.location.pathname.indexOf("journal.html") !== -1) {
+                  window.location.href = "index.html";
+              }
+          })
+          .catch((error) => {
+              console.error("Sign out error:", error);
+          });
     }
     window.signOut = signOut;
   });
