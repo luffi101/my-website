@@ -40,10 +40,13 @@ document.addEventListener('DOMContentLoaded', function() {
                       displayDate = dateObj.toLocaleString(); // e.g., "2/9/2025, 5:05:57 PM"
                   }
                   
+                  // Replace newline characters with <br> tags for proper formatting
+                  const formattedContent = entry.content.replace(/\n/g, "<br>");
+                  
                   // Display date at the top, then title and content.
                   entryItem.innerHTML = `<small>${displayDate}</small>
                                            <h3>${entry.title}</h3>
-                                           <p>${entry.content}</p>`;
+                                           <p>${formattedContent}</p>`;
                   
                   // If the entry is private and belongs to the logged-in user, add a "Make Public" button.
                   if (entry.isPrivate && userId && entry.uid === userId) {
@@ -110,17 +113,17 @@ document.addEventListener('DOMContentLoaded', function() {
           // Check that the user is authenticated.
           const user = firebase.auth().currentUser;
           if (!user) {
-            document.getElementById("feedback").innerText = "Please sign in to save your journal.";
-            return;
+              document.getElementById("feedback").innerText = "Please sign in to save your journal.";
+              return;
           }
 
           // Prepare the journal entry object.
           const entry = {
-            title: title,
-            content: content,
-            isPrivate: isPrivate,
-            uid: user.uid,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+              title: title,
+              content: content,
+              isPrivate: isPrivate,
+              uid: user.uid,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
           };
 
           // Save to Firestore in the "journals" collection.
