@@ -21,11 +21,18 @@
   <script src="timeline.js"></script>
   
   <style>
-    /* Style for the timeline container */
+    /* Timeline container styles */
     #timeline-container {
       width: 100%;
-      height: 600px; /* Adjust height as needed */
+      height: 600px; /* Adjust as needed */
       border: 1px solid #ccc;
+    }
+    
+    /* New timeline section for full-width display */
+    #timeline-section {
+      width: 100%;
+      padding: 20px;
+      margin: 0;
     }
   </style>
 </head>
@@ -38,10 +45,14 @@
         <a href="journal.html">Journal</a>
         <a href="timeline.html">Timeline</a>
       </nav>
-      <!-- Authentication info (login status and logout button) -->
+      <!-- Authentication info (status and logout) -->
       <div id="auth-info"></div>
     </header>
-    <div id="timeline-container"></div>
   </div>
+  
+  <!-- Timeline section now in its own full-width section -->
+  <section id="timeline-section">
+    <div id="timeline-container"></div>
+  </section>
 </body>
 </html>

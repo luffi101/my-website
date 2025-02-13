@@ -8,10 +8,17 @@ body {
   }
   
   .container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 20px;
     background-color: #fff;
+  }
+
+  /* Additional styling for timeline section to span full width */
+  #timeline-section {
+    width: 100%;
+    padding: 20px;
+    margin: 0;
   }
   
   h1, h2, h3 {
