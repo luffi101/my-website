@@ -3,37 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Website</title>
+  <title>Historical Figures Timeline</title>
   <link rel="stylesheet" href="style.css">
-
+  
+  <!-- vis.js CSS/JS from CDN -->
+  <link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+  
   <!-- Firebase SDK (compat versions) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   
-  <!-- Firebase Config -->
+  <!-- Firebase Config, Auth, and Timeline Script -->
   <script src="firebase-config.js"></script>
+  <script src="auth.js"></script>
+  <script src="timeline.js"></script>
+  
+  <style>
+    /* Style for the timeline container */
+    #timeline-container {
+      width: 100%;
+      height: 600px; /* Adjust height as needed */
+      border: 1px solid #ccc;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Welcome to My Website</h1>
+      <h1>Historical Figures Timeline</h1>
       <nav>
         <a href="index.html">Home</a>
         <a href="journal.html">Journal</a>
         <a href="timeline.html">Timeline</a>
       </nav>
-      <!-- Top-right authentication info -->
+      <!-- Authentication info (login status and logout button) -->
       <div id="auth-info"></div>
     </header>
-    <p class="intro-text">This is a simple personal web page</p>
-    
-    <!-- Central login button, shown only when not logged in -->
-    <div id="center-login">
-      <button onclick="signInWithGoogle()">Login with Google</button>
-    </div>
+    <div id="timeline-container"></div>
   </div>
-  
-  <script src="auth.js"></script>
 </body>
 </html>
