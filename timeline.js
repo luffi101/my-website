@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // Define groups (the 7 categories)
+  // Define groups (categories) for the timeline.
   const groups = [
     { id: "Politics", content: "Politics" },
     { id: "Science", content: "Science" },
@@ -54,6 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
     "Philosophy & Religion": "indigo",
     "Social & Cultural Movement": "orange"
   };
+
+  // Helper function: normalize group strings to Title Case.
+  function normalizeGroup(str) {
+    return str.trim().split(' ').map(word => {
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    }).join(' ');
+  }
 
   // Retrieve historical figures from Firestore.
   firebase.firestore().collection("historicalFigures")
@@ -81,10 +88,11 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
            }
 
-           // For groups, use the first element of the groups array; default to "Politics".
-           const primaryGroup = (data.groups && data.groups.length > 0) ? data.groups[0] : "Politics";
+           // For groups, use the first element in the groups array; default to "Politics".
+           let primaryGroupRaw = (data.groups && data.groups.length > 0) ? data.groups[0] : "Politics";
+           const primaryGroup = normalizeGroup(primaryGroupRaw);
 
-           // Process name: convert "Lastname, Firstname" to "Firstname Lastname"
+           // Process name: convert "Lastname, Firstname" to "Firstname Lastname".
            let formattedName = data.name;
            if (formattedName && formattedName.includes(",")) {
              const parts = formattedName.split(",");
@@ -126,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Event listener for the new historical figure form.
+  // Add event listener for the new historical figure form.
   const figureForm = document.getElementById("figureForm");
   if (figureForm) {
     figureForm.addEventListener("submit", (e) => {
