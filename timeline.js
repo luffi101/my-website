@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
            }
 
            // Use the first element from data.groups as the primary group (default to "politics")
-           const primaryGroup = (data.groups && data.groups.length > 0) ? data.groups[0].toLowerCase() : "politics";
+           const primaryGroup = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
            
            // Get the color for the primary group.
            const bgColor = groupColors[primaryGroup] || "gray";
