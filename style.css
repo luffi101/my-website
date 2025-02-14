@@ -1,77 +1,87 @@
-/* style.css */
-
+/* Global Styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f7f7f7;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #fff;
-  }
+  font-family: Arial, sans-serif;
+  background-color: #f7f7f7;
+  margin: 0;
+  padding: 0;
+}
 
-  /* Additional styling for timeline section to span full width */
-  #timeline-section {
-    width: 96%;
-    padding: 20px; /* 20px of space inside the section (between its border and its content) */
-    margin: 2px;   /* 2px of space outside the section (between it and adjacent elements) */
-  }
-  
-  
-  h1, h2, h3 {
-    color: #333;
-  }
-  
-  nav a {
-    margin-right: 15px;
-    text-decoration: none;
-    color: #007bff;
-  }
-  
-  .intro-text {
-    font-size: 1.2em;
-    color: #555;
-  }
-  
-  button {
-    padding: 10px 15px;
-    font-size: 1em;
-    margin: 5px;
-    cursor: pointer;
-  }
-  
-  #journalForm input[type="text"],
-  #journalForm textarea {
-    width: 100%;
-    padding: 8px;
-    margin: 5px 0;
-    box-sizing: border-box;
-  }
-  
-  #entries-list {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  #entries-list li {
-    background: #f1f1f1;
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 5px;
-  }
-  
-  header {
-    position: relative;
-    padding: 10px;
-  }
-  
-  #auth-info {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-  }
-  
+/* Container for main content */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+}
+
+/* Header and Navigation */
+header {
+  position: relative;
+  padding: 10px;
+}
+
+header h1 {
+  margin: 0;
+}
+
+nav a {
+  margin-right: 15px;
+  text-decoration: none;
+  color: #007bff;
+}
+
+/* Authentication Info in Header */
+#auth-info {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* Intro Text */
+.intro-text {
+  font-size: 1.2em;
+  color: #555;
+}
+
+/* Buttons */
+button {
+  padding: 10px 15px;
+  font-size: 1em;
+  margin: 5px;
+  cursor: pointer;
+}
+
+/* Journal Form Styles */
+#journalForm input[type="text"],
+#journalForm textarea {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  box-sizing: border-box;
+}
+
+/* Journal Entries List */
+#entries-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+#entries-list li {
+  background: #f1f1f1;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* Timeline Specific Styles */
+#timeline-container {
+  width: 95%;
+  height: 600px; /* Adjust height as needed */
+  border: 2px solid #ccc;
+}
+
+#timeline-section {
+  width: 100%;
+  padding: 20px;
+  margin: 0;
+}
