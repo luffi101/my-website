@@ -124,3 +124,9 @@ button {
   line-height: 1.2em !important;
 }
 */
+
+/* Override vis.js hover and selected background colors */
+.vis-item:hover,
+.vis-item.vis-selected {
+  background-color: inherit !important;
+}
