@@ -1,18 +1,13 @@
-// timeline.js
-
 document.addEventListener('DOMContentLoaded', function() {
   const container = document.getElementById('timeline-container');
 
   // Milliseconds per year (using 365.25 days/year)
   const msPerYear = 31557600000;
 
-  // Desired zoom limits using George Washington’s 67-year lifespan as reference:
-  // Zoom In: minimum visible span = 201 years (so his block occupies ~1/3 of the container width)
-  const zoomMin = 201 * msPerYear;
-  
-  // Zoom Out: ensure his block remains at least ~1 inch (≈96px) wide.
+  // Zoom settings based on George Washington’s 67-year lifespan as reference:
+  const zoomMin = 201 * msPerYear; // Minimum visible span = 201 years
   const containerWidth = container.offsetWidth;
-  const zoomMax = (67 * msPerYear * containerWidth) / 96;
+  const zoomMax = (67 * msPerYear * containerWidth) / 96; // Maximum visible span such that a 67-year block is at least 96px wide
 
   const options = {
     orientation: 'top',
@@ -32,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // Define the 7 geographical regions.
+  // Define the 7 geographical regions and create groups (2 rows per region)
   const regions = [
     "North America",
     "South America",
@@ -43,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
 
-  // Create groups: each region gets two rows; add fallback unknown rows.
   const groups = [];
   regions.forEach(region => {
     groups.push({ id: region.toLowerCase() + " - 1", content: region + " (Row 1)" });
@@ -52,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
   groups.push({ id: "unknown - 1", content: "Unknown (Row 1)" });
   groups.push({ id: "unknown - 2", content: "Unknown (Row 2)" });
 
-  // Initialize region counters for alternating rows.
+  // Counters for alternating rows for each region.
   const regionCounters = {};
   regions.forEach(region => {
     regionCounters[region.toLowerCase()] = 0;
@@ -94,28 +88,9 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
            }
 
-           // Determine region (default "unknown").
-           let region = "unknown";
-           if (data.region && typeof data.region === "string") {
-             let normalizedRegion = data.region.trim().toLowerCase();
-             if (regions.map(r => r.toLowerCase()).includes(normalizedRegion)) {
-               region = normalizedRegion;
-             }
-           }
-
-           // Alternate row assignment for the region.
-           const counter = regionCounters[region] || 0;
-           const rowNumber = (counter % 2 === 0) ? " - 1" : " - 2";
-           regionCounters[region] = counter + 1;
-           const groupId = region + rowNumber;
-
-           // Determine expertise category from data.groups (default "politics").
-           let expertiseCategory = "politics";
-           if (data.groups && Array.isArray(data.groups) && data.groups.length > 0) {
-             expertiseCategory = data.groups[0].trim().toLowerCase();
-           }
-           // Get background color based on expertise.
-           const bgColor = expertiseColors[expertiseCategory] || "gray";
+           // Determine the primary expertise category from the "groups" field (default to "politics").
+           const primaryExpertise = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
+           const bgColor = expertiseColors[primaryExpertise] || "gray";
 
            // Process name: convert "Lastname, Firstname" to "Firstname Lastname".
            let formattedName = data.name;
@@ -126,9 +101,23 @@ document.addEventListener('DOMContentLoaded', function() {
              }
            }
 
-           // Build content HTML: display only the name.
-           let contentHTML = `<div class="figure-content">
-                                  <h3>${formattedName}</h3>
+           // Determine region (default to "unknown") from the "region" field.
+           let region = "unknown";
+           if (data.region && typeof data.region === "string") {
+             let normalizedRegion = data.region.trim().toLowerCase();
+             if (regions.map(r => r.toLowerCase()).includes(normalizedRegion)) {
+               region = normalizedRegion;
+             }
+           }
+           // Alternate row assignment for the region.
+           const counter = regionCounters[region] || 0;
+           const rowNumber = (counter % 2 === 0) ? " - 1" : " - 2";
+           regionCounters[region] = counter + 1;
+           const groupId = region + rowNumber;
+
+           // Build content HTML: display only the formatted name with inline style for color.
+           const contentHTML = `<div class="figure-content" style="background-color: ${bgColor}; padding: 2px; color: white;">
+                                  <h3 style="margin: 0; font-size: 0.9em;">${formattedName}</h3>
                                 </div>`;
 
            items.push({
@@ -136,9 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
              group: groupId,
              content: contentHTML,
              start: startDate,
-             end: endDate,
-             // Set inline style for the block using the expertise color.
-             style: "background-color: " + bgColor + " !important; color: white; padding: 2px; font-size: 0.9em; line-height: 1.2em;"
+             end: endDate
            });
        });
 
@@ -157,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Add event listener for the "Add Historical Figure" form.
+  // Event listener for the new historical figure form.
   const figureForm = document.getElementById("figureForm");
   if (figureForm) {
     figureForm.addEventListener("submit", (e) => {
