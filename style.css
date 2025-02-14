@@ -14,6 +14,7 @@ body {
   background-color: #fff;
 }
 
+
 /* Header and Navigation */
 header {
   position: relative;
@@ -85,13 +86,13 @@ button {
   padding: 20px;
   margin: 0;
 }
-/*
-.figure-content h4 {
-  margin: 2;
-  font-size: 6em;
-  line-height: 1.0em;
-  padding: 8px;
-}*/
+
+.figure-content {
+  display: flex;
+  align-items: center; /* vertically centers the content */
+  justify-content: center; /* horizontally centers the content (if desired) */
+  height: 100%;
+}
 
 /* Historical Figure Form Styles */
 #figure-form-section {
