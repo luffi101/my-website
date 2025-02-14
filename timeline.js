@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // Define groups (categories) based on your 7 categories.
+  // Define groups (the 7 categories)
   const groups = [
     { id: "Politics", content: "Politics" },
     { id: "Science", content: "Science" },
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
     { id: "Social & Cultural Movement", content: "Social & Cultural Movement" }
   ];
 
-  // Map groups to colors (using the 7 colors: red, orange, yellow, green, blue, indigo, violet).
+  // Map each category to a color.
   const groupColors = {
     "Politics": "red",
     "Science": "blue",
@@ -81,10 +81,10 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
            }
 
-           // For groups, use the first element in the groups array; default to "Politics".
+           // For groups, use the first element of the groups array; default to "Politics".
            const primaryGroup = (data.groups && data.groups.length > 0) ? data.groups[0] : "Politics";
 
-           // Process name: convert "Lastname, Firstname" to "Firstname Lastname".
+           // Process name: convert "Lastname, Firstname" to "Firstname Lastname"
            let formattedName = data.name;
            if (formattedName && formattedName.includes(",")) {
              const parts = formattedName.split(",");
@@ -93,9 +93,11 @@ document.addEventListener('DOMContentLoaded', function() {
              }
            }
 
-           // Build content HTML: only display the name.
+           // Get background color for the primary group.
            const bgColor = groupColors[primaryGroup] || "gray";
-           let contentHTML = `<div class="figure-content" style="background-color: ${bgColor}; padding: 5px;">
+
+           // Build content HTML: display only the name.
+           let contentHTML = `<div class="figure-content" style="background-color: ${bgColor}; padding: 5px; color: white;">
                                   <h3>${formattedName}</h3>
                                 </div>`;
 
@@ -124,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Add event listener for the new historical figure form.
+  // Event listener for the new historical figure form.
   const figureForm = document.getElementById("figureForm");
   if (figureForm) {
     figureForm.addEventListener("submit", (e) => {
@@ -156,7 +158,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(() => {
           document.getElementById("figureFeedback").innerText = "Historical figure added successfully!";
           figureForm.reset();
-          // Optionally, reload the page to update the timeline.
           window.location.reload();
         })
         .catch(error => {
