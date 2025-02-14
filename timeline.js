@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     showCurrentTime: false,
     zoomMin: zoomMin,             // Minimum visible time span (~201 years)
     zoomMax: zoomMax,             // Maximum visible time span (calculated dynamically)
-    // Set timeline bounds (from year 1 to 2025)
+    // Timeline bounds from year 1 to 2025
     min: new Date("0001-01-01"),
     max: new Date("2025-12-31"),
     stack: false,
@@ -33,19 +33,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // Define groups (categories) for the timeline.
-  const groups = [
-    { id: "politics", content: "Politics" },
-    { id: "science", content: "Science" },
-    { id: "economy", content: "Economy" },
-    { id: "arts & culture", content: "Arts & Culture" },
-    { id: "literature", content: "Literature" },
-    { id: "philosophy & religion", content: "Philosophy & Religion" },
-    { id: "social & cultural movement", content: "Social & Cultural Movement" }
+  // Define the 7 geographical regions.
+  const regions = [
+    "North America",
+    "South America",
+    "Europe",
+    "Africa",
+    "Middle East",
+    "East Asia",
+    "Australia"
   ];
 
-  // Map each category to a color (keys in lowercase)
-  const groupColors = {
+  // Create groups: each region gets two rows.
+  const groups = [];
+  regions.forEach(region => {
+    groups.push({ id: region.toLowerCase() + " - 1", content: region + " (Row 1)" });
+    groups.push({ id: region.toLowerCase() + " - 2", content: region + " (Row 2)" });
+  });
+  // Fallback groups for unknown region.
+  groups.push({ id: "unknown - 1", content: "Unknown (Row 1)" });
+  groups.push({ id: "unknown - 2", content: "Unknown (Row 2)" });
+
+  // Set up counters to alternate rows for each region.
+  const regionCounters = {};
+  regions.forEach(region => {
+    regionCounters[region.toLowerCase()] = 0;
+  });
+  regionCounters["unknown"] = 0;
+
+  // Map expertise categories (the "groups" field in the document) to colors.
+  // These colors represent the figure's field of expertise.
+  const expertiseColors = {
     "politics": "red",
     "science": "blue",
     "economy": "green",
@@ -81,11 +99,30 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
            }
 
-           // Use the first element from data.groups as the primary group; default to "politics".
-           const primaryGroup = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
-           
-           // Get the color for the primary group.
-           const bgColor = groupColors[primaryGroup] || "gray";
+           // Determine the region from the document (default to "unknown").
+           let region = "unknown";
+           if (data.region && typeof data.region === "string") {
+             let normalizedRegion = data.region.trim().toLowerCase();
+             if (regions.map(r => r.toLowerCase()).includes(normalizedRegion)) {
+               region = normalizedRegion;
+             }
+           }
+
+           // Alternate row assignment for the region.
+           const counter = regionCounters[region] || 0;
+           const rowNumber = (counter % 2 === 0) ? " - 1" : " - 2";
+           regionCounters[region] = counter + 1;
+           const groupId = region + rowNumber;
+
+           // Determine the expertise category from data.groups.
+           // Use the first expertise in the array (if available); default to "politics".
+           let expertiseCategory = "politics";
+           if (data.groups && Array.isArray(data.groups) && data.groups.length > 0) {
+             expertiseCategory = data.groups[0].trim().toLowerCase();
+           }
+
+           // Get the background color based on the expertise category.
+           const bgColor = expertiseColors[expertiseCategory] || "gray";
 
            // Process name: convert "Lastname, Firstname" to "Firstname Lastname".
            let formattedName = data.name;
@@ -96,17 +133,17 @@ document.addEventListener('DOMContentLoaded', function() {
              }
            }
 
-           // Build content HTML: display only the name.
-           let contentHTML = `<h3>${formattedName}</h3>`;
+           // Build content HTML: display only the formatted name.
+           let contentHTML = `<div class="figure-content" style="background-color: ${bgColor}; padding: 5px; color: white;">
+                                  <h3>${formattedName}</h3>
+                                </div>`;
 
-           // Instead of applying the background color in the HTML, set it via the "style" property.
            items.push({
              id: doc.id,
-             group: primaryGroup,  // Must match one of the lower-case group IDs defined above.
+             group: groupId,  // Based on region and alternating row.
              content: contentHTML,
              start: startDate,
-             end: endDate,
-             style: "background-color: " + bgColor + " !important; color: white; padding: 5px;"
+             end: endDate
            });
        });
 
@@ -126,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Add event listener for the new historical figure form.
+  // Add event listener for the "Add Historical Figure" form.
   const figureForm = document.getElementById("figureForm");
   if (figureForm) {
     figureForm.addEventListener("submit", (e) => {
@@ -140,7 +177,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const nationality = document.getElementById("nationality").value.trim();
       const description = document.getElementById("description").value.trim();
       const imageUrl = document.getElementById("imageUrl").value.trim();
-
+      const region = document.getElementById("figureRegion").value.trim();
+      
       const newFigure = {
         name: name,
         groups: groupsArr,
@@ -148,7 +186,8 @@ document.addEventListener('DOMContentLoaded', function() {
         dateOfDeath: dateOfDeath,
         nationality: nationality,
         description: description,
-        imageUrl: imageUrl
+        imageUrl: imageUrl,
+        region: region
       };
 
       firebase.firestore().collection("historicalFigures").add(newFigure)

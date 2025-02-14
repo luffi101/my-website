@@ -19,22 +19,6 @@
   <script src="firebase-config.js"></script>
   <script src="auth.js"></script>
   <script src="timeline.js"></script>
-  
-  <style>
-    /* Timeline container styles */
-    #timeline-container {
-      width: 98%;
-      height: 600px; /* Adjust height as needed */
-      border: 2px solid #ccc;
-    }
-    
-    /* Timeline section for full-width display */
-    #timeline-section {
-      width: 100%;
-      padding: 20px;
-      margin: 0;
-    }
-  </style>
 </head>
 <body>
   <div class="container">
@@ -53,6 +37,56 @@
   <!-- Timeline section -->
   <section id="timeline-section">
     <div id="timeline-container"></div>
+  </section>
+  
+  <!-- New Historical Figure Form (only visible when logged in) -->
+  <section id="figure-form-section" class="container" style="display: none;">
+    <h2>Add New Historical Figure</h2>
+    <form id="figureForm">
+      <div class="form-group">
+        <label for="figureName">Name (Lastname, Firstname):</label>
+        <input type="text" id="figureName" placeholder="e.g., Franklin, Benjamin" required>
+      </div>
+      <div class="form-group">
+        <label for="figureGroups">Groups (comma-separated):</label>
+        <input type="text" id="figureGroups" placeholder="e.g., Politics, Science" required>
+      </div>
+      <div class="form-group">
+        <label for="figureRegion">Region:</label>
+        <select id="figureRegion" required>
+          <option value="">--Select Region--</option>
+          <option value="North America">North America</option>
+          <option value="South America">South America</option>
+          <option value="Europe">Europe</option>
+          <option value="Africa">Africa</option>
+          <option value="Middle East">Middle East</option>
+          <option value="East Asia">East Asia</option>
+          <option value="Australia">Australia</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="dateOfBirth">Date of Birth (YYYY or YYYY-MM-DD):</label>
+        <input type="text" id="dateOfBirth" required>
+      </div>
+      <div class="form-group">
+        <label for="dateOfDeath">Date of Death (YYYY or YYYY-MM-DD):</label>
+        <input type="text" id="dateOfDeath" required>
+      </div>
+      <div class="form-group">
+        <label for="nationality">Nationality:</label>
+        <input type="text" id="nationality">
+      </div>
+      <div class="form-group">
+        <label for="description" style="vertical-align: top;">Description:</label>
+        <textarea id="description" rows="3" style="width: 500px;" placeholder="Enter description"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="imageUrl">Image URL:</label>
+        <input type="url" id="imageUrl">
+      </div>
+      <button type="submit">Add Historical Figure</button>
+    </form>
+    <div id="figureFeedback"></div>
   </section>
 </body>
 </html>
