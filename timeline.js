@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
            }
 
-           // Use the first element from data.groups as the primary group (default to "politics")
+           // Use the first element from data.groups as the primary group; default to "politics".
            const primaryGroup = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
            
            // Get the color for the primary group.
@@ -96,17 +96,17 @@ document.addEventListener('DOMContentLoaded', function() {
              }
            }
 
-           // Build content HTML: display only the name in a div with the background color.
-           let contentHTML = `<div class="figure-content" style="background-color: ${bgColor} !important; padding: 5px; color: white;">
-                                  <h3>${formattedName}</h3>
-                                </div>`;
+           // Build content HTML: display only the name.
+           let contentHTML = `<h3>${formattedName}</h3>`;
 
+           // Instead of applying the background color in the HTML, set it via the "style" property.
            items.push({
              id: doc.id,
              group: primaryGroup,  // Must match one of the lower-case group IDs defined above.
              content: contentHTML,
              start: startDate,
-             end: endDate
+             end: endDate,
+             style: "background-color: " + bgColor + " !important; color: white; padding: 5px;"
            });
        });
 
