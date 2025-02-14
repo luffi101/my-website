@@ -6,24 +6,24 @@ document.addEventListener('DOMContentLoaded', function() {
   // Milliseconds per year (using 365.25 days/year)
   const msPerYear = 31557600000;
 
-  // Desired zoom limits using George Washington's 67-year lifespan as a reference:
+  // Desired zoom limits using George Washington’s 67-year lifespan as a reference:
   // Zoom In: minimum visible span = 201 years (so his block occupies ~1/3 of the container width).
   const zoomMin = 201 * msPerYear;
   
-  // Zoom Out: Ensure his block remains at least ~1 inch (≈96px) wide.
+  // Zoom Out: ensure his block remains at least ~1 inch (≈96px) wide.
   const containerWidth = container.offsetWidth;
   const zoomMax = (67 * msPerYear * containerWidth) / 96;
 
   const options = {
-    orientation: 'top',           // Place labels above blocks.
+    orientation: 'top',           // Place labels above blocks
     showCurrentTime: false,
-    zoomMin: zoomMin,             // Minimum visible time span (~201 years).
-    zoomMax: zoomMax,             // Maximum visible time span (calculated dynamically).
-    // Set timeline bounds (from year 1 to 2025).
+    zoomMin: zoomMin,             // Minimum visible time span (~201 years)
+    zoomMax: zoomMax,             // Maximum visible time span (calculated dynamically)
+    // Set timeline bounds (from year 1 to 2025)
     min: new Date("0001-01-01"),
     max: new Date("2025-12-31"),
     stack: false,
-    groupOrder: 'content',        // Order groups by name.
+    groupOrder: 'content',        // Order groups by name
     tooltip: {
       delay: 100,
       followMouse: true
@@ -33,8 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // Define groups (categories).
-  // Note: These group IDs are used for mapping; if a figure belongs to multiple groups, the first is taken.
+  // Define groups (categories) for the timeline.
   const groups = [
     { id: "Politics", content: "Politics" },
     { id: "Science", content: "Science" },
@@ -42,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function() {
   ];
 
   // Retrieve historical figures from Firestore.
-  // This will work regardless of user authentication, provided your Firestore rules allow public reads.
   firebase.firestore().collection("historicalFigures")
     .get()
     .then(snapshot => {
@@ -64,11 +62,11 @@ document.addEventListener('DOMContentLoaded', function() {
            const startDate = birthDateStr ? new Date(birthDateStr) : null;
            const endDate = deathDateStr ? new Date(deathDateStr) : null;
            if (!startDate || !endDate) {
-             console.warn(`Skipping ${data.name} due to missing dates.`);
+             console.warn(`Skipping ${data.name} due to missing or invalid dates.`);
              return;
            }
 
-           // For groups, use the first element in the groups array (if available), default to "Politics".
+           // For groups, use the first element in the groups array (if available); default to "Politics".
            const primaryGroup = (data.groups && data.groups.length > 0) ? data.groups[0] : "Politics";
 
            // Build content HTML.
@@ -87,12 +85,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
            items.push({
              id: doc.id,
-             group: primaryGroup,  // This should match one of the group ids defined above.
+             group: primaryGroup,  // Must match one of the group IDs defined above.
              content: contentHTML,
              start: startDate,
              end: endDate
            });
        });
+
+       // Log the fetched items for debugging.
+       console.log("Timeline items:", items);
 
        // Initialize the timeline with the fetched items.
        const timeline = new vis.Timeline(container, items, groups, options);
