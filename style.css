@@ -107,8 +107,19 @@ button {
 }
 
 #figure-form-section input,
-#figure-form-section textarea {
+#figure-form-section textarea,
+#figure-form-section select {
   width: calc(100% - 160px);
   padding: 5px;
   box-sizing: border-box;
+}
+
+/* Additional style for timeline item content 
+   This rule helps enforce the appearance of the blocks.
+*/
+.vis-item-content .figure-content {
+  background-color: inherit !important;
+  padding: 2px !important;
+  font-size: 0.9em !important;
+  line-height: 1.2em !important;
 }

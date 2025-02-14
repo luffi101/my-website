@@ -15,15 +15,14 @@ document.addEventListener('DOMContentLoaded', function() {
   const zoomMax = (67 * msPerYear * containerWidth) / 96;
 
   const options = {
-    orientation: 'top',           // Place labels above blocks
+    orientation: 'top',
     showCurrentTime: false,
-    zoomMin: zoomMin,             // Minimum visible time span (~201 years)
-    zoomMax: zoomMax,             // Maximum visible time span (calculated dynamically)
-    // Set timeline bounds (from year 1 to 2025)
+    zoomMin: zoomMin,
+    zoomMax: zoomMax,
     min: new Date("0001-01-01"),
     max: new Date("2025-12-31"),
     stack: false,
-    groupOrder: 'content',        // Order groups by name
+    groupOrder: 'content',
     tooltip: {
       delay: 100,
       followMouse: true
@@ -33,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // Define the 7 geographical regions and create 14 groups (2 rows per region).
+  // Define the 7 geographical regions.
   const regions = [
     "North America",
     "South America",
@@ -44,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
 
+  // Create groups: each region gets two rows; add fallback unknown rows.
   const groups = [];
   regions.forEach(region => {
     groups.push({ id: region.toLowerCase() + " - 1", content: region + " (Row 1)" });
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
   groups.push({ id: "unknown - 1", content: "Unknown (Row 1)" });
   groups.push({ id: "unknown - 2", content: "Unknown (Row 2)" });
 
-  // Prepare counters to alternate rows for each region.
+  // Initialize region counters for alternating rows.
   const regionCounters = {};
   regions.forEach(region => {
     regionCounters[region.toLowerCase()] = 0;
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
        snapshot.forEach(doc => {
            const data = doc.data();
 
-           // Process dateOfBirth: if only a year is provided, append "-01-01"
+           // Process dates: if only a year is provided, append "-01-01".
            let birthDateStr = data.dateOfBirth;
            if (birthDateStr && birthDateStr.length === 4) {
              birthDateStr += "-01-01";
@@ -87,8 +87,6 @@ document.addEventListener('DOMContentLoaded', function() {
            if (deathDateStr && deathDateStr.length === 4) {
              deathDateStr += "-01-01";
            }
-
-           // Convert to Date objects.
            const startDate = birthDateStr ? new Date(birthDateStr) : null;
            const endDate = deathDateStr ? new Date(deathDateStr) : null;
            if (!startDate || !endDate) {
@@ -96,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
            }
 
-           // Determine the region from the document; default to "unknown" if missing.
+           // Determine region (default "unknown").
            let region = "unknown";
            if (data.region && typeof data.region === "string") {
              let normalizedRegion = data.region.trim().toLowerCase();
@@ -111,13 +109,12 @@ document.addEventListener('DOMContentLoaded', function() {
            regionCounters[region] = counter + 1;
            const groupId = region + rowNumber;
 
-           // Determine expertise category from data.groups.
+           // Determine expertise category from data.groups (default "politics").
            let expertiseCategory = "politics";
            if (data.groups && Array.isArray(data.groups) && data.groups.length > 0) {
              expertiseCategory = data.groups[0].trim().toLowerCase();
            }
-
-           // Get the background color based on the expertise category.
+           // Get background color based on expertise.
            const bgColor = expertiseColors[expertiseCategory] || "gray";
 
            // Process name: convert "Lastname, Firstname" to "Firstname Lastname".
@@ -130,22 +127,22 @@ document.addEventListener('DOMContentLoaded', function() {
            }
 
            // Build content HTML: display only the name.
-           // Adjust padding to reduce block height.
-           let contentHTML = `<div class="figure-content" style="background-color: ${bgColor} !important; padding: 2px; color: white;">
-                                  <h3 style="margin: 0; font-size: 1em;">${formattedName}</h3>
+           let contentHTML = `<div class="figure-content">
+                                  <h3>${formattedName}</h3>
                                 </div>`;
 
            items.push({
              id: doc.id,
-             group: groupId,  // Based on region and alternating row.
+             group: groupId,
              content: contentHTML,
              start: startDate,
-             end: endDate
+             end: endDate,
+             // Set inline style for the block using the expertise color.
+             style: "background-color: " + bgColor + " !important; color: white; padding: 2px; font-size: 0.9em; line-height: 1.2em;"
            });
        });
 
        console.log("Timeline items:", items);
-       // Initialize the timeline with the fetched items.
        const timeline = new vis.Timeline(container, items, groups, options);
     })
     .catch(error => {
@@ -160,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Add event listener for the new historical figure form.
+  // Add event listener for the "Add Historical Figure" form.
   const figureForm = document.getElementById("figureForm");
   if (figureForm) {
     figureForm.addEventListener("submit", (e) => {
