@@ -16,10 +16,11 @@ body {
 
   /* Additional styling for timeline section to span full width */
   #timeline-section {
-    width: 100%;
-    padding: 20px;
-    margin: 0;
+    width: 96%;
+    padding: 20px; /* 20px of space inside the section (between its border and its content) */
+    margin: 2px;   /* 2px of space outside the section (between it and adjacent elements) */
   }
+  
   
   h1, h2, h3 {
     color: #333;

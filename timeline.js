@@ -7,7 +7,7 @@ const groups = [
   { id: 3, content: 'Economy' }
 ];
 
-// Define historical figures (blocks) using full ISO date strings for consistency.
+// Define historical figures (blocks) using full ISO date strings for reliable parsing.
 const items = [
   {
     id: 1,
@@ -32,25 +32,28 @@ document.addEventListener('DOMContentLoaded', function() {
   // Milliseconds per year (using 365.25 days/year for average)
   const msPerYear = 31557600000;
 
-  // Desired conditions for George Washington's block (67 years lifespan):
-  // Zoom In: When zoomed in, the visible time span should be no less than 134 years (so his block is at most half the container width).
-  const zoomMin = 134 * msPerYear;
+  // Desired conditions using George Washington's 67-year lifespan:
+  // When zooming in, we want his block to span at most 1/3 of the container width.
+  // That means the minimum visible time span should be: 67 * 3 = 201 years.
+  const zoomMin = 201 * msPerYear;
 
-  // Zoom Out: We want his block to be at least 1 inch wide.
-  // Assume 1 inch ≈ 96px. Let containerWidth be the pixel width of the timeline container.
+  // When zooming out, we want his block to remain at least ~1 inch wide.
+  // Assuming 1 inch is ~96px and container width is dynamic:
   const containerWidth = container.offsetWidth;
+  // Visible span (years) such that 67 years equals 1 inch:
+  // (67 / visibleSpan) * containerWidth = 96 => visibleSpan = (67 * containerWidth) / 96.
   const zoomMax = (67 * msPerYear * containerWidth) / 96;
 
   const options = {
-    orientation: 'top',         // Labels above the blocks.
+    orientation: 'top',           // Place labels above blocks
     showCurrentTime: false,
-    zoomMin: zoomMin,           // Minimum visible span (cannot zoom in further than 134 years).
-    zoomMax: zoomMax,           // Maximum visible span (cannot zoom out beyond this value).
+    zoomMin: zoomMin,             // Minimum visible time span (~201 years)
+    zoomMax: zoomMax,             // Maximum visible time span (calculated dynamically)
     // Set timeline bounds.
     min: new Date("0001-01-01"),
     max: new Date("2025-12-31"),
     stack: false,
-    groupOrder: 'content',      // Order groups alphabetically.
+    groupOrder: 'content',        // Order groups by name
     tooltip: {
       delay: 100,
       followMouse: true
