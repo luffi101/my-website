@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Milliseconds per year (using 365.25 days/year)
   const msPerYear = 31557600000;
 
-  // Zoom limits based on George Washington’s 67-year lifespan as reference:
+  // Desired zoom limits using George Washington’s 67-year lifespan as reference:
   const zoomMin = 201 * msPerYear; // minimum visible span = 201 years
   const containerWidth = container.offsetWidth;
   const zoomMax = (67 * msPerYear * containerWidth) / 96; // ensure 67-year block is at least ~96px wide
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
 
-  // Create groups: each region gets 2 rows; add fallback unknown rows.
+  // Create groups: each region gets two rows; add fallback unknown rows.
   const groups = [];
   regions.forEach(region => {
     groups.push({ id: region.toLowerCase() + " - 1", content: region + " (Row 1)" });
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   regionCounters["unknown"] = 0;
 
-  // Map expertise categories (from the "groups" field) to colors.
+  // Map expertise categories to colors.
   const expertiseColors = {
     "politics": "red",
     "science": "blue",
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
        snapshot.forEach(doc => {
            const data = doc.data();
 
-           // Process dateOfBirth: if only a year is provided, append "-01-01".
+           // Process dates: if only a year is provided, append "-01-01".
            let birthDateStr = data.dateOfBirth;
            if (birthDateStr && birthDateStr.length === 4) {
              birthDateStr += "-01-01";
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
            }
 
-           // Determine expertise category from data.groups; default to "politics".
+           // Determine primary expertise from data.groups (default "politics").
            const expertiseCategory = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
            const bgColor = expertiseColors[expertiseCategory] || "gray";
 
@@ -113,17 +113,19 @@ document.addEventListener('DOMContentLoaded', function() {
            regionCounters[region] = counter + 1;
            const groupId = region + rowNumber;
 
-           // Build content: just the formatted name.
-           const contentHTML = `<h3 style="margin: 0; font-size: 0.9em;">${formattedName}</h3>`;
+           // Build content HTML: display only the formatted name.
+           const contentHTML = `<div class="figure-content">
+                                  <h3 style="margin: 0; font-size: 0.8em;">${formattedName}</h3>
+                                </div>`;
 
-           // Instead of embedding the style in the content HTML, use the "style" property.
+           // Use the "style" property of the timeline item to enforce background color.
            items.push({
              id: doc.id,
              group: groupId,
              content: contentHTML,
              start: startDate,
              end: endDate,
-             style: "background-color: " + bgColor + " !important; color: white; padding: 2px; font-size: 0.9em; line-height: 1.2em;"
+             style: "background-color: " + bgColor + " !important; color: white; padding: 1px 2px; font-size: 0.8em; line-height: 1.0em;"
            });
        });
 
@@ -142,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Add event listener for the "Add Historical Figure" form.
+  // Event listener for the "Add Historical Figure" form.
   const figureForm = document.getElementById("figureForm");
   if (figureForm) {
     figureForm.addEventListener("submit", (e) => {
