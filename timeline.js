@@ -4,20 +4,24 @@ document.addEventListener('DOMContentLoaded', function() {
   // Milliseconds per year (using 365.25 days/year)
   const msPerYear = 31557600000;
 
-  // Zoom settings based on George Washington’s 67-year lifespan as reference:
-  const zoomMin = 201 * msPerYear; // Minimum visible span = 201 years
+  // Desired zoom limits based on George Washington’s 67-year lifespan:
+  // Zoom In: minimum visible span = 201 years (so his block occupies ~1/3 of the container width)
+  const zoomMin = 201 * msPerYear;
+  
+  // Zoom Out: ensure his block remains at least ~1 inch (≈96px) wide.
   const containerWidth = container.offsetWidth;
-  const zoomMax = (67 * msPerYear * containerWidth) / 96; // Maximum visible span such that a 67-year block is at least 96px wide
+  const zoomMax = (67 * msPerYear * containerWidth) / 96;
 
   const options = {
-    orientation: 'top',
+    orientation: 'top',           // Place labels above blocks
     showCurrentTime: false,
-    zoomMin: zoomMin,
-    zoomMax: zoomMax,
+    zoomMin: zoomMin,             // Minimum visible time span (~201 years)
+    zoomMax: zoomMax,             // Maximum visible time span (calculated dynamically)
+    // Timeline bounds (from year 1 to 2025)
     min: new Date("0001-01-01"),
     max: new Date("2025-12-31"),
     stack: false,
-    groupOrder: 'content',
+    groupOrder: 'content',        // Order groups by name
     tooltip: {
       delay: 100,
       followMouse: true
@@ -27,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // Define the 7 geographical regions and create groups (2 rows per region)
+  // Define geographical regions and create groups (2 rows per region, plus unknown).
   const regions = [
     "North America",
     "South America",
@@ -46,14 +50,14 @@ document.addEventListener('DOMContentLoaded', function() {
   groups.push({ id: "unknown - 1", content: "Unknown (Row 1)" });
   groups.push({ id: "unknown - 2", content: "Unknown (Row 2)" });
 
-  // Counters for alternating rows for each region.
+  // Set up region counters for alternating rows.
   const regionCounters = {};
   regions.forEach(region => {
     regionCounters[region.toLowerCase()] = 0;
   });
   regionCounters["unknown"] = 0;
 
-  // Map expertise categories to colors.
+  // Map expertise categories (the "groups" field) to colors.
   const expertiseColors = {
     "politics": "red",
     "science": "blue",
@@ -88,9 +92,9 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
            }
 
-           // Determine the primary expertise category from the "groups" field (default to "politics").
-           const primaryExpertise = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
-           const bgColor = expertiseColors[primaryExpertise] || "gray";
+           // Determine the primary expertise category from data.groups (default "politics").
+           const expertiseCategory = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
+           const bgColor = expertiseColors[expertiseCategory] || "gray";
 
            // Process name: convert "Lastname, Firstname" to "Firstname Lastname".
            let formattedName = data.name;
@@ -101,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
              }
            }
 
-           // Determine region (default to "unknown") from the "region" field.
+           // Determine region (default "unknown") from the "region" field.
            let region = "unknown";
            if (data.region && typeof data.region === "string") {
              let normalizedRegion = data.region.trim().toLowerCase();
@@ -109,14 +113,16 @@ document.addEventListener('DOMContentLoaded', function() {
                region = normalizedRegion;
              }
            }
+
            // Alternate row assignment for the region.
            const counter = regionCounters[region] || 0;
            const rowNumber = (counter % 2 === 0) ? " - 1" : " - 2";
            regionCounters[region] = counter + 1;
            const groupId = region + rowNumber;
 
-           // Build content HTML: display only the formatted name with inline style for color.
-           const contentHTML = `<div class="figure-content" style="background-color: ${bgColor}; padding: 2px; color: white;">
+           // Build content HTML: display only the formatted name.
+           // Use inline style with !important to force background color.
+           let contentHTML = `<div class="figure-content" style="background-color: ${bgColor} !important; padding: 2px; color: white;">
                                   <h3 style="margin: 0; font-size: 0.9em;">${formattedName}</h3>
                                 </div>`;
 
@@ -130,6 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
        });
 
        console.log("Timeline items:", items);
+       // Initialize the timeline with the fetched items.
        const timeline = new vis.Timeline(container, items, groups, options);
     })
     .catch(error => {
@@ -144,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Event listener for the new historical figure form.
+  // Event listener for the "Add Historical Figure" form.
   const figureForm = document.getElementById("figureForm");
   if (figureForm) {
     figureForm.addEventListener("submit", (e) => {
