@@ -126,12 +126,13 @@ button {
 */
 
 /* Override vis.js hover and selected background colors */
+/*
 .vis-item:hover,
 .vis-item.vis-selected {
   background-color: inherit !important;
   opacity: 1 !important;
 }
-
+*/
 /* Optionally, override vis.js item content styles for figure blocks  */
 .vis-item-content .figure-content {
   background-color: inherit !important;
