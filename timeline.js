@@ -6,10 +6,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // Milliseconds per year (using 365.25 days/year)
   const msPerYear = 31557600000;
 
-  // Zoom limits based on George Washington’s 67-year lifespan:
-  const zoomMin = 201 * msPerYear; // Minimum visible span = 201 years
+  // Desired zoom limits using George Washington’s 67-year lifespan as reference:
+  // Zoom In: minimum visible span = 201 years (so his block occupies ~1/3 of the container width)
+  const zoomMin = 201 * msPerYear;
+  
+  // Zoom Out: ensure his block remains at least ~1 inch (≈96px) wide.
   const containerWidth = container.offsetWidth;
-  const zoomMax = (67 * msPerYear * containerWidth) / 96; // Ensure 67-year block is at least ~96px wide
+  const zoomMax = (67 * msPerYear * containerWidth) / 96;
 
   const options = {
     orientation: 'top',
@@ -70,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
        snapshot.forEach(doc => {
            const data = doc.data();
 
-           // Process dates: if only a year is provided, append "-01-01".
+           // Process dateOfBirth: if only a year is provided, append "-01-01"
            let birthDateStr = data.dateOfBirth;
            if (birthDateStr && birthDateStr.length === 4) {
              birthDateStr += "-01-01";
@@ -113,10 +116,24 @@ document.addEventListener('DOMContentLoaded', function() {
            regionCounters[region] = counter + 1;
            const groupId = region + rowNumber;
 
-           // Build content HTML: display only the formatted name.
-           const contentHTML = `<h3 style="margin: 0; font-size: 0.8em;">${formattedName}</h3>`;
+           // Build content HTML using <h4> instead of <h3>
+           const contentHTML = `<div class="figure-content">
+                                  <h4 style="margin: 0; font-size: 0.8em;">${formattedName}</h4>
+                                </div>`;
 
-           // Use the style property to set background color, padding, etc.
+           // Use the style property to force background color, padding, etc.
+
+            // Use the style property without !important
+            items.push({
+              id: doc.id,
+              group: groupId,
+              content: contentHTML,
+              start: startDate,
+              end: endDate,
+              style: "background-color: " + bgColor + "; color: white; padding: 1px 2px; font-size: 0.8em; line-height: 1.0em; min-height: 0;"
+            });
+
+           /*
            items.push({
              id: doc.id,
              group: groupId,
@@ -124,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
              start: startDate,
              end: endDate,
              style: "background-color: " + bgColor + " !important; color: white; padding: 1px 2px; font-size: 0.8em; line-height: 1.0em; min-height: 0 !important;"
-           });
+           }); */
        });
 
        console.log("Timeline items:", items);
