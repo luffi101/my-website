@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Milliseconds per year (using 365.25 days/year)
   const msPerYear = 31557600000;
 
-  // Desired zoom limits using George Washington’s 67-year lifespan as a reference:
+  // Desired zoom limits using George Washington’s 67-year lifespan as reference:
   // Zoom In: minimum visible span = 201 years (so his block occupies ~1/3 of the container width)
   const zoomMin = 201 * msPerYear;
   
@@ -35,32 +35,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Define groups (categories) for the timeline.
   const groups = [
-    { id: "Politics", content: "Politics" },
-    { id: "Science", content: "Science" },
-    { id: "Economy", content: "Economy" },
-    { id: "Arts & Culture", content: "Arts & Culture" },
-    { id: "Literature", content: "Literature" },
-    { id: "Philosophy & Religion", content: "Philosophy & Religion" },
-    { id: "Social & Cultural Movement", content: "Social & Cultural Movement" }
+    { id: "politics", content: "Politics" },
+    { id: "science", content: "Science" },
+    { id: "economy", content: "Economy" },
+    { id: "arts & culture", content: "Arts & Culture" },
+    { id: "literature", content: "Literature" },
+    { id: "philosophy & religion", content: "Philosophy & Religion" },
+    { id: "social & cultural movement", content: "Social & Cultural Movement" }
   ];
 
-  // Map each category to a color.
+  // Map each category to a color (keys in lowercase)
   const groupColors = {
-    "Politics": "red",
-    "Science": "blue",
-    "Economy": "green",
-    "Arts & Culture": "violet",
-    "Literature": "yellow",
-    "Philosophy & Religion": "indigo",
-    "Social & Cultural Movement": "orange"
+    "politics": "red",
+    "science": "blue",
+    "economy": "green",
+    "arts & culture": "violet",
+    "literature": "yellow",
+    "philosophy & religion": "indigo",
+    "social & cultural movement": "orange"
   };
-
-  // Helper function: normalize group strings to Title Case.
-  function normalizeGroup(str) {
-    return str.trim().split(' ').map(word => {
-      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    }).join(' ');
-  }
 
   // Retrieve historical figures from Firestore.
   firebase.firestore().collection("historicalFigures")
@@ -70,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
        snapshot.forEach(doc => {
            const data = doc.data();
 
-           // Process dateOfBirth: if only a year is provided, append "-01-01".
+           // Process dateOfBirth: if only a year is provided, append "-01-01"
            let birthDateStr = data.dateOfBirth;
            if (birthDateStr && birthDateStr.length === 4) {
              birthDateStr += "-01-01";
@@ -88,9 +81,11 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
            }
 
-           // For groups, use the first element in the groups array; default to "Politics".
-           let primaryGroupRaw = (data.groups && data.groups.length > 0) ? data.groups[0] : "Politics";
-           const primaryGroup = normalizeGroup(primaryGroupRaw);
+           // Use the first element from data.groups as the primary group (default to "politics")
+           const primaryGroup = (data.groups && data.groups.length > 0) ? data.groups[0].toLowerCase() : "politics";
+           
+           // Get the color for the primary group.
+           const bgColor = groupColors[primaryGroup] || "gray";
 
            // Process name: convert "Lastname, Firstname" to "Firstname Lastname".
            let formattedName = data.name;
@@ -101,17 +96,14 @@ document.addEventListener('DOMContentLoaded', function() {
              }
            }
 
-           // Get background color for the primary group.
-           const bgColor = groupColors[primaryGroup] || "gray";
-
-           // Build content HTML: display only the name.
+           // Build content HTML: display only the name in a div with the background color.
            let contentHTML = `<div class="figure-content" style="background-color: ${bgColor}; padding: 5px; color: white;">
                                   <h3>${formattedName}</h3>
                                 </div>`;
 
            items.push({
              id: doc.id,
-             group: primaryGroup,  // Must match one of the group IDs defined above.
+             group: primaryGroup,  // Must match one of the lower-case group IDs defined above.
              content: contentHTML,
              start: startDate,
              end: endDate
@@ -140,7 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
     figureForm.addEventListener("submit", (e) => {
       e.preventDefault();
       
-      // Get form values.
       const name = document.getElementById("figureName").value.trim();
       const groupsStr = document.getElementById("figureGroups").value.trim();
       const groupsArr = groupsStr.split(",").map(s => s.trim());
@@ -150,7 +141,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const description = document.getElementById("description").value.trim();
       const imageUrl = document.getElementById("imageUrl").value.trim();
 
-      // Create new historical figure object.
       const newFigure = {
         name: name,
         groups: groupsArr,
@@ -161,7 +151,6 @@ document.addEventListener('DOMContentLoaded', function() {
         imageUrl: imageUrl
       };
 
-      // Save to Firestore in the "historicalFigures" collection.
       firebase.firestore().collection("historicalFigures").add(newFigure)
         .then(() => {
           document.getElementById("figureFeedback").innerText = "Historical figure added successfully!";
