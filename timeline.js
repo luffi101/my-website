@@ -66,12 +66,21 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
            }
 
+           // Process name to convert "Lastname, Firstname" to "Firstname Lastname"
+           let formattedName = data.name;
+           if (formattedName && formattedName.includes(",")) {
+             const parts = formattedName.split(",");
+             if (parts.length >= 2) {
+               formattedName = parts[1].trim() + " " + parts[0].trim();
+             }
+           }
+
            // For groups, use the first element in the groups array (if available); default to "Politics".
            const primaryGroup = (data.groups && data.groups.length > 0) ? data.groups[0] : "Politics";
 
            // Build content HTML.
            let contentHTML = `<div class="figure-content">
-                                  <h3>${data.name}</h3>`;
+                                  <h3>${formattedName}</h3>`;
            if (data.nationality) {
              contentHTML += `<p><em>${data.nationality}</em></p>`;
            }
@@ -79,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
              contentHTML += `<p>${data.description}</p>`;
            }
            if (data.imageUrl) {
-             contentHTML += `<img src="${data.imageUrl}" alt="${data.name}" style="max-width:100px;">`;
+             contentHTML += `<img src="${data.imageUrl}" alt="${formattedName}" style="max-width:100px;">`;
            }
            contentHTML += `</div>`;
 
@@ -92,9 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
            });
        });
 
-       // Log the fetched items for debugging.
        console.log("Timeline items:", items);
-
        // Initialize the timeline with the fetched items.
        const timeline = new vis.Timeline(container, items, groups, options);
     })
