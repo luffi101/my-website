@@ -7,7 +7,7 @@ const groups = [
   { id: 3, content: 'Economy' }
 ];
 
-// Define historical figures (blocks). Use full date strings for reliable parsing.
+// Define historical figures (blocks) using full ISO date strings for consistency.
 const items = [
   {
     id: 1,
@@ -23,31 +23,34 @@ const items = [
     start: '1643-01-04',
     end: '1727-03-31'
   }
-  // Add more historical figures here...
+  // Add more historical figures as needed...
 ];
 
 document.addEventListener('DOMContentLoaded', function() {
   const container = document.getElementById('timeline-container');
 
-  // Convert years to milliseconds.
-  // One year is approximately 31,557,600,000 ms (using 365.25 days/year).
+  // Milliseconds per year (using 365.25 days/year for average)
   const msPerYear = 31557600000;
-  
-  // Desired zoom limits based on George Washington's block:
-  // Minimum visible span: ~134 years (Washington's block spans ~half the screen)
-  // Maximum visible span: ~558 years (Washington's block spans ~1 inch)
-  const zoomMin = 134 * msPerYear;  // ≈ 4.23e12 ms
-  const zoomMax = 558 * msPerYear;  // ≈ 1.76e13 ms
+
+  // Desired conditions for George Washington's block (67 years lifespan):
+  // Zoom In: When zoomed in, the visible time span should be no less than 134 years (so his block is at most half the container width).
+  const zoomMin = 134 * msPerYear;
+
+  // Zoom Out: We want his block to be at least 1 inch wide.
+  // Assume 1 inch ≈ 96px. Let containerWidth be the pixel width of the timeline container.
+  const containerWidth = container.offsetWidth;
+  const zoomMax = (67 * msPerYear * containerWidth) / 96;
 
   const options = {
-    orientation: 'top',           // Place labels above blocks
+    orientation: 'top',         // Labels above the blocks.
     showCurrentTime: false,
-    zoomMin: zoomMin,             // Minimum zoom: 134 years visible
-    zoomMax: zoomMax,             // Maximum zoom: 558 years visible
-    min: new Date("0001-01-01"),   // Timeline cannot scroll before year 1 CE
-    max: new Date("2025-12-31"),   // Timeline cannot scroll after 2025
+    zoomMin: zoomMin,           // Minimum visible span (cannot zoom in further than 134 years).
+    zoomMax: zoomMax,           // Maximum visible span (cannot zoom out beyond this value).
+    // Set timeline bounds.
+    min: new Date("0001-01-01"),
+    max: new Date("2025-12-31"),
     stack: false,
-    groupOrder: 'content',        // Order groups by name
+    groupOrder: 'content',      // Order groups alphabetically.
     tooltip: {
       delay: 100,
       followMouse: true
