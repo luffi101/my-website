@@ -6,10 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // Milliseconds per year (using 365.25 days/year)
   const msPerYear = 31557600000;
 
-  // Desired zoom limits using George Washington’s 67-year lifespan as reference:
-  const zoomMin = 201 * msPerYear; // minimum visible span = 201 years
+  // Zoom limits based on George Washington’s 67-year lifespan:
+  const zoomMin = 201 * msPerYear; // Minimum visible span = 201 years
   const containerWidth = container.offsetWidth;
-  const zoomMax = (67 * msPerYear * containerWidth) / 96; // ensure 67-year block is at least ~96px wide
+  const zoomMax = (67 * msPerYear * containerWidth) / 96; // Ensure 67-year block is at least ~96px wide
 
   const options = {
     orientation: 'top',
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
 
-  // Create groups: each region gets two rows; add fallback unknown rows.
+  // Create groups: each region gets 2 rows; add fallback unknown rows.
   const groups = [];
   regions.forEach(region => {
     groups.push({ id: region.toLowerCase() + " - 1", content: region + " (Row 1)" });
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   regionCounters["unknown"] = 0;
 
-  // Map expertise categories to colors.
+  // Map expertise categories (from the "groups" field) to colors.
   const expertiseColors = {
     "politics": "red",
     "science": "blue",
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
            }
 
-           // Determine primary expertise from data.groups (default "politics").
+           // Determine primary expertise category from data.groups (default "politics").
            const expertiseCategory = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
            const bgColor = expertiseColors[expertiseCategory] || "gray";
 
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
              }
            }
 
-           // Determine region (default to "unknown") from the "region" field.
+           // Determine region (default "unknown") from the "region" field.
            let region = "unknown";
            if (data.region && typeof data.region === "string") {
              let normalizedRegion = data.region.trim().toLowerCase();
@@ -114,18 +114,16 @@ document.addEventListener('DOMContentLoaded', function() {
            const groupId = region + rowNumber;
 
            // Build content HTML: display only the formatted name.
-           const contentHTML = `<div class="figure-content">
-                                  <h3 style="margin: 0; font-size: 0.8em;">${formattedName}</h3>
-                                </div>`;
+           const contentHTML = `<h3 style="margin: 0; font-size: 0.8em;">${formattedName}</h3>`;
 
-           // Use the "style" property of the timeline item to enforce background color.
+           // Use the style property to set background color, padding, etc.
            items.push({
              id: doc.id,
              group: groupId,
              content: contentHTML,
              start: startDate,
              end: endDate,
-             style: "background-color: " + bgColor + " !important; color: white; padding: 1px 2px; font-size: 0.8em; line-height: 1.0em;"
+             style: "background-color: " + bgColor + " !important; color: white; padding: 1px 2px; font-size: 0.8em; line-height: 1.0em; min-height: 0 !important;"
            });
        });
 

@@ -129,4 +129,21 @@ button {
 .vis-item:hover,
 .vis-item.vis-selected {
   background-color: inherit !important;
+  opacity: 1 !important;
 }
+
+/* Optionally, override vis.js item content styles for figure blocks 
+.vis-item-content .figure-content {
+  background-color: inherit !important;
+  padding: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+*/
+/* If needed, override vis.js item default min-height 
+.vis-item {
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+*/
