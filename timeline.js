@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
            }
 
            // Build content HTML: display only the name in a div with the background color.
-           let contentHTML = `<div class="figure-content" style="background-color: ${bgColor}; padding: 5px; color: white;">
+           let contentHTML = `<div class="figure-content" style="background-color: ${bgColor} !important; padding: 5px; color: white;">
                                   <h3>${formattedName}</h3>
                                 </div>`;
 
