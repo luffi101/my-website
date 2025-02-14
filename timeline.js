@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
               content: contentHTML,
               start: startDate,
               end: endDate,
-              style: "background-color: " + bgColor + "; color: white; padding: 1px 2px; font-size: 1em; line-height: 1.0em; height: 20px; min-height: 0;"
+              style: "background-color: " + bgColor + "; color: white; padding: 1px 2px; font-size: 1em; line-height: 1.0em; height: 40px; min-height: 0;"
             });
 /*  "; color: white; padding: 1px 2px; font-size: 0.8em; line-height: 1.0em; min-height: 0;" */
            /*
