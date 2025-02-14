@@ -19,22 +19,6 @@
   <script src="firebase-config.js"></script>
   <script src="auth.js"></script>
   <script src="timeline.js"></script>
-  
-  <style>
-    /* Timeline container styles */
-    #timeline-container {
-      width: 98%;
-      height: 600px; /* Adjust height as needed */
-      border: 2px solid #ccc;
-    }
-    
-    /* Timeline section for full-width display */
-    #timeline-section {
-      width: 100%;
-      padding: 20px;
-      margin: 0;
-    }
-  </style>
 </head>
 <body>
   <div class="container">
@@ -50,9 +34,39 @@
     </header>
   </div>
   
-  <!-- Timeline section now in its own full-width section -->
+  <!-- Timeline section -->
   <section id="timeline-section">
     <div id="timeline-container"></div>
+  </section>
+  
+  <!-- New Historical Figure Form (only visible when logged in) -->
+  <section id="figure-form-section" style="display: none;">
+    <h2>Add New Historical Figure</h2>
+    <form id="figureForm">
+      <label for="figureName">Name (Lastname, Firstname):</label>
+      <input type="text" id="figureName" placeholder="e.g., Franklin, Benjamin" required>
+      <br>
+      <label for="figureGroups">Groups (comma-separated):</label>
+      <input type="text" id="figureGroups" placeholder="e.g., Politics, Science" required>
+      <br>
+      <label for="dateOfBirth">Date of Birth (YYYY or YYYY-MM-DD):</label>
+      <input type="text" id="dateOfBirth" required>
+      <br>
+      <label for="dateOfDeath">Date of Death (YYYY or YYYY-MM-DD):</label>
+      <input type="text" id="dateOfDeath" required>
+      <br>
+      <label for="nationality">Nationality:</label>
+      <input type="text" id="nationality">
+      <br>
+      <label for="description">Description:</label>
+      <textarea id="description"></textarea>
+      <br>
+      <label for="imageUrl">Image URL:</label>
+      <input type="url" id="imageUrl">
+      <br>
+      <button type="submit">Add Historical Figure</button>
+    </form>
+    <div id="figureFeedback"></div>
   </section>
 </body>
 </html>
