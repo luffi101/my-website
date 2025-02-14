@@ -87,10 +87,10 @@ button {
 }
 
 .figure-content h4 {
-  margin: 0;
-  font-size: 3em;
+  margin: 2;
+  font-size: 6em;
   line-height: 1.0em;
-  padding: 2px;
+  padding: 8px;
 }
 
 /* Historical Figure Form Styles */
