@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
            // Build content HTML using <h4> instead of <h3>
            const contentHTML = `<div class="figure-content">
-                                  <h4 style="margin: 0; font-size: 0.8em;">${formattedName}</h4>
+                                  <h4 style="margin: 0; font-size: 1em;">${formattedName}</h4>
                                 </div>`;
 
            // Use the style property to force background color, padding, etc.
