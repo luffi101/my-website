@@ -1,37 +1,30 @@
+// timeline.js
+
 document.addEventListener('DOMContentLoaded', function() {
   const container = document.getElementById('timeline-container');
 
   // Milliseconds per year (using 365.25 days/year)
   const msPerYear = 31557600000;
 
-  // Desired zoom limits based on George Washington’s 67-year lifespan:
-  // Zoom In: minimum visible span = 201 years (so his block occupies ~1/3 of the container width)
-  const zoomMin = 201 * msPerYear;
-  
-  // Zoom Out: ensure his block remains at least ~1 inch (≈96px) wide.
+  // Zoom limits based on George Washington’s 67-year lifespan as reference:
+  const zoomMin = 201 * msPerYear; // minimum visible span = 201 years
   const containerWidth = container.offsetWidth;
-  const zoomMax = (67 * msPerYear * containerWidth) / 96;
+  const zoomMax = (67 * msPerYear * containerWidth) / 96; // ensure 67-year block is at least ~96px wide
 
   const options = {
-    orientation: 'top',           // Place labels above blocks
+    orientation: 'top',
     showCurrentTime: false,
-    zoomMin: zoomMin,             // Minimum visible time span (~201 years)
-    zoomMax: zoomMax,             // Maximum visible time span (calculated dynamically)
-    // Timeline bounds (from year 1 to 2025)
+    zoomMin: zoomMin,
+    zoomMax: zoomMax,
     min: new Date("0001-01-01"),
     max: new Date("2025-12-31"),
     stack: false,
-    groupOrder: 'content',        // Order groups by name
-    tooltip: {
-      delay: 100,
-      followMouse: true
-    },
-    margin: {
-      item: { horizontal: 0, vertical: 5 }
-    }
+    groupOrder: 'content',
+    tooltip: { delay: 100, followMouse: true },
+    margin: { item: { horizontal: 0, vertical: 5 } }
   };
 
-  // Define geographical regions and create groups (2 rows per region, plus unknown).
+  // Define the 7 geographical regions.
   const regions = [
     "North America",
     "South America",
@@ -42,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
 
+  // Create groups: each region gets 2 rows; add fallback unknown rows.
   const groups = [];
   regions.forEach(region => {
     groups.push({ id: region.toLowerCase() + " - 1", content: region + " (Row 1)" });
@@ -50,14 +44,14 @@ document.addEventListener('DOMContentLoaded', function() {
   groups.push({ id: "unknown - 1", content: "Unknown (Row 1)" });
   groups.push({ id: "unknown - 2", content: "Unknown (Row 2)" });
 
-  // Set up region counters for alternating rows.
+  // Set up counters to alternate rows for each region.
   const regionCounters = {};
   regions.forEach(region => {
     regionCounters[region.toLowerCase()] = 0;
   });
   regionCounters["unknown"] = 0;
 
-  // Map expertise categories (the "groups" field) to colors.
+  // Map expertise categories (from the "groups" field) to colors.
   const expertiseColors = {
     "politics": "red",
     "science": "blue",
@@ -76,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
        snapshot.forEach(doc => {
            const data = doc.data();
 
-           // Process dates: if only a year is provided, append "-01-01".
+           // Process dateOfBirth: if only a year is provided, append "-01-01".
            let birthDateStr = data.dateOfBirth;
            if (birthDateStr && birthDateStr.length === 4) {
              birthDateStr += "-01-01";
@@ -92,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
            }
 
-           // Determine the primary expertise category from data.groups (default "politics").
+           // Determine expertise category from data.groups; default to "politics".
            const expertiseCategory = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
            const bgColor = expertiseColors[expertiseCategory] || "gray";
 
@@ -105,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
              }
            }
 
-           // Determine region (default "unknown") from the "region" field.
+           // Determine region (default to "unknown") from the "region" field.
            let region = "unknown";
            if (data.region && typeof data.region === "string") {
              let normalizedRegion = data.region.trim().toLowerCase();
@@ -113,30 +107,27 @@ document.addEventListener('DOMContentLoaded', function() {
                region = normalizedRegion;
              }
            }
-
            // Alternate row assignment for the region.
            const counter = regionCounters[region] || 0;
            const rowNumber = (counter % 2 === 0) ? " - 1" : " - 2";
            regionCounters[region] = counter + 1;
            const groupId = region + rowNumber;
 
-           // Build content HTML: display only the formatted name.
-           // Use inline style with !important to force background color.
-           let contentHTML = `<div class="figure-content" style="background-color: ${bgColor} !important; padding: 2px; color: white;">
-                                  <h3 style="margin: 0; font-size: 0.9em;">${formattedName}</h3>
-                                </div>`;
+           // Build content: just the formatted name.
+           const contentHTML = `<h3 style="margin: 0; font-size: 0.9em;">${formattedName}</h3>`;
 
+           // Instead of embedding the style in the content HTML, use the "style" property.
            items.push({
              id: doc.id,
              group: groupId,
              content: contentHTML,
              start: startDate,
-             end: endDate
+             end: endDate,
+             style: "background-color: " + bgColor + " !important; color: white; padding: 2px; font-size: 0.9em; line-height: 1.2em;"
            });
        });
 
        console.log("Timeline items:", items);
-       // Initialize the timeline with the fetched items.
        const timeline = new vis.Timeline(container, items, groups, options);
     })
     .catch(error => {
@@ -151,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Event listener for the "Add Historical Figure" form.
+  // Add event listener for the "Add Historical Figure" form.
   const figureForm = document.getElementById("figureForm");
   if (figureForm) {
     figureForm.addEventListener("submit", (e) => {
