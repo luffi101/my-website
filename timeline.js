@@ -1,13 +1,15 @@
+// timeline.js
+
 document.addEventListener('DOMContentLoaded', function() {
   const container = document.getElementById('timeline-container');
 
   // Milliseconds per year (using 365.25 days/year)
   const msPerYear = 31557600000;
 
-  // Desired zoom limits using George Washington’s 67-year lifespan as reference:
-  const zoomMin = 201 * msPerYear; // minimum visible span = 201 years
+  // Zoom limits based on George Washington’s 67-year lifespan:
+  const zoomMin = 201 * msPerYear; // Minimum visible span = 201 years
   const containerWidth = container.offsetWidth;
-  const zoomMax = (67 * msPerYear * containerWidth) / 96; // ensure 67-year block is at least ~96px wide
+  const zoomMax = (67 * msPerYear * containerWidth) / 96; // Ensure 67-year block is at least ~96px wide
 
   const options = {
     orientation: 'top',
@@ -49,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   regionCounters["unknown"] = 0;
 
-  // Map expertise categories (from the "groups" field) to colors.
+  // Map expertise categories (from the "groups" field) to background colors.
   const expertiseColors = {
     "politics": "red",
     "science": "blue",
@@ -60,80 +62,92 @@ document.addEventListener('DOMContentLoaded', function() {
     "social & cultural movement": "orange"
   };
 
+  // Map expertise categories to text colors.
+  const expertiseTextColors = {
+    "politics": "white",
+    "science": "white",
+    "economy": "white",
+    "arts & culture": "white",
+    "literature": "black", // Use black for literature so text is readable on yellow.
+    "philosophy & religion": "white",
+    "social & cultural movement": "white"
+  };
+
   // Retrieve historical figures from Firestore.
   firebase.firestore().collection("historicalFigures")
     .get()
     .then(snapshot => {
-      const items = [];
-      snapshot.forEach(doc => {
-        const data = doc.data();
+       const items = [];
+       snapshot.forEach(doc => {
+           const data = doc.data();
 
-        // Process dates: if only a year is provided, append "-01-01".
-        let birthDateStr = data.dateOfBirth;
-        if (birthDateStr && birthDateStr.length === 4) {
-          birthDateStr += "-01-01";
-        }
-        let deathDateStr = data.dateOfDeath;
-        if (deathDateStr && deathDateStr.length === 4) {
-          deathDateStr += "-01-01";
-        }
-        const startDate = birthDateStr ? new Date(birthDateStr) : null;
-        const endDate = deathDateStr ? new Date(deathDateStr) : null;
-        if (!startDate || !endDate) {
-          console.warn(`Skipping ${data.name} due to missing or invalid dates.`);
-          return;
-        }
+           // Process dateOfBirth: if only a year is provided, append "-01-01".
+           let birthDateStr = data.dateOfBirth;
+           if (birthDateStr && birthDateStr.length === 4) {
+             birthDateStr += "-01-01";
+           }
+           let deathDateStr = data.dateOfDeath;
+           if (deathDateStr && deathDateStr.length === 4) {
+             deathDateStr += "-01-01";
+           }
+           const startDate = birthDateStr ? new Date(birthDateStr) : null;
+           const endDate = deathDateStr ? new Date(deathDateStr) : null;
+           if (!startDate || !endDate) {
+             console.warn(`Skipping ${data.name} due to missing or invalid dates.`);
+             return;
+           }
 
-        // Determine primary expertise category from data.groups (default to "politics").
-        const expertiseCategory = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
-        const bgColor = expertiseColors[expertiseCategory] || "gray";
+           // Determine primary expertise category from data.groups (default "politics").
+           const expertiseCategory = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
+           const bgColor = expertiseColors[expertiseCategory] || "gray";
+           const textColor = expertiseTextColors[expertiseCategory] || "white";
 
-        // Process name: convert "Lastname, Firstname" to "Firstname Lastname".
-        let formattedName = data.name;
-        if (formattedName && formattedName.includes(",")) {
-          const parts = formattedName.split(",");
-          if (parts.length >= 2) {
-            formattedName = parts[1].trim() + " " + parts[0].trim();
-          }
-        }
+           // Process name: convert "Lastname, Firstname" to "Firstname Lastname".
+           let formattedName = data.name;
+           if (formattedName && formattedName.includes(",")) {
+             const parts = formattedName.split(",");
+             if (parts.length >= 2) {
+               formattedName = parts[1].trim() + " " + parts[0].trim();
+             }
+           }
 
-        // Determine region (default "unknown") from the "region" field.
-        let region = "unknown";
-        if (data.region && typeof data.region === "string") {
-          let normalizedRegion = data.region.trim().toLowerCase();
-          if (regions.map(r => r.toLowerCase()).includes(normalizedRegion)) {
-            region = normalizedRegion;
-          }
-        }
-        // Alternate row assignment for the region.
-        const counter = regionCounters[region] || 0;
-        const rowNumber = (counter % 2 === 0) ? " - 1" : " - 2";
-        regionCounters[region] = counter + 1;
-        const groupId = region + rowNumber;
+           // Determine region (default "unknown") from the "region" field.
+           let region = "unknown";
+           if (data.region && typeof data.region === "string") {
+             let normalizedRegion = data.region.trim().toLowerCase();
+             if (regions.map(r => r.toLowerCase()).includes(normalizedRegion)) {
+               region = normalizedRegion;
+             }
+           }
+           // Alternate row assignment for the region.
+           const counter = regionCounters[region] || 0;
+           const rowNumber = (counter % 2 === 0) ? " - 1" : " - 2";
+           regionCounters[region] = counter + 1;
+           const groupId = region + rowNumber;
 
-        // Build content HTML using <h4> for the name.
-        const contentHTML = `<div class="figure-content">
-                              <h4 style="margin: 0; font-size: 1em;">${formattedName}</h4>
-                             </div>`;
+           // Build content HTML using <h4> for the name.
+           const contentHTML = `<div class="figure-content">
+                                  <h4 style="margin: 0;">${formattedName}</h4>
+                                </div>`;
 
-        // Add the timeline item with inline style (no !important)
-        items.push({
-          id: doc.id,
-          group: groupId,
-          content: contentHTML,
-          start: startDate,
-          end: endDate,
-          style: "background-color: " + bgColor + "; color: white; padding: 1px 2px; font-size: 1em; line-height: 1.0em; height: 40px; min-height: 0;"
-        });
-      });
+           // Use the style property to set background color, text color, padding, etc.
+           items.push({
+             id: doc.id,
+             group: groupId,
+             content: contentHTML,
+             start: startDate,
+             end: endDate,
+             style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 1px 2px; font-size: 1em; line-height: 1.0em; height: 40px; min-height: 0;"
+           });
+       });
 
-      console.log("Timeline items:", items);
-      const timeline = new vis.Timeline(container, items, groups, options);
+       console.log("Timeline items:", items);
+       const timeline = new vis.Timeline(container, items, groups, options);
     })
     .catch(error => {
-      console.error("Error loading historical figures:", error);
+       console.error("Error loading historical figures:", error);
     });
-
+  
   // Show/hide the "Add Historical Figure" form based on authentication.
   firebase.auth().onAuthStateChanged(user => {
     const figureFormSection = document.getElementById('figure-form-section');
@@ -147,9 +161,9 @@ document.addEventListener('DOMContentLoaded', function() {
   if (figureForm) {
     figureForm.addEventListener("submit", (e) => {
       e.preventDefault();
-
+      
       const name = document.getElementById("figureName").value.trim();
-      // Gather values from the checkboxes for categories.
+      // Gather checkbox values for categories.
       const categoryCheckboxes = document.querySelectorAll('input[name="figureCategory"]:checked');
       const groupsArr = Array.from(categoryCheckboxes).map(cb => cb.value);
       
@@ -159,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const description = document.getElementById("description").value.trim();
       const imageUrl = document.getElementById("imageUrl").value.trim();
       const region = document.getElementById("figureRegion").value.trim();
-
+      
       const newFigure = {
         name: name,
         groups: groupsArr,
