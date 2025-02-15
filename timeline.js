@@ -150,10 +150,10 @@ const deathYear = endDate.getFullYear();
 const contentHTML = `
   <div class="figure-content" style="position: relative; width: 100%; height: 100%; padding-bottom: 10px;">
     <div style="position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); text-align: center;">
-      <span class="figure-name" style="font-size: 1em;">${formattedName}</span>
+      <span class="figure-name" style="font-size: 1.2em;">${formattedName}</span>
     </div>
-    <span class="birth-year" style="position: absolute; bottom: 0; left: 0; font-size: 0.7em; opacity: 0.8;">${birthYear}</span>
-    <span class="death-year" style="position: absolute; bottom: 0; display: block; width: 100%; text-align: right; font-size: 0.7em; opacity: 0.8;">${deathYear}</span>
+    <span class="birth-year" style="position: absolute; bottom: 0; left: 0; font-size: 0.6em; opacity: 0.8;">${birthYear}</span>
+    <span class="death-year" style="position: absolute; bottom: 0; display: block; width: 100%; text-align: right; font-size: 0.6em; opacity: 0.8;">${deathYear}</span>
   </div>
 `;
 
@@ -165,7 +165,7 @@ const contentHTML = `
           content: contentHTML,
           start: startDate,
           end: endDate,
-          style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 1px 2px; line-height: 1.0em; height: 40px; min-height: 0;"
+          style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 1px 2px; line-height: 1.0em; height: 50px; min-height: 0;"
         });
       });
         // font-size: 1em; 
