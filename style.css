@@ -173,42 +173,26 @@ button {
   opacity: 0.8;
 }
 
-/* Override vis.js hover and selection opacity if needed */
-.vis-item:hover,
-.vis-item.vis-selected {
-  opacity: 1;
+/* Ensure groups have a minimum height */
+.vis-group .vis-group-content {
+  min-height: 60px;
+  padding: 5px;
 }
 
-/* Optionally, override default min-height of vis.js items */
-.vis-item {
-  min-height: 0;
-  height: auto;
+/* Alternate background colors and borders for groups */
+.vis-group:nth-child(2n-1) .vis-group-content {
+  background-color: #f9f9f9;
+  border-top: 2px solid #333;  /* Top border for odd rows */
+  border-bottom: 1px solid #ccc;
 }
 
-/* Hidden class for elements that should not be displayed */
-.hidden {
-  display: none;
+.vis-group:nth-child(2n) .vis-group-content {
+  background-color: #f1f1f1;
+  border-bottom: 2px solid #333;  /* Bottom border for even rows */
+  margin-bottom: 10px;  /* Extra space after a region pair */
 }
 
-/* Hide the label for groups with the hidden class */
+/* Hide the label for groups we want hidden */
 .vis-group-label-hidden {
   visibility: hidden;
-}
-
-/* Custom styling for region groups to visually separate rows */
-
-/* Target groups with our custom class names (added via timeline.js) */
-.vis-group.region-group.odd {
-  background-color: #f9f9f9;
-  border-bottom: 1px solid #ccc;
-  /* Optional: add some padding for separation */
-  padding: 5px 0;
-}
-
-.vis-group.region-group.even {
-  background-color: #f1f1f1;
-  border-bottom: 1px solid #ccc;
-  padding: 5px 0;
-  /* Add a bottom margin to separate regions from each other */
-  margin-bottom: 10px;
 }

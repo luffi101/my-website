@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const containerWidth = container.offsetWidth;
   const zoomMax = (67 * msPerYear * containerWidth) / 96; // Ensure 67-year block is at least ~96px wide
 
+  // Set a fixed minimum group height for styling purposes
   const options = {
     orientation: 'top',
     showCurrentTime: false,
@@ -32,25 +33,23 @@ document.addEventListener('DOMContentLoaded', function() {
     max: new Date("2025-12-31"),
     stack: false,
     groupOrder: 'content',
+    groupMinHeight: 60, // Ensure each group has at least 60px height
     tooltip: { delay: 100, followMouse: true },
     margin: { item: { horizontal: 0, vertical: 5 } }
   };
 
-  // Use a custom group template to only show a label on the first row.
+  // Custom group template: for rows ending with " - 2", we output a placeholder to hide the label.
   options.groupTemplate = function (group) {
-    // If the group's id ends with " - 2", return a span with a non-breaking space.
     if (group.id.endsWith(" - 2")) {
       const span = document.createElement('span');
-      // Using a non-breaking space prevents the row from collapsing.
-      span.innerHTML = '&nbsp;';
+      span.innerHTML = '&nbsp;'; // non-breaking space so the row isn't collapsed
       span.className = 'vis-group-label-hidden';
       return span;
     }
-    // Otherwise, return the normal label.
     return group.content;
   };
 
-  // Define the 7 geographical regions.
+  // Define regions.
   const regions = [
     "North America",
     "South America",
@@ -62,24 +61,13 @@ document.addEventListener('DOMContentLoaded', function() {
   ];
 
   // Create groups: each region gets 2 rows.
-  // The first row gets the region label; the second row’s label is hidden via groupTemplate.
-  // We also add class names to each group so we can style them.
   const groups = [];
   regions.forEach(region => {
-    let regionClass = region.toLowerCase().replace(/\s+/g, '-'); // e.g., "north-america"
-    groups.push({ 
-      id: region.toLowerCase() + " - 1", 
-      content: region, 
-      className: "region-group odd " + regionClass 
-    });
-    groups.push({ 
-      id: region.toLowerCase() + " - 2", 
-      content: region, 
-      className: "region-group even " + regionClass 
-    });
+    groups.push({ id: region.toLowerCase() + " - 1", content: region });
+    groups.push({ id: region.toLowerCase() + " - 2", content: region });
   });
-  groups.push({ id: "unknown - 1", content: "Unknown", className: "region-group odd unknown" });
-  groups.push({ id: "unknown - 2", content: "Unknown", className: "region-group even unknown" });
+  groups.push({ id: "unknown - 1", content: "Unknown" });
+  groups.push({ id: "unknown - 2", content: "Unknown" });
 
   // Set up counters to alternate rows for each region.
   const regionCounters = {};
@@ -99,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "social & cultural movement": "orange"
   };
 
-  // Map expertise categories to text colors for good contrast.
+  // Map expertise categories to text colors.
   const expertiseTextColors = {
     "politics": "black",
     "science": "white",
@@ -151,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formattedName = formatName(data.name);
 
-        // Determine region (default "unknown") from the "region" field.
+        // Determine region (default "unknown").
         let region = "unknown";
         if (data.region && typeof data.region === "string") {
           let normalizedRegion = data.region.trim().toLowerCase();
@@ -168,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const birthYear = startDate.getFullYear();
         const deathYear = endDate.getFullYear();
 
-        // Build content HTML; layout is controlled via CSS.
+        // Build content HTML (layout is controlled via CSS).
         const contentHTML = `
           <div class="figure-content">
             <div class="name-container">
