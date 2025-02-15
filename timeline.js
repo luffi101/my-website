@@ -142,13 +142,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const birthYear = startDate.getFullYear();
         const deathYear = endDate.getFullYear();
 
-        // Build content HTML with the name and the birth/death years in the lower corners.
+        // Build content HTML.
+        // We use a relative container with extra padding-bottom to reserve space for the years.
+        // The name is placed in an absolutely positioned container centered vertically.
         const contentHTML = `
-          <div class="figure-content" style="position: relative;">
-            <span class="figure-name" style="display: block; text-align: center; margin: 0; font-size: 1em;">${formattedName}</span>
+          <div class="figure-content" style="position: relative; height: 100%; padding-bottom: 10px;">
+            <div style="position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); text-align: center;">
+              <span class="figure-name" style="font-size: 1em;">${formattedName}</span>
+            </div>
             <span class="birth-year" style="position: absolute; bottom: 0; left: 0; font-size: 0.7em; opacity: 0.8;">${birthYear}</span>
             <span class="death-year" style="position: absolute; bottom: 0; right: 0; font-size: 0.7em; opacity: 0.8;">${deathYear}</span>
-          </div>`;
+          </div>
+        `;
+
 
         // Create the timeline item.
         items.push({
