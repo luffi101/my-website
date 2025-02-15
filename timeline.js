@@ -1,6 +1,27 @@
 // timeline.js
 
 document.addEventListener('DOMContentLoaded', function() {
+
+  flatpickr("#dateOfBirth", {
+    dateFormat: "Y-m-d",
+    minDate: "0001-01-01",
+    maxDate: "2025-12-31",
+    // Enable the year dropdown so the user can quickly select a year.
+    // Flatpickr shows a month select by default; you can further customize if needed.
+    altInput: true,
+    altFormat: "F j, Y",
+    allowInput: true
+  });
+
+  flatpickr("#dateOfDeath", {
+    dateFormat: "Y-m-d",
+    minDate: "0001-01-01",
+    maxDate: "2025-12-31",
+    altInput: true,
+    altFormat: "F j, Y",
+    allowInput: true
+  });
+    
   const container = document.getElementById('timeline-container');
 
   // Milliseconds per year (using 365.25 days/year)
@@ -67,7 +88,7 @@ const expertiseTextColors = {
   "politics": "black",           // Black text on bright red.
   "science": "white",            // White text on blue.
   "economy": "white",            // White text on green.
-  "arts & culture": "white",     // White text on violet.
+  "arts & culture": "#333333",   // Violet with dark gray text.
   "literature": "black",         // Black text on yellow.
   "philosophy & religion": "white", // White text on indigo.
   "social & cultural movement": "white" // White text on orange.
