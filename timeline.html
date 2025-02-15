@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   
-  
   <!-- vis.js CSS/JS from CDN -->
   <link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet">
   <script src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
@@ -21,7 +20,7 @@
   <!-- Firebase Config, Auth, and Timeline Script -->
   <script src="firebase-config.js"></script>
   <script src="auth.js"></script>
-  <script src="timeline.js"></script>
+  <script src="timeline.js" defer></script>
 </head>
 <body>
   <div class="container">
@@ -43,7 +42,7 @@
   </section>
   
   <!-- New Historical Figure Form (only visible when logged in) -->
-  <section id="figure-form-section" class="container" style="display: none;">
+  <section id="figure-form-section" class="container hidden">
     <h2>Add New Historical Figure</h2>
     <form id="figureForm">
       <div class="form-group">

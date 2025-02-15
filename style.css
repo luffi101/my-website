@@ -134,54 +134,58 @@ button {
 }
 
 /* Timeline Item Overrides */
-/* Ensure the inner content of timeline items is styled as desired */
-.vis-item-content .figure-content {
-  position: relative !important;
-  width: 100% !important;
-  height: 100% !important;
-  padding-bottom: 10px !important;  /* Reserve space for footer (years) */
+#timeline-container .vis-item-content .figure-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 10px;  /* Reserve space for footer (years) */
 }
 
-.vis-item-content .name-container {
-  position: absolute !important;
-  top: 50% !important;
-  left: 0 !important;
-  right: 0 !important;
-  transform: translateY(-50%) !important;
-  text-align: center !important;
+#timeline-container .vis-item-content .name-container {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  text-align: center;
 }
 
-.vis-item-content .figure-name {
-  display: block !important;
-  margin: 0 !important;
-  font-size: 1em !important;
-  line-height: 1em !important;
+#timeline-container .vis-item-content .figure-name {
+  display: block;
+  margin: 0;
+  font-size: 1em;
+  line-height: 1em;
 }
 
-.vis-item-content .birth-year {
-  position: absolute !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  font-size: 0.7em !important;
-  opacity: 0.8 !important;
+#timeline-container .vis-item-content .birth-year {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  font-size: 0.7em;
+  opacity: 0.8;
 }
 
-.vis-item-content .death-year {
-  position: absolute !important;
-  bottom: 0 !important;
-  right: 0 !important;
-  font-size: 0.7em !important;
-  opacity: 0.8 !important;
+#timeline-container .vis-item-content .death-year {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-size: 0.7em;
+  opacity: 0.8;
 }
 
 /* Override vis.js hover and selection opacity if needed */
 .vis-item:hover,
 .vis-item.vis-selected {
-  opacity: 1 !important;
+  opacity: 1;
 }
 
 /* Optionally, override default min-height of vis.js items */
 .vis-item {
-  min-height: 0 !important;
-  height: auto !important;
+  min-height: 0;
+  height: auto;
+}
+
+/* Hidden class for elements that should not be displayed */
+.hidden {
+  display: none;
 }
