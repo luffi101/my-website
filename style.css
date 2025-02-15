@@ -83,7 +83,7 @@ button {
 
 #timeline-section {
   width: 100%;
-  padding: 40px;
+  padding: 4px;
   margin: 0;
 }
 /*
@@ -121,9 +121,11 @@ button {
   padding: 5px;
   box-sizing: border-box;
 }
+.vis-group {
+  height: 40px;
+}
 
-.vis-item-content {
-  display: flex;
+.vis-item {
   align-items: center;
   /*justify-content: center; /* Use this if you also want horizontal centering */
   /*height: 100%;*/
