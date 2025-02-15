@@ -51,27 +51,27 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   regionCounters["unknown"] = 0;
 
-  // Map expertise categories (from the "groups" field) to background colors.
-  const expertiseColors = {
-    "politics": "red",
-    "science": "blue",
-    "economy": "green",
-    "arts & culture": "violet",
-    "literature": "yellow",
-    "philosophy & religion": "indigo",
-    "social & cultural movement": "orange"
-  };
+// Map expertise categories (from the "groups" field) to background colors.
+const expertiseColors = {
+  "politics": "red",             // Bright red for Politics.
+  "science": "blue",             // Blue for Science.
+  "economy": "green",            // Green for Economy.
+  "arts & culture": "violet",    // Violet for Arts & Culture.
+  "literature": "yellow",        // Yellow for Literature.
+  "philosophy & religion": "indigo", // Indigo for Philosophy & Religion.
+  "social & cultural movement": "orange" // Orange for Social & Cultural Movement.
+};
 
-  // Map expertise categories to text colors.
-  const expertiseTextColors = {
-    "politics": "white",
-    "science": "white",
-    "economy": "white",
-    "arts & culture": "white",
-    "literature": "black", // Use black for literature so text is readable on yellow.
-    "philosophy & religion": "white",
-    "social & cultural movement": "white"
-  };
+// Map expertise categories to text colors (ensuring good contrast).
+const expertiseTextColors = {
+  "politics": "black",           // Black text on bright red.
+  "science": "white",            // White text on blue.
+  "economy": "white",            // White text on green.
+  "arts & culture": "white",     // White text on violet.
+  "literature": "black",         // Black text on yellow.
+  "philosophy & religion": "white", // White text on indigo.
+  "social & cultural movement": "white" // White text on orange.
+};
 
   // Retrieve historical figures from Firestore.
   firebase.firestore().collection("historicalFigures")
