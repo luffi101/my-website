@@ -126,7 +126,7 @@ button {
 .checkbox-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px; /* spacing between checkbox items */
+  gap: 20px; /* spacing between checkbox items */
   align-items: center;
 }
 
@@ -138,13 +138,20 @@ button {
 }
 
 .checkbox-item input[type="checkbox"] {
-  margin: 0 5px 0 0; /* Adjust spacing between checkbox and label */
+  margin: 10px; /* Adjust spacing between checkbox and label */
   vertical-align: middle; /* Ensure checkbox is vertically aligned with the label */
 }
 
 .checkbox-item label {
   vertical-align: middle;
-  margin: 0;
+  margin: 10px;
+}
+
+input[type="checkbox"] {
+  transform: scale(1.5);
+  -ms-transform: scale(1.5); /* IE 9 */
+  -webkit-transform: scale(1.5); /* Safari and Chrome */
+  margin: 0 5px 0 0; /* Adjust spacing as needed */
 }
 
 .vis-group {
