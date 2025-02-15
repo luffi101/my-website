@@ -164,3 +164,39 @@ input[type="checkbox"] {
   height: 100%;
 }
 
+.figure-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 10px; /* Reserve space for the years at the bottom */
+}
+
+.name-container {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  text-align: center;
+}
+
+.figure-name {
+  font-size: 1em !important; /* Adjust as needed */
+  margin: 0;
+}
+
+.birth-year {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  font-size: 0.7em !important;
+  opacity: 0.8;
+}
+
+.death-year {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-size: 0.7em !important;
+  opacity: 0.8;
+}

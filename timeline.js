@@ -142,18 +142,14 @@ document.addEventListener('DOMContentLoaded', function() {
 const birthYear = startDate.getFullYear();
 const deathYear = endDate.getFullYear();
 
-// Build content HTML.
-// The container is set to position: relative with full width,
-// the name is centered in the middle,
-// the birth year is absolutely positioned at the bottom-left,
-// and the death year is now styled as a block that spans the full width with text aligned right.
+// Build content HTML with classes.
 const contentHTML = `
-  <div class="figure-content" style="position: relative; width: 100%; height: 100%; padding-bottom: 10px;">
-    <div style="position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); text-align: center;">
-      <span class="figure-name" style="font-size: 1.2em;">${formattedName}</span>
+  <div class="figure-content">
+    <div class="name-container">
+      <span class="figure-name">${formattedName}</span>
     </div>
-    <span class="birth-year" style="position: absolute; bottom: 0; left: 0; font-size: 0.6em; opacity: 0.8;">${birthYear}</span>
-    <span class="death-year" style="position: absolute; bottom: 0; display: block; width: 100%; text-align: right; font-size: 0.6em; opacity: 0.8;">${deathYear}</span>
+    <span class="birth-year">${birthYear}</span>
+    <span class="death-year">${deathYear}</span>
   </div>
 `;
 
