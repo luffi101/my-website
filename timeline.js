@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const container = document.getElementById('timeline-container');
   const msPerYear = 31557600000; // 365.25 days/year in milliseconds
 
-  // Zoom limits based on George Washington’s 67-year lifespan:
+  // Zoom limits based on a reference lifespan:
   const zoomMin = 201 * msPerYear; // Minimum visible span = 201 years
   const containerWidth = container.offsetWidth;
   const zoomMax = (67 * msPerYear * containerWidth) / 96; // Ensure 67-year block is at least ~96px wide
@@ -36,6 +36,21 @@ document.addEventListener('DOMContentLoaded', function() {
     margin: { item: { horizontal: 0, vertical: 5 } }
   };
 
+  // Use a custom group template to only show a label on the first row.
+  options.groupTemplate = function (group) {
+    // If the group's id ends with " - 2", return a span with a non-breaking space.
+    if (group.id.endsWith(" - 2")) {
+      const span = document.createElement('span');
+      // Using a non-breaking space prevents the row from collapsing.
+      span.innerHTML = '&nbsp;';
+      // Optionally, you can add a custom CSS class to style it (or hide it visually)
+      span.className = 'vis-group-label-hidden';
+      return span;
+    }
+    // Otherwise, return the normal label.
+    return group.content;
+  };
+
   // Define the 7 geographical regions.
   const regions = [
     "North America",
@@ -47,15 +62,15 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
 
-  // Create groups: each region gets 2 rows for layout,
-  // but only the first row gets a label so both rows share one label.
+  // Create groups: each region gets 2 rows.
+  // The first group gets the region name; the second group’s label is handled by groupTemplate.
   const groups = [];
   regions.forEach(region => {
     groups.push({ id: region.toLowerCase() + " - 1", content: region });
-    groups.push({ id: region.toLowerCase() + " - 2", content: "" });
+    groups.push({ id: region.toLowerCase() + " - 2", content: region }); // content will be hidden by template.
   });
   groups.push({ id: "unknown - 1", content: "Unknown" });
-  groups.push({ id: "unknown - 2", content: "" });
+  groups.push({ id: "unknown - 2", content: "Unknown" });
 
   // Set up counters to alternate rows for each region.
   const regionCounters = {};
@@ -144,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const birthYear = startDate.getFullYear();
         const deathYear = endDate.getFullYear();
 
-        // Build content HTML without inline positioning styles; handled in style.css.
+        // Build content HTML; layout is controlled via CSS.
         const contentHTML = `
           <div class="figure-content">
             <div class="name-container">

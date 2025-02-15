@@ -189,3 +189,10 @@ button {
 .hidden {
   display: none;
 }
+
+/* Hide the label for groups with the hidden class */
+.vis-group-label-hidden {
+  visibility: hidden;
+  /* Alternatively, you can set the color to transparent */
+  /* color: transparent; */
+}
