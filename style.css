@@ -121,6 +121,32 @@ button {
   padding: 5px;
   box-sizing: border-box;
 }
+
+/* Style for checkbox container in the historical figure form */
+.checkbox-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* spacing between checkbox items */
+  align-items: center;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  /* Optionally, set a fixed width if you want consistent alignment: */
+  /* width: 200px; */
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin: 0 5px 0 0; /* Adjust spacing between checkbox and label */
+  vertical-align: middle; /* Ensure checkbox is vertically aligned with the label */
+}
+
+.checkbox-item label {
+  vertical-align: middle;
+  margin: 0;
+}
+
 .vis-group {
   height: 40px;
 }
