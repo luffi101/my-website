@@ -17,16 +17,12 @@ document.addEventListener('DOMContentLoaded', function() {
     altFormat: "F j, Y",
     allowInput: true
   });
-
+    
   const container = document.getElementById('timeline-container');
-
-  // Milliseconds per year (using 365.25 days/year)
-  const msPerYear = 31557600000;
-
-  // Zoom limits based on George Washington’s 67-year lifespan:
+  const msPerYear = 31557600000; // 365.25 days/year in milliseconds
   const zoomMin = 201 * msPerYear; // Minimum visible span = 201 years
   const containerWidth = container.offsetWidth;
-  const zoomMax = (67 * msPerYear * containerWidth) / 96; // Ensure 67-year block is at least ~96px wide
+  const zoomMax = (67 * msPerYear * containerWidth) / 96; // Ensure a 67-year span is at least ~96px wide
 
   const options = {
     orientation: 'top',
@@ -41,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
     margin: { item: { horizontal: 0, vertical: 5 } }
   };
 
-  // Define the 7 geographical regions.
+  // Define 7 geographical regions.
   const regions = [
     "North America",
     "South America",
@@ -52,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
 
-  // Create groups: each region gets 2 rows; add fallback unknown rows.
+  // Create groups: each region gets two rows; add fallback unknown rows.
   const groups = [];
   regions.forEach(region => {
     groups.push({ id: region.toLowerCase() + " - 1", content: region + " (Row 1)" });
@@ -81,11 +77,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Map expertise categories to text colors for good contrast.
   const expertiseTextColors = {
-    "politics": "black",
+    "politics": "black",           // Black text on bright red.
     "science": "white",
     "economy": "white",
     "arts & culture": "#333333",   // Dark gray for better contrast on violet.
-    "literature": "black",
+    "literature": "black",         // Black text on yellow.
     "philosophy & religion": "white",
     "social & cultural movement": "white"
   };
@@ -98,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
       snapshot.forEach(doc => {
         const data = doc.data();
 
-        // Process dateOfBirth: if only a year is provided, append "-01-01"
+        // Process dates: if only a year is provided, append "-01-01".
         let birthDateStr = data.dateOfBirth;
         if (birthDateStr && birthDateStr.length === 4) {
           birthDateStr += "-01-01";
@@ -114,12 +110,12 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
 
-        // Determine primary expertise category from data.groups (default "politics")
+        // Determine primary expertise category from data.groups (default "politics").
         const expertiseCategory = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
         const bgColor = expertiseColors[expertiseCategory] || "gray";
         const textColor = expertiseTextColors[expertiseCategory] || "white";
 
-        // Process name: convert "Lastname, Firstname" to "Firstname Lastname"
+        // Process name: convert "Lastname, Firstname" to "Firstname Lastname".
         let formattedName = data.name;
         if (formattedName && formattedName.includes(",")) {
           const parts = formattedName.split(",");
@@ -142,12 +138,19 @@ document.addEventListener('DOMContentLoaded', function() {
         regionCounters[region] = counter + 1;
         const groupId = region + rowNumber;
 
-        // Build content HTML using a <span> for the name (for tighter layout).
-        const contentHTML = `<div class="figure-content">
-                                <span class="figure-name">${formattedName}</span>
-                             </div>`;
+        // Extract the birth and death years.
+        const birthYear = startDate.getFullYear();
+        const deathYear = endDate.getFullYear();
 
-        // Create the timeline item, using the style property to set visual appearance.
+        // Build content HTML with the name and the birth/death years in the lower corners.
+        const contentHTML = `
+          <div class="figure-content" style="position: relative;">
+            <span class="figure-name" style="display: block; text-align: center; margin: 0; font-size: 1em;">${formattedName}</span>
+            <span class="birth-year" style="position: absolute; bottom: 0; left: 0; font-size: 0.7em; opacity: 0.8;">${birthYear}</span>
+            <span class="death-year" style="position: absolute; bottom: 0; right: 0; font-size: 0.7em; opacity: 0.8;">${deathYear}</span>
+          </div>`;
+
+        // Create the timeline item.
         items.push({
           id: doc.id,
           group: groupId,
@@ -183,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Gather checkbox values for categories.
       const categoryCheckboxes = document.querySelectorAll('input[name="figureCategory"]:checked');
       const groupsArr = Array.from(categoryCheckboxes).map(cb => cb.value);
-      
+
       const dateOfBirth = document.getElementById("dateOfBirth").value.trim();
       const dateOfDeath = document.getElementById("dateOfDeath").value.trim();
       const nationality = document.getElementById("nationality").value.trim();
