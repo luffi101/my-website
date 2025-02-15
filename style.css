@@ -14,7 +14,6 @@ body {
   background-color: #fff;
 }
 
-
 /* Header and Navigation */
 header {
   position: relative;
@@ -83,17 +82,10 @@ button {
 
 #timeline-section {
   width: 100%;
-  padding: 4px;
+  padding: 20px;
   margin: 0;
 }
-/*
-.figure-content {
-  display: flex;
-  align-items: center; /* vertically centers the content */ /*
-  justify-content: center; /* horizontally centers the content (if desired) */ /*
-  height: 100%;
-}
-*/
+
 /* Historical Figure Form Styles */
 #figure-form-section {
   max-width: 800px;
@@ -122,81 +114,74 @@ button {
   box-sizing: border-box;
 }
 
-/* Style for checkbox container in the historical figure form */
+/* Checkbox Container for Categories */
 .checkbox-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px; /* spacing between checkbox items */
+  gap: 10px;
   align-items: center;
 }
 
 .checkbox-item {
   display: flex;
   align-items: center;
-  /* Optionally, set a fixed width if you want consistent alignment: */
-  /* width: 200px; */
 }
 
 .checkbox-item input[type="checkbox"] {
-  margin: 10px; /* Adjust spacing between checkbox and label */
-  vertical-align: middle; /* Ensure checkbox is vertically aligned with the label */
-}
-
-.checkbox-item label {
+  transform: scale(1.2);
+  margin: 0 5px 0 0;
   vertical-align: middle;
-  margin: 10px;
 }
 
-input[type="checkbox"] {
-  transform: scale(1.5);
-  -ms-transform: scale(1.5); /* IE 9 */
-  -webkit-transform: scale(1.5); /* Safari and Chrome */
-  margin: 0 5px 0 0; /* Adjust spacing as needed */
+/* Timeline Item Overrides */
+/* Ensure the inner content of timeline items is styled as desired */
+.vis-item-content .figure-content {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding-bottom: 10px !important;  /* Reserve space for footer (years) */
 }
 
-.vis-group {
-  height: 40px;
+.vis-item-content .name-container {
+  position: absolute !important;
+  top: 50% !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: translateY(-50%) !important;
+  text-align: center !important;
 }
 
-.vis-item-content {
-  display: flex !important;
-  align-items: center !important;
-  height: 100%;
+.vis-item-content .figure-name {
+  display: block !important;
+  margin: 0 !important;
+  font-size: 1em !important;
+  line-height: 1em !important;
 }
 
-.figure-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  padding-bottom: 10px; /* Reserve space for the years at the bottom */
-}
-
-.name-container {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
-  text-align: center;
-}
-
-.figure-name {
-  font-size: 1em !important; /* Adjust as needed */
-  margin: 0;
-}
-
-.birth-year {
-  position: absolute;
-  bottom: 0;
-  left: 0;
+.vis-item-content .birth-year {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
   font-size: 0.7em !important;
-  opacity: 0.8;
+  opacity: 0.8 !important;
 }
 
-.death-year {
-  position: absolute;
-  bottom: 0;
-  right: 0;
+.vis-item-content .death-year {
+  position: absolute !important;
+  bottom: 0 !important;
+  right: 0 !important;
   font-size: 0.7em !important;
-  opacity: 0.8;
+  opacity: 0.8 !important;
+}
+
+/* Override vis.js hover and selection opacity if needed */
+.vis-item:hover,
+.vis-item.vis-selected {
+  opacity: 1 !important;
+}
+
+/* Optionally, override default min-height of vis.js items */
+.vis-item {
+  min-height: 0 !important;
+  height: auto !important;
 }
