@@ -161,41 +161,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Event listener for the "Add Historical Figure" form.
   const figureForm = document.getElementById("figureForm");
-  if (figureForm) {
-    figureForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      
-      const name = document.getElementById("figureName").value.trim();
-      const groupsStr = document.getElementById("figureGroups").value.trim();
-      const groupsArr = groupsStr.split(",").map(s => s.trim());
-      const dateOfBirth = document.getElementById("dateOfBirth").value.trim();
-      const dateOfDeath = document.getElementById("dateOfDeath").value.trim();
-      const nationality = document.getElementById("nationality").value.trim();
-      const description = document.getElementById("description").value.trim();
-      const imageUrl = document.getElementById("imageUrl").value.trim();
-      const region = document.getElementById("figureRegion").value.trim();
-      
-      const newFigure = {
-        name: name,
-        groups: groupsArr,
-        dateOfBirth: dateOfBirth,
-        dateOfDeath: dateOfDeath,
-        nationality: nationality,
-        description: description,
-        imageUrl: imageUrl,
-        region: region
-      };
+if (figureForm) {
+  figureForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    
+    const name = document.getElementById("figureName").value.trim();
+    // Instead of a text input for groups, gather values from the checkboxes:
+    const categoryCheckboxes = document.querySelectorAll('input[name="figureCategory"]:checked');
+    const groupsArr = Array.from(categoryCheckboxes).map(cb => cb.value);
+    
+    const dateOfBirth = document.getElementById("dateOfBirth").value.trim();
+    const dateOfDeath = document.getElementById("dateOfDeath").value.trim();
+    const nationality = document.getElementById("nationality").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const imageUrl = document.getElementById("imageUrl").value.trim();
+    const region = document.getElementById("figureRegion").value.trim();
+    
+    const newFigure = {
+      name: name,
+      groups: groupsArr,
+      dateOfBirth: dateOfBirth,
+      dateOfDeath: dateOfDeath,
+      nationality: nationality,
+      description: description,
+      imageUrl: imageUrl,
+      region: region
+    };
 
-      firebase.firestore().collection("historicalFigures").add(newFigure)
-        .then(() => {
-          document.getElementById("figureFeedback").innerText = "Historical figure added successfully!";
-          figureForm.reset();
-          window.location.reload();
-        })
-        .catch(error => {
-          console.error("Error adding historical figure:", error);
-          document.getElementById("figureFeedback").innerText = "Error: " + error.message;
-        });
-    });
-  }
-});
+    firebase.firestore().collection("historicalFigures").add(newFigure)
+      .then(() => {
+        document.getElementById("figureFeedback").innerText = "Historical figure added successfully!";
+        figureForm.reset();
+        window.location.reload();
+      })
+      .catch(error => {
+        console.error("Error adding historical figure:", error);
+        document.getElementById("figureFeedback").innerText = "Error: " + error.message;
+      });
+  });
+}
