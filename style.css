@@ -86,14 +86,14 @@ button {
   padding: 20px;
   margin: 0;
 }
-
+/*
 .figure-content {
   display: flex;
-  align-items: center; /* vertically centers the content */
-  justify-content: center; /* horizontally centers the content (if desired) */
+  align-items: center; /* vertically centers the content */ /*
+  justify-content: center; /* horizontally centers the content (if desired) */ /*
   height: 100%;
 }
-
+*/
 /* Historical Figure Form Styles */
 #figure-form-section {
   max-width: 800px;
@@ -142,14 +142,14 @@ button {
 }
 */
 /* Optionally, override vis.js item content styles for figure blocks  */
-/*
+
 .vis-item-content .figure-content {
-  background-color: inherit !important;
-  padding: inherit !important;
-  font-size: inherit !important;
-  line-height: inherit !important;
+  display: flex;
+  align-items: center;
+  /*justify-content: center; /* Use this if you also want horizontal centering */
+  /*height: 100%;*/
 }
-  */
+
 
 /* If needed, override vis.js item default min-height 
 .vis-item {
