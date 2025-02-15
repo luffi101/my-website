@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const span = document.createElement('span');
       // Using a non-breaking space prevents the row from collapsing.
       span.innerHTML = '&nbsp;';
-      // Optionally, you can add a custom CSS class to style it (or hide it visually)
       span.className = 'vis-group-label-hidden';
       return span;
     }
@@ -63,14 +62,24 @@ document.addEventListener('DOMContentLoaded', function() {
   ];
 
   // Create groups: each region gets 2 rows.
-  // The first group gets the region name; the second group’s label is handled by groupTemplate.
+  // The first row gets the region label; the second row’s label is hidden via groupTemplate.
+  // We also add class names to each group so we can style them.
   const groups = [];
   regions.forEach(region => {
-    groups.push({ id: region.toLowerCase() + " - 1", content: region });
-    groups.push({ id: region.toLowerCase() + " - 2", content: region }); // content will be hidden by template.
+    let regionClass = region.toLowerCase().replace(/\s+/g, '-'); // e.g., "north-america"
+    groups.push({ 
+      id: region.toLowerCase() + " - 1", 
+      content: region, 
+      className: "region-group odd " + regionClass 
+    });
+    groups.push({ 
+      id: region.toLowerCase() + " - 2", 
+      content: region, 
+      className: "region-group even " + regionClass 
+    });
   });
-  groups.push({ id: "unknown - 1", content: "Unknown" });
-  groups.push({ id: "unknown - 2", content: "Unknown" });
+  groups.push({ id: "unknown - 1", content: "Unknown", className: "region-group odd unknown" });
+  groups.push({ id: "unknown - 2", content: "Unknown", className: "region-group even unknown" });
 
   // Set up counters to alternate rows for each region.
   const regionCounters = {};

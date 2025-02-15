@@ -193,6 +193,22 @@ button {
 /* Hide the label for groups with the hidden class */
 .vis-group-label-hidden {
   visibility: hidden;
-  /* Alternatively, you can set the color to transparent */
-  /* color: transparent; */
+}
+
+/* Custom styling for region groups to visually separate rows */
+
+/* Target groups with our custom class names (added via timeline.js) */
+.vis-group.region-group.odd {
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #ccc;
+  /* Optional: add some padding for separation */
+  padding: 5px 0;
+}
+
+.vis-group.region-group.even {
+  background-color: #f1f1f1;
+  border-bottom: 1px solid #ccc;
+  padding: 5px 0;
+  /* Add a bottom margin to separate regions from each other */
+  margin-bottom: 10px;
 }
