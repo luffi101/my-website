@@ -125,9 +125,9 @@ button {
   height: 40px;
 }
 
-.vis-item {
-  align-items: center;
-  /*justify-content: center; /* Use this if you also want horizontal centering */
-  /*height: 100%;*/
+.vis-item-content {
+  display: flex !important;
+  align-items: center !important;
+  height: 100%;
 }
 
