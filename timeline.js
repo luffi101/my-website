@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     altFormat: "F j, Y",
     allowInput: true
   });
-  
+
   flatpickr("#dateOfDeath", {
     dateFormat: "Y-m-d",
     minDate: "0001-01-01",
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     altFormat: "F j, Y",
     allowInput: true
   });
-    
+
   const container = document.getElementById('timeline-container');
   const msPerYear = 31557600000; // 365.25 days/year in milliseconds
   
@@ -38,14 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
     tooltip: { delay: 100, followMouse: true },
     margin: { item: { horizontal: 0, vertical: 5 } }
   };
-
-  // Custom group label formatter: if the group id ends with " - 2", return an empty label.
-  options.groupLabelFormatter = function(group) {
-    if (group.id.endsWith(" - 2")) {
-      return "";
-    }
-    return group.content;
-  };
   
   // Define the 7 geographical regions.
   const regions = [
@@ -58,15 +50,14 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
   
-  // Create groups: each region gets 2 rows.
-  // The first row will show the zone name; the second row will have an empty label (merged into one).
+  // Create groups: each region gets 2 rows with distinct labels.
   const groups = [];
   regions.forEach(region => {
-    groups.push({ id: region.toLowerCase() + " - 1", content: region });
-    groups.push({ id: region.toLowerCase() + " - 2", content: "" });
+    groups.push({ id: region.toLowerCase() + " - 1", content: region + " (Row 1)" });
+    groups.push({ id: region.toLowerCase() + " - 2", content: region + " (Row 2)" });
   });
-  groups.push({ id: "unknown - 1", content: "Unknown" });
-  groups.push({ id: "unknown - 2", content: "" });
+  groups.push({ id: "unknown - 1", content: "Unknown (Row 1)" });
+  groups.push({ id: "unknown - 2", content: "Unknown (Row 2)" });
   
   // Set up counters to alternate rows for each region.
   const regionCounters = {};
@@ -155,9 +146,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const birthYear = startDate.getFullYear();
         const deathYear = endDate.getFullYear();
   
-        // Build content HTML:
-        // The container reserves bottom padding for the years (footer).
-        // The name is centered; birth year is at bottom left, death year at bottom right.
+        // Build content HTML: the container reserves bottom padding for the footer.
+        // The name is centered; the birth year appears at the bottom left, and the death year at the bottom right.
         const contentHTML = `
           <div class="figure-content" style="position: relative; width: 100%; height: 100%; padding-bottom: 10px;">
             <div class="name-container" style="position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); text-align: center;">
