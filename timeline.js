@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     altFormat: "F j, Y",
     allowInput: true
   });
-
+  
   flatpickr("#dateOfDeath", {
     dateFormat: "Y-m-d",
     minDate: "0001-01-01",
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     altFormat: "F j, Y",
     allowInput: true
   });
-    
+  
   const container = document.getElementById('timeline-container');
   const msPerYear = 31557600000; // 365.25 days/year in milliseconds
   
@@ -50,14 +50,14 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
   
-  // Create groups: each region gets 2 rows; for the first row, show the label, for the second row, use an empty label.
+  // Create groups: each region gets 2 rows; add fallback unknown rows.
   const groups = [];
   regions.forEach(region => {
-    groups.push({ id: region.toLowerCase() + " - 1", content: region });
-    groups.push({ id: region.toLowerCase() + " - 2", content: "" });
+    groups.push({ id: region.toLowerCase() + " - 1", content: region + " (Row 1)" });
+    groups.push({ id: region.toLowerCase() + " - 2", content: region + " (Row 2)" });
   });
-  groups.push({ id: "unknown - 1", content: "Unknown" });
-  groups.push({ id: "unknown - 2", content: "" });
+  groups.push({ id: "unknown - 1", content: "Unknown (Row 1)" });
+  groups.push({ id: "unknown - 2", content: "Unknown (Row 2)" });
   
   // Set up counters to alternate rows for each region.
   const regionCounters = {};
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
       snapshot.forEach(doc => {
         const data = doc.data();
   
-        // Process dateOfBirth: if only a year is provided, append "-01-01"
+        // Process dates: if only a year is provided, append "-01-01".
         let birthDateStr = data.dateOfBirth;
         if (birthDateStr && birthDateStr.length === 4) {
           birthDateStr += "-01-01";
@@ -112,14 +112,14 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
   
-        // Determine primary expertise category from data.groups (default "politics")
+        // Determine primary expertise category from data.groups (default "politics").
         const expertiseCategory = (data.groups && data.groups.length > 0) 
           ? data.groups[0].trim().toLowerCase() 
           : "politics";
         const bgColor = expertiseColors[expertiseCategory] || "gray";
         const textColor = expertiseTextColors[expertiseCategory] || "white";
   
-        // Process name: convert "Lastname, Firstname" to "Firstname Lastname"
+        // Process name: convert "Lastname, Firstname" to "Firstname Lastname".
         let formattedName = data.name;
         if (formattedName && formattedName.includes(",")) {
           const parts = formattedName.split(",");
@@ -146,7 +146,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const birthYear = startDate.getFullYear();
         const deathYear = endDate.getFullYear();
   
-        // Build content HTML with centered name and years at the bottom corners.
+        // Build content HTML:
+        // The container is set to position: relative with extra padding-bottom.
+        // The name is centered vertically, and the birth and death years are positioned at the bottom left and right.
         const contentHTML = `
           <div class="figure-content" style="position: relative; width: 100%; height: 100%; padding-bottom: 10px;">
             <div class="name-container" style="position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); text-align: center;">
