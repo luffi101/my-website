@@ -1,13 +1,9 @@
-// timeline.js
-
 document.addEventListener('DOMContentLoaded', function() {
-
+  // Initialize Flatpickr for date inputs
   flatpickr("#dateOfBirth", {
     dateFormat: "Y-m-d",
     minDate: "0001-01-01",
     maxDate: "2025-12-31",
-    // Enable the year dropdown so the user can quickly select a year.
-    // Flatpickr shows a month select by default; you can further customize if needed.
     altInput: true,
     altFormat: "F j, Y",
     allowInput: true
@@ -21,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     altFormat: "F j, Y",
     allowInput: true
   });
-    
+
   const container = document.getElementById('timeline-container');
 
   // Milliseconds per year (using 365.25 days/year)
@@ -72,103 +68,103 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   regionCounters["unknown"] = 0;
 
-// Map expertise categories (from the "groups" field) to background colors.
-const expertiseColors = {
-  "politics": "red",             // Bright red for Politics.
-  "science": "blue",             // Blue for Science.
-  "economy": "green",            // Green for Economy.
-  "arts & culture": "violet",    // Violet for Arts & Culture.
-  "literature": "yellow",        // Yellow for Literature.
-  "philosophy & religion": "indigo", // Indigo for Philosophy & Religion.
-  "social & cultural movement": "orange" // Orange for Social & Cultural Movement.
-};
+  // Map expertise categories (from the "groups" field) to background colors.
+  const expertiseColors = {
+    "politics": "red",             // Bright red for Politics.
+    "science": "blue",             // Blue for Science.
+    "economy": "green",            // Green for Economy.
+    "arts & culture": "violet",    // Violet for Arts & Culture.
+    "literature": "yellow",        // Yellow for Literature.
+    "philosophy & religion": "indigo", // Indigo for Philosophy & Religion.
+    "social & cultural movement": "orange" // Orange for Social & Cultural Movement.
+  };
 
-// Map expertise categories to text colors (ensuring good contrast).
-const expertiseTextColors = {
-  "politics": "black",           // Black text on bright red.
-  "science": "white",            // White text on blue.
-  "economy": "white",            // White text on green.
-  "arts & culture": "#333333",   // Violet with dark gray text.
-  "literature": "black",         // Black text on yellow.
-  "philosophy & religion": "white", // White text on indigo.
-  "social & cultural movement": "white" // White text on orange.
-};
+  // Map expertise categories to text colors for good contrast.
+  const expertiseTextColors = {
+    "politics": "black",
+    "science": "white",
+    "economy": "white",
+    "arts & culture": "#333333",   // Dark gray for better contrast on violet.
+    "literature": "black",
+    "philosophy & religion": "white",
+    "social & cultural movement": "white"
+  };
 
   // Retrieve historical figures from Firestore.
   firebase.firestore().collection("historicalFigures")
     .get()
     .then(snapshot => {
-       const items = [];
-       snapshot.forEach(doc => {
-           const data = doc.data();
+      const items = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
 
-           // Process dateOfBirth: if only a year is provided, append "-01-01".
-           let birthDateStr = data.dateOfBirth;
-           if (birthDateStr && birthDateStr.length === 4) {
-             birthDateStr += "-01-01";
-           }
-           let deathDateStr = data.dateOfDeath;
-           if (deathDateStr && deathDateStr.length === 4) {
-             deathDateStr += "-01-01";
-           }
-           const startDate = birthDateStr ? new Date(birthDateStr) : null;
-           const endDate = deathDateStr ? new Date(deathDateStr) : null;
-           if (!startDate || !endDate) {
-             console.warn(`Skipping ${data.name} due to missing or invalid dates.`);
-             return;
-           }
+        // Process dateOfBirth: if only a year is provided, append "-01-01"
+        let birthDateStr = data.dateOfBirth;
+        if (birthDateStr && birthDateStr.length === 4) {
+          birthDateStr += "-01-01";
+        }
+        let deathDateStr = data.dateOfDeath;
+        if (deathDateStr && deathDateStr.length === 4) {
+          deathDateStr += "-01-01";
+        }
+        const startDate = birthDateStr ? new Date(birthDateStr) : null;
+        const endDate = deathDateStr ? new Date(deathDateStr) : null;
+        if (!startDate || !endDate) {
+          console.warn(`Skipping ${data.name} due to missing or invalid dates.`);
+          return;
+        }
 
-           // Determine primary expertise category from data.groups (default "politics").
-           const expertiseCategory = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
-           const bgColor = expertiseColors[expertiseCategory] || "gray";
-           const textColor = expertiseTextColors[expertiseCategory] || "white";
+        // Determine primary expertise category from data.groups (default "politics")
+        const expertiseCategory = (data.groups && data.groups.length > 0) ? data.groups[0].trim().toLowerCase() : "politics";
+        const bgColor = expertiseColors[expertiseCategory] || "gray";
+        const textColor = expertiseTextColors[expertiseCategory] || "white";
 
-           // Process name: convert "Lastname, Firstname" to "Firstname Lastname".
-           let formattedName = data.name;
-           if (formattedName && formattedName.includes(",")) {
-             const parts = formattedName.split(",");
-             if (parts.length >= 2) {
-               formattedName = parts[1].trim() + " " + parts[0].trim();
-             }
-           }
+        // Process name: convert "Lastname, Firstname" to "Firstname Lastname"
+        let formattedName = data.name;
+        if (formattedName && formattedName.includes(",")) {
+          const parts = formattedName.split(",");
+          if (parts.length >= 2) {
+            formattedName = parts[1].trim() + " " + parts[0].trim();
+          }
+        }
 
-           // Determine region (default "unknown") from the "region" field.
-           let region = "unknown";
-           if (data.region && typeof data.region === "string") {
-             let normalizedRegion = data.region.trim().toLowerCase();
-             if (regions.map(r => r.toLowerCase()).includes(normalizedRegion)) {
-               region = normalizedRegion;
-             }
-           }
-           // Alternate row assignment for the region.
-           const counter = regionCounters[region] || 0;
-           const rowNumber = (counter % 2 === 0) ? " - 1" : " - 2";
-           regionCounters[region] = counter + 1;
-           const groupId = region + rowNumber;
+        // Determine region (default "unknown") from the "region" field.
+        let region = "unknown";
+        if (data.region && typeof data.region === "string") {
+          let normalizedRegion = data.region.trim().toLowerCase();
+          if (regions.map(r => r.toLowerCase()).includes(normalizedRegion)) {
+            region = normalizedRegion;
+          }
+        }
+        // Alternate row assignment for the region.
+        const counter = regionCounters[region] || 0;
+        const rowNumber = (counter % 2 === 0) ? " - 1" : " - 2";
+        regionCounters[region] = counter + 1;
+        const groupId = region + rowNumber;
 
-           // Build content HTML using <h4> for the name.
-           const contentHTML = `<div class="figure-content">
-                                  <h4 style="margin: 0;">${formattedName}</h4>
-                                </div>`;
+        // Build content HTML using a <span> for the name (for tighter layout).
+        const contentHTML = `<div class="figure-content">
+                                <span class="figure-name">${formattedName}</span>
+                             </div>`;
 
-           // Use the style property to set background color, text color, padding, etc.
-           items.push({
-             id: doc.id,
-             group: groupId,
-             content: contentHTML,
-             start: startDate,
-             end: endDate,
-             style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 1px 2px; font-size: 1em; line-height: 1.0em; height: 40px; min-height: 0;"
-           });
-       });
+        // Create the timeline item, using the style property to set visual appearance.
+        items.push({
+          id: doc.id,
+          group: groupId,
+          content: contentHTML,
+          start: startDate,
+          end: endDate,
+          style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 1px 2px; font-size: 1em; line-height: 1.0em; height: 40px; min-height: 0;"
+        });
+      });
 
-       console.log("Timeline items:", items);
-       const timeline = new vis.Timeline(container, items, groups, options);
+      console.log("Timeline items:", items);
+      const timeline = new vis.Timeline(container, items, groups, options);
     })
     .catch(error => {
-       console.error("Error loading historical figures:", error);
+      console.error("Error loading historical figures:", error);
     });
-  
+
   // Show/hide the "Add Historical Figure" form based on authentication.
   firebase.auth().onAuthStateChanged(user => {
     const figureFormSection = document.getElementById('figure-form-section');
@@ -182,7 +178,7 @@ const expertiseTextColors = {
   if (figureForm) {
     figureForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      
+
       const name = document.getElementById("figureName").value.trim();
       // Gather checkbox values for categories.
       const categoryCheckboxes = document.querySelectorAll('input[name="figureCategory"]:checked');
@@ -194,7 +190,7 @@ const expertiseTextColors = {
       const description = document.getElementById("description").value.trim();
       const imageUrl = document.getElementById("imageUrl").value.trim();
       const region = document.getElementById("figureRegion").value.trim();
-      
+
       const newFigure = {
         name: name,
         groups: groupsArr,
