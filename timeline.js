@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     altFormat: "F j, Y",
     allowInput: true
   });
-  
+
   flatpickr("#dateOfDeath", {
     dateFormat: "Y-m-d",
     minDate: "0001-01-01",
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     altFormat: "F j, Y",
     allowInput: true
   });
-  
+    
   const container = document.getElementById('timeline-container');
   const msPerYear = 31557600000; // 365.25 days/year in milliseconds
   
@@ -50,14 +50,16 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
   
-  // Create groups: each region gets 2 rows; add fallback unknown rows.
+  // Create groups: each region gets 2 rows.
+  // The first row's label is the region name (e.g. "Africa")
+  // The second row's label is empty.
   const groups = [];
   regions.forEach(region => {
-    groups.push({ id: region.toLowerCase() + " - 1", content: region + " (Row 1)" });
-    groups.push({ id: region.toLowerCase() + " - 2", content: region + " (Row 2)" });
+    groups.push({ id: region.toLowerCase() + " - 1", content: region });
+    groups.push({ id: region.toLowerCase() + " - 2", content: "" });
   });
-  groups.push({ id: "unknown - 1", content: "Unknown (Row 1)" });
-  groups.push({ id: "unknown - 2", content: "Unknown (Row 2)" });
+  groups.push({ id: "unknown - 1", content: "Unknown" });
+  groups.push({ id: "unknown - 2", content: "" });
   
   // Set up counters to alternate rows for each region.
   const regionCounters = {};
@@ -96,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
       snapshot.forEach(doc => {
         const data = doc.data();
   
-        // Process dates: if only a year is provided, append "-01-01".
+        // Process dateOfBirth: if only a year is provided, append "-01-01".
         let birthDateStr = data.dateOfBirth;
         if (birthDateStr && birthDateStr.length === 4) {
           birthDateStr += "-01-01";
@@ -147,8 +149,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const deathYear = endDate.getFullYear();
   
         // Build content HTML:
-        // The container is set to position: relative with extra padding-bottom.
-        // The name is centered vertically, and the birth and death years are positioned at the bottom left and right.
+        // The container is positioned relative with extra padding at the bottom for the footer.
+        // The name is centered vertically.
+        // The birth year is in the bottom left; the death year in the bottom right.
         const contentHTML = `
           <div class="figure-content" style="position: relative; width: 100%; height: 100%; padding-bottom: 10px;">
             <div class="name-container" style="position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); text-align: center;">
@@ -194,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Gather checkbox values for categories.
       const categoryCheckboxes = document.querySelectorAll('input[name="figureCategory"]:checked');
       const groupsArr = Array.from(categoryCheckboxes).map(cb => cb.value);
-  
+      
       const dateOfBirth = document.getElementById("dateOfBirth").value.trim();
       const dateOfDeath = document.getElementById("dateOfDeath").value.trim();
       const nationality = document.getElementById("nationality").value.trim();
