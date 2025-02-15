@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     zoomMax: zoomMax,
     min: new Date("0001-01-01"),
     max: new Date("2025-12-31"),
-    stack: false,
+    stack: true,
     groupOrder: 'content',
     groupMinHeight: 60, // Ensure each group has at least 60px height
     tooltip: { delay: 100, followMouse: true },
