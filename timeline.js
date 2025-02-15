@@ -161,7 +161,7 @@ const contentHTML = `
           content: contentHTML,
           start: startDate,
           end: endDate,
-          style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 1px 2px; line-height: 1.0em; height: 50px; min-height: 0;"
+          style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 1px 2px; height: 40px; min-height: 0;"
         });
       });
         // font-size: 1em; 
