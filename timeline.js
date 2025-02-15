@@ -47,14 +47,15 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
 
-  // Create groups: each region gets 2 rows with distinct labels.
+  // Create groups: each region gets 2 rows for layout,
+  // but only the first row gets a label so both rows share one label.
   const groups = [];
   regions.forEach(region => {
-    groups.push({ id: region.toLowerCase() + " - 1", content: region + " (Row 1)" });
-    groups.push({ id: region.toLowerCase() + " - 2", content: region + " (Row 2)" });
+    groups.push({ id: region.toLowerCase() + " - 1", content: region });
+    groups.push({ id: region.toLowerCase() + " - 2", content: "" });
   });
-  groups.push({ id: "unknown - 1", content: "Unknown (Row 1)" });
-  groups.push({ id: "unknown - 2", content: "Unknown (Row 2)" });
+  groups.push({ id: "unknown - 1", content: "Unknown" });
+  groups.push({ id: "unknown - 2", content: "" });
 
   // Set up counters to alternate rows for each region.
   const regionCounters = {};
@@ -126,6 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formattedName = formatName(data.name);
 
+        // Determine region (default "unknown") from the "region" field.
         let region = "unknown";
         if (data.region && typeof data.region === "string") {
           let normalizedRegion = data.region.trim().toLowerCase();
@@ -133,6 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
             region = normalizedRegion;
           }
         }
+        // Alternate row assignment for the region.
         const counter = regionCounters[region] || 0;
         const rowNumber = (counter % 2 === 0) ? " - 1" : " - 2";
         regionCounters[region] = counter + 1;
@@ -141,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const birthYear = startDate.getFullYear();
         const deathYear = endDate.getFullYear();
 
-        // Build content HTML without inline styles; styling is now in style.css.
+        // Build content HTML without inline positioning styles; handled in style.css.
         const contentHTML = `
           <div class="figure-content">
             <div class="name-container">
