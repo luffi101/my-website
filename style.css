@@ -78,62 +78,10 @@ button {
   width: 98%;
   height: 900px; /* Adjust height as needed */
   border: 2px solid #ccc;
-}
-
-#timeline-section {
-  width: 100%;
-  padding: 20px;
-  margin: 0;
-}
-
-/* Historical Figure Form Styles */
-#figure-form-section {
-  max-width: 800px;
   margin: 20px auto;
-  padding: 20px;
-  background-color: #fff;
-  border: 2px solid #ccc;
 }
 
-#figure-form-section .form-group {
-  margin-bottom: 15px;
-}
-
-#figure-form-section label {
-  display: inline-block;
-  width: 150px;
-  vertical-align: top;
-  margin-bottom: 5px;
-}
-
-#figure-form-section input,
-#figure-form-section textarea,
-#figure-form-section select {
-  width: calc(100% - 160px);
-  padding: 5px;
-  box-sizing: border-box;
-}
-
-/* Checkbox Container for Categories */
-.checkbox-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-}
-
-.checkbox-item {
-  display: flex;
-  align-items: center;
-}
-
-.checkbox-item input[type="checkbox"] {
-  transform: scale(1.2);
-  margin: 0 5px 0 0;
-  vertical-align: middle;
-}
-
-/* Timeline Item Overrides */
+/* Historical Figure Content Styles (inside timeline items) */
 #timeline-container .vis-item-content .figure-content {
   position: relative;
   width: 100%;
@@ -173,64 +121,19 @@ button {
   opacity: 0.8;
 }
 
-/* Ensure groups have a minimum height */
-.vis-group .vis-group-content {
-  min-height: 60px;
-  padding: 5px;
+/* Override vis.js hover and selection opacity if needed */
+.vis-item:hover,
+.vis-item.vis-selected {
+  opacity: 1;
 }
 
-/* Alternate background colors and borders for groups */
-.vis-group:nth-child(2n-1) .vis-group-content {
-  background-color: #f9f9f9;
-  border-top: 2px solid #333;  /* Top border for odd rows */
-  border-bottom: 1px solid #ccc;
+/* Ensure items have no minimum height conflict */
+.vis-item {
+  min-height: 0;
+  height: auto;
 }
 
-.vis-group:nth-child(2n) .vis-group-content {
-  background-color: #f1f1f1;
-  border-bottom: 2px solid #333;  /* Bottom border for even rows */
-  margin-bottom: 10px;  /* Extra space after a region pair */
-}
-
-/* Hide the label for groups we want hidden */
-.vis-group-label-hidden {
-  visibility: hidden;
-}
-
-
-/* Legend Styles */
-#legend {
-  margin: 20px auto;
-  padding: 10px;
-  max-width: 800px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-}
-
-#legend h3 {
-  margin: 0 0 10px;
-  font-size: 1.2em;
-}
-
-#legend ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-}
-
-#legend ul li {
-  margin-right: 15px;
-  display: flex;
-  align-items: center;
-  font-size: 0.9em;
-}
-
-.legend-color {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
-  border: 1px solid #000;
+/* Hidden class for elements that should not be displayed */
+.hidden {
+  display: none;
 }
