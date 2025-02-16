@@ -37,6 +37,43 @@ nav a {
   right: 10px;
 }
 
+/* Color Legend Section */
+#legend-section {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  margin: 20px auto;
+  max-width: 800px;
+  padding: 10px;
+}
+
+#legend-section h3 {
+  font-size: 1.2em;
+  margin: 0 0 10px;
+}
+
+#legend-section ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#legend-section ul li {
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  font-size: 0.9em;
+}
+
+#legend-section .legend-color {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+  border: 1px solid #000;
+}
+
 /* Timeline Container */
 #timeline-container {
   width: 98%;
