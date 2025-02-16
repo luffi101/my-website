@@ -37,43 +37,7 @@ nav a {
   right: 10px;
 }
 
-/* Intro Text */
-.intro-text {
-  font-size: 1.2em;
-  color: #555;
-}
-
-/* Buttons */
-button {
-  padding: 10px 15px;
-  font-size: 1em;
-  margin: 5px;
-  cursor: pointer;
-}
-
-/* Journal Form Styles */
-#journalForm input[type="text"],
-#journalForm textarea {
-  width: 100%;
-  padding: 8px;
-  margin: 5px 0;
-  box-sizing: border-box;
-}
-
-/* Journal Entries List */
-#entries-list {
-  list-style-type: none;
-  padding: 0;
-}
-
-#entries-list li {
-  background: #f1f1f1;
-  margin: 10px 0;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-/* Timeline Specific Styles */
+/* Timeline Container */
 #timeline-container {
   width: 98%;
   height: 900px; /* Adjust height as needed */
@@ -81,12 +45,12 @@ button {
   margin: 20px auto;
 }
 
-/* Historical Figure Content Styles (inside timeline items) */
+/* Timeline Item Content Styles */
 #timeline-container .vis-item-content .figure-content {
   position: relative;
   width: 100%;
   height: 100%;
-  padding-bottom: 10px;  /* Reserve space for footer (years) */
+  padding-bottom: 10px;  /* Reserve space for birth/death years */
 }
 
 #timeline-container .vis-item-content .name-container {
@@ -121,19 +85,19 @@ button {
   opacity: 0.8;
 }
 
-/* Override vis.js hover and selection opacity if needed */
+/* Vis.js Item Hover/Selection */
 .vis-item:hover,
 .vis-item.vis-selected {
   opacity: 1;
 }
 
-/* Ensure items have no minimum height conflict */
+/* Ensure Items Have Appropriate Height */
 .vis-item {
   min-height: 0;
   height: auto;
 }
 
-/* Hidden class for elements that should not be displayed */
+/* Hidden Elements */
 .hidden {
   display: none;
 }
