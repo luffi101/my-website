@@ -135,6 +135,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const deathYear = endDate.getFullYear();
 
         // Build content HTML; layout is controlled via CSS.
+        const contentHTML = `${formattedName} (${birthYear} - ${deathYear})`;
+
+        /*
         const contentHTML = `
           <div class="figure-content">
             <div class="name-container">
@@ -143,6 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <span class="birth-year">${birthYear}</span>
             <span class="death-year">${deathYear}</span>
           </div>`;
+          */
 
         items.push({
           id: doc.id,
