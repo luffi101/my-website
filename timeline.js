@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     min: new Date("0001-01-01"),
     max: new Date("2025-12-31"),
     stack: true, // Enable stacking to prevent overlapping
-    groupOrder: 'content',
+    //groupOrder: 'content',
     tooltip: { delay: 100, followMouse: true },
     margin: { item: { horizontal: 0, vertical: 5 } }
   };
