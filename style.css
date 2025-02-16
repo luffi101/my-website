@@ -1,42 +1,3 @@
-/* Global Styles */
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f7f7f7;
-  margin: 0;
-  padding: 0;
-}
-
-/* Container for main content */
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #fff;
-}
-
-/* Header and Navigation */
-header {
-  position: relative;
-  padding: 10px;
-}
-
-header h1 {
-  margin: 0;
-}
-
-nav a {
-  margin-right: 15px;
-  text-decoration: none;
-  color: #007bff;
-}
-
-/* Authentication Info in Header */
-#auth-info {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
 /* Color Legend Section */
 #legend-section {
   background-color: #fff;
@@ -57,10 +18,10 @@ nav a {
   padding: 0;
   display: flex;
   flex-wrap: wrap;
+  gap: 10px 15px; /* 10px row gap, 15px column gap */
 }
 
 #legend-section ul li {
-  margin-right: 15px;
   display: flex;
   align-items: center;
   font-size: 0.9em;
@@ -72,69 +33,4 @@ nav a {
   height: 20px;
   margin-right: 5px;
   border: 1px solid #000;
-}
-
-/* Timeline Container */
-#timeline-container {
-  width: 98%;
-  height: 900px; /* Adjust height as needed */
-  border: 2px solid #ccc;
-  margin: 20px auto;
-}
-
-/* Timeline Item Content Styles */
-#timeline-container .vis-item-content .figure-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  padding-bottom: 10px;  /* Reserve space for birth/death years */
-}
-
-#timeline-container .vis-item-content .name-container {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
-  text-align: center;
-}
-
-#timeline-container .vis-item-content .figure-name {
-  display: block;
-  margin: 0;
-  font-size: 1em;
-  line-height: 1em;
-}
-
-#timeline-container .vis-item-content .birth-year {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  font-size: 0.7em;
-  opacity: 0.8;
-}
-
-#timeline-container .vis-item-content .death-year {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  font-size: 0.7em;
-  opacity: 0.8;
-}
-
-/* Vis.js Item Hover/Selection */
-.vis-item:hover,
-.vis-item.vis-selected {
-  opacity: 1;
-}
-
-/* Ensure Items Have Appropriate Height */
-.vis-item {
-  min-height: 0;
-  height: auto;
-}
-
-/* Hidden Elements */
-.hidden {
-  display: none;
 }
