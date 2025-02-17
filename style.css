@@ -139,19 +139,19 @@ nav a {
 }
 
 /* Alternate background colors and borders for groups */
-/*
+
 .vis-group:nth-child(2n-1) .vis-group-content {
   background-color: #ffcaca;
   border-top: 2px solid #333;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #000000;
 }
 
 .vis-group:nth-child(2n) .vis-group-content {
   background-color: #acffb7;
-  border-bottom: 2px solid #333;
+  border-bottom: 2px solid #000000;
   margin-bottom: 10px;
 }
-*/
+
 /* Hide the label for groups we want hidden */
 .vis-group-label-hidden {
   visibility: hidden;
