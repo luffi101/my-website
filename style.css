@@ -191,10 +191,11 @@ nav a {
 .checkbox-item {
   display: flex;
   align-items: center;
+  vertical-align: middle;
 }
 
 .checkbox-item input[type="checkbox"] {
-  transform: scale(1.2);
+  transform: scale(2);
   margin: 0 5px 0 0;
   vertical-align: middle;
 }

@@ -59,24 +59,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Map expertise categories to background colors.
   const expertiseColors = {
-    "politics & military": "red",  // New mapping for Politics and Military
+    "politics": "red",
     "science": "blue",
     "economy": "green",
-    "arts, musics & cultural": "violet",
+    "arts & culture": "violet",
     "literature": "yellow",
     "philosophy & religion": "indigo",
-    "social & cultural movement": "orange"
+    "social & cultural movement": "orange",
+    "exploration & discovery": "sienna"  // New category color (you can choose a different color if desired)
   };
 
   // Map expertise categories to text colors for contrast.
   const expertiseTextColors = {
-    "politics & military": "black",
+    "politics": "black",
     "science": "white",
     "economy": "white",
-    "arts, musics & cultural": "#333333",
+    "arts & culture": "#333333",
     "literature": "black",
     "philosophy & religion": "white",
-    "social & cultural movement": "white"
+    "social & cultural movement": "white",
+    "exploration & discovery": "white"  // Set text color for the new category
   };
 
   // Helper functions for formatting dates and names
