@@ -89,14 +89,15 @@ nav a {
   padding: 20px;
   margin: 0;
 }
-
+/*
 #timeline-container .vis-item-content .figure-content {
   position: relative;
   width: 100%;
   height: 100%;
-  padding-bottom: 10px;  /* Reserve space for birth/death years */
+  padding-bottom: 10px; */ /* Reserve space for birth/death years */ /*
 }
-
+*/
+/*
 #timeline-container .vis-item-content .name-container {
   position: absolute;
   top: 50%;
@@ -129,6 +130,7 @@ nav a {
   font-size: 0.7em;
   opacity: 0.8;
 }
+  */
 
 /* Ensure groups have a minimum height */
 .vis-group .vis-group-content {
