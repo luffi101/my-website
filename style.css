@@ -89,6 +89,11 @@ nav a {
 }
 
 /* Timeline Item Content Styles */
+.block-text {
+  font-family: Times, serif;
+  font-size: 1em;
+}
+
 #timeline-container .vis-item-content .figure-content {
   position: relative;
   width: 100%;
