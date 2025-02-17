@@ -57,7 +57,7 @@ nav a {
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 15px; /* 10px gap between rows, 15px gap between columns */
+  gap: 10px 15px;
 }
 
 #legend-section ul li {
@@ -74,12 +74,18 @@ nav a {
   border: 1px solid #000;
 }
 
-/* Timeline Container */
+/* Timeline Specific Styles */
 #timeline-container {
   width: 98%;
   height: 900px; /* Adjust height as needed */
   border: 2px solid #ccc;
   margin: 20px auto;
+}
+
+#timeline-section {
+  width: 100%;
+  padding: 20px;
+  margin: 0;
 }
 
 /* Timeline Item Content Styles */
@@ -122,16 +128,144 @@ nav a {
   opacity: 0.8;
 }
 
-/* Vis.js Item Hover/Selection */
-.vis-item:hover,
-.vis-item.vis-selected {
-  opacity: 1;
+/* Ensure groups have a minimum height */
+.vis-group .vis-group-content {
+  min-height: 60px;
+  padding: 5px;
 }
 
-/* Ensure Items Have Appropriate Height */
-.vis-item {
-  min-height: 0;
-  height: auto;
+/* Alternate background colors and borders for groups */
+.vis-group:nth-child(2n-1) .vis-group-content {
+  background-color: #f9f9f9;
+  border-top: 2px solid #333;
+  border-bottom: 1px solid #ccc;
+}
+
+.vis-group:nth-child(2n) .vis-group-content {
+  background-color: #f1f1f1;
+  border-bottom: 2px solid #333;
+  margin-bottom: 10px;
+}
+
+/* Hide the label for groups we want hidden */
+.vis-group-label-hidden {
+  visibility: hidden;
+}
+
+/* Historical Figure Form Styles */
+#figure-form-section {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border: 2px solid #ccc;
+}
+
+#figure-form-section .form-group {
+  margin-bottom: 15px;
+}
+
+#figure-form-section label {
+  display: inline-block;
+  width: 150px;
+  vertical-align: top;
+  margin-bottom: 5px;
+}
+
+#figure-form-section input,
+#figure-form-section textarea,
+#figure-form-section select {
+  width: calc(100% - 160px);
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+/* Checkbox Container for Categories */
+.checkbox-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-item input[type="checkbox"] {
+  transform: scale(1.2);
+  margin: 0 5px 0 0;
+  vertical-align: middle;
+}
+
+/* Journal Entry Section Styles */
+#journalForm {
+  margin-bottom: 20px;
+}
+
+#journalForm label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+#journalForm input[type="text"],
+#journalForm textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#journalForm button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#journalForm button:hover {
+  background-color: #45a049;
+}
+
+/* Journal Entries List Styles */
+.journal-entry {
+  border-bottom: 1px solid #ccc;
+  padding: 10px 0;
+}
+
+.journal-entry h3 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.journal-entry p {
+  margin: 5px 0 0;
+}
+
+/* Button Styles for Delete/Add Actions */
+.delete-button {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.add-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 0.9em;
 }
 
 /* Hidden Elements */

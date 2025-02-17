@@ -1,0 +1,78 @@
+Name: Imhotep
+Date of Birth - Date of Death: 27th century BCE (approx.)
+Nationality: Ancient Egyptian
+Region of the world: Africa
+Description of his significance:
+Imhotep served as an architect, engineer, and physician under Pharaoh Djoser. He is traditionally credited with designing the Step Pyramid at Saqqara and is recognized in later periods as a patron of scribes and medicine. His reputation for wisdom and healing made him a legendary figure in Egyptian history.
+
+---
+Name: Thales of Miletus
+Date of Birth - Date of Death: c. 624 – c. 545 BCE
+Nationality: Greek (Ionian)
+Region of the world: Eastern Mediterranean
+Description of his significance:
+Often considered the first philosopher-scientist in the Greek tradition, Thales attempted to explain natural phenomena without resorting to mythology. He is credited with important work in geometry and astronomy, including the prediction of a solar eclipse.
+
+---
+Name: Pythagoras
+Date of Birth - Date of Death: c. 570 – c. 495 BCE
+Nationality: Greek (Ionian)
+Region of the world: Eastern Mediterranean
+Description of his significance:
+Founder of the Pythagorean school, Pythagoras influenced mathematics, music theory, and philosophy. He is best known for the Pythagorean theorem (though its discovery may predate him), and he introduced the idea that numbers underpin the structure of the universe.
+
+---
+Name: Hippocrates
+Date of Birth - Date of Death: c. 460 – c. 370 BCE
+Nationality: Greek
+Region of the world: Eastern Mediterranean
+Description of his significance:
+Widely regarded as the “Father of Medicine,” Hippocrates revolutionized the practice of medicine by seeking natural, rather than supernatural, explanations for diseases. The Hippocratic Oath, though modified over time, remains influential in medical ethics.
+
+---
+Name: Democritus
+Date of Birth - Date of Death: c. 460 – c. 370 BCE
+Nationality: Greek
+Region of the world: Eastern Mediterranean
+Description of his significance:
+Democritus is best known for his atomic theory of the universe, proposing that all matter is composed of tiny, indivisible particles (atoms). His work laid a foundation for later scientific inquiry into the nature of matter.
+
+---
+Name: Aristotle
+Date of Birth - Date of Death: 384 – 322 BCE
+Nationality: Greek
+Region of the world: Eastern Mediterranean
+Description of his significance:
+A student of Plato and tutor to Alexander the Great, Aristotle wrote extensively on biology, physics, astronomy, logic, and many other subjects. His empirical approach to observation and classification greatly influenced scientific thought up to the modern era.
+
+---
+Name: Euclid
+Date of Birth - Date of Death: c. 300 BCE (approx.)
+Nationality: Greek (associated with Alexandria, Egypt)
+Region of the world: Eastern Mediterranean, North Africa
+Description of his significance:
+Known as the “Father of Geometry,” Euclid authored *The Elements*, a foundational text organizing geometrical knowledge into a logical system. His work remained the standard geometry textbook for over two millennia.
+
+---
+Name: Archimedes
+Date of Birth - Date of Death: c. 287 – c. 212 BCE
+Nationality: Greek (Syracusan)
+Region of the world: Eastern Mediterranean
+Description of his significance:
+A brilliant mathematician, inventor, and engineer, Archimedes produced important work on geometry, calculus-like methods, and mechanics. He is credited with discovering principles of buoyancy (“Archimedes’ principle”) and devising ingenious machines for warfare and water management.
+
+---
+Name: Claudius Ptolemy
+Date of Birth - Date of Death: c. 100 – c. 170 CE
+Nationality: Greco-Egyptian (Roman province of Egypt)
+Region of the world: North Africa
+Description of his significance:
+Ptolemy’s works, including the *Almagest*, *Geography*, and *Tetrabiblos*, dominated astronomy, geography, and astrology in the Western and Islamic worlds for centuries. His geocentric model of the cosmos persisted until the Copernican revolution.
+
+---
+Name: Hypatia of Alexandria
+Date of Birth - Date of Death: c. 350–370 – 415 CE
+Nationality: Greco-Egyptian (Roman province of Egypt)
+Region of the world: North Africa
+Description of his significance:
+A renowned philosopher, mathematician, and astronomer, Hypatia led the Neoplatonic school in Alexandria. She wrote commentaries on mathematics and astronomy and taught students from across the Mediterranean. Her murder by a mob in 415 CE marked a turning point in the intellectual life of Late Antiquity.

@@ -59,10 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Map expertise categories to background colors.
   const expertiseColors = {
-    "politics": "red",
+    "politics & military": "red",  // New mapping for Politics and Military
     "science": "blue",
     "economy": "green",
-    "arts & culture": "violet",
+    "arts, musics & cultural": "violet",
     "literature": "yellow",
     "philosophy & religion": "indigo",
     "social & cultural movement": "orange"
@@ -70,10 +70,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Map expertise categories to text colors for contrast.
   const expertiseTextColors = {
-    "politics": "black",
+    "politics & military": "black",
     "science": "white",
     "economy": "white",
-    "arts & culture": "#333333",
+    "arts, musics & cultural": "#333333",
     "literature": "black",
     "philosophy & religion": "white",
     "social & cultural movement": "white"
