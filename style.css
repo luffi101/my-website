@@ -134,6 +134,8 @@ nav a {
 
 /* Ensure groups have a minimum height */
 .vis-group {
+  background-color: #ffcaca;  
+  border-bottom: 2px solid #000000;
   min-height: 60px;
   padding: 5px;
 }
