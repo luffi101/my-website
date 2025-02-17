@@ -90,7 +90,7 @@ nav a {
 
 /* Timeline Item Content Styles */
 .block-text {
-  font-family: Times, serif;
+  font-family: "Times New Roman", Times, serif !important;;
   font-size: 1em;
 }
 
