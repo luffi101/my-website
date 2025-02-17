@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
           content: contentHTML,
           start: startDate,
           end: endDate,
-          style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 1px 2px; height: 40px; min-height: 0;"
+          style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 2px 3px; height: 60px;"
         });
       });
 
