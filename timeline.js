@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const deathYear = endDate.getFullYear();
 
         // Build content HTML; layout is controlled via CSS.
-        const contentHTML = `<span class="block-text">${formattedName} (${birthYear} - ${deathYear})</span>`;
+        const contentHTML = ${formattedName} (${birthYear} - ${deathYear});
 
         /*
         const contentHTML = `
