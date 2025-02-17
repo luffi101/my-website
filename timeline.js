@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "literature": "black",
     "philosophy & religion": "white",
     "social & cultural movement": "white",
-    "exploration & discovery": "sienna"  // Set text color for the new category
+    "exploration & discovery": "yellow"  // Set text color for the new category
   };
 
   // Helper functions for formatting dates and names
