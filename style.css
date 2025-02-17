@@ -80,6 +80,8 @@ nav a {
   height: 900px; /* Adjust height as needed */
   border: 2px solid #ccc;
   margin: 20px auto;
+  font-family: "Times New Roman", Times, serif !important;;
+  font-size: 1em;  
 }
 
 #timeline-container .block-text {
