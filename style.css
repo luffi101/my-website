@@ -139,7 +139,7 @@ nav a {
 }
 
 /* Alternate background colors and borders for groups */
-
+/*
 .vis-group:nth-child(2n-1) {
   background-color: #ffcaca;
   border-top: 2px solid #333;
@@ -151,7 +151,7 @@ nav a {
   border-bottom: 2px solid #000000;
   margin-bottom: 10px;
 }
-
+*/
 /* Hide the label for groups we want hidden */
 .vis-group-label-hidden {
   visibility: hidden;
