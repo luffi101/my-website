@@ -82,16 +82,15 @@ nav a {
   margin: 20px auto;
 }
 
+#timeline-container .block-text {
+  font-family: "Times New Roman", Times, serif !important;;
+  font-size: 1em;
+}
+
 #timeline-section {
   width: 100%;
   padding: 20px;
   margin: 0;
-}
-
-/* Timeline Item Content Styles */
-.block-text {
-  font-family: "Times New Roman", Times, serif !important;;
-  font-size: 1em;
 }
 
 #timeline-container .vis-item-content .figure-content {
