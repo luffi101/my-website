@@ -10,20 +10,20 @@ document.addEventListener('DOMContentLoaded', function() {
       allowInput: true
     });
   }
-
+  
   // Initialize both date inputs
   initDatePicker("#dateOfBirth");
   initDatePicker("#dateOfDeath");
 
   const container = document.getElementById('timeline-container');
   const msPerYear = 31557600000; // 365.25 days/year in milliseconds
-
+  
   // Zoom limits based on a reference lifespan:
   const zoomMin = 201 * msPerYear; // Minimum visible span = 201 years
   const containerWidth = container.offsetWidth;
   const zoomMax = (67 * msPerYear * containerWidth) / 96; // Ensure 67-year block is at least ~96px wide
-
-  // Updated options: use stack:true and remove two-row layout.
+  
+  // Timeline options with stacking enabled and minimum group height.
   const options = {
     orientation: 'top',
     showCurrentTime: false,
@@ -31,9 +31,9 @@ document.addEventListener('DOMContentLoaded', function() {
     zoomMax: zoomMax,
     min: new Date("0001-01-01"),
     max: new Date("2025-12-31"),
-    stack: true, // Enable stacking to prevent overlapping
-    //groupOrder: 'content',
-    groupMinHeight: 60, // Adjust this value to change the minimum height of region rows.
+    stack: true,
+    groupOrder: 'content',
+    groupMinHeight: 60,
     tooltip: { delay: 100, followMouse: true },
     margin: { item: { horizontal: 0, vertical: 5 } }
   };
@@ -48,15 +48,13 @@ document.addEventListener('DOMContentLoaded', function() {
     "East Asia",
     "Australia"
   ];
-
+  
   // Create one group per region.
   const groups = regions.map(region => {
     return { id: region.toLowerCase(), content: region };
   });
   // Also add a group for "Unknown" region.
   groups.push({ id: "unknown", content: "Unknown" });
-
-  // No longer need regionCounters since we use one group per region.
 
   // Map expertise categories to background colors.
   const expertiseColors = {
@@ -67,10 +65,10 @@ document.addEventListener('DOMContentLoaded', function() {
     "literature": "yellow",
     "philosophy & religion": "indigo",
     "social & cultural movement": "orange",
-    "exploration & discovery": "sienna"  // New category color (you can choose a different color if desired)
+    "exploration & discovery": "sienna"
   };
 
-  // Map expertise categories to text colors for contrast.
+  // Map expertise categories to text colors.
   const expertiseTextColors = {
     "politics & military": "black",
     "science": "white",
@@ -79,17 +77,17 @@ document.addEventListener('DOMContentLoaded', function() {
     "literature": "black",
     "philosophy & religion": "white",
     "social & cultural movement": "white",
-    "exploration & discovery": "yellow"  // Set text color for the new category
+    "exploration & discovery": "yellow"
   };
 
-  // Helper functions for formatting dates and names
+  // Helper functions for formatting dates and names.
   function formatDate(dateStr) {
     if (dateStr && dateStr.length === 4) {
       dateStr += "-01-01";
     }
     return dateStr ? new Date(dateStr) : null;
   }
-
+  
   function formatName(name) {
     if (name && name.includes(",")) {
       const parts = name.split(",");
@@ -99,6 +97,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return name;
   }
+  
+  // Declare timeline in outer scope so it can be accessed later.
+  let timeline;
 
   // Retrieve historical figures from Firestore.
   firebase.firestore().collection("historicalFigures")
@@ -107,50 +108,38 @@ document.addEventListener('DOMContentLoaded', function() {
       const items = [];
       snapshot.forEach(doc => {
         const data = doc.data();
-
+  
         const startDate = formatDate(data.dateOfBirth);
         const endDate = formatDate(data.dateOfDeath);
         if (!startDate || !endDate) {
           console.warn(`Skipping ${data.name} due to missing or invalid dates.`);
           return;
         }
-
+  
         const expertiseCategory = (data.groups && data.groups.length > 0)
           ? data.groups[0].trim().toLowerCase()
           : "politics";
         const bgColor = expertiseColors[expertiseCategory] || "gray";
         const textColor = expertiseTextColors[expertiseCategory] || "white";
-
+  
         const formattedName = formatName(data.name);
-
-        // Determine region (default "unknown").
+  
+        // Determine region (default "unknown") from the "region" field.
         let region = "unknown";
         if (data.region && typeof data.region === "string") {
-          let normalizedRegion = data.region.trim().toLowerCase();
+          const normalizedRegion = data.region.trim().toLowerCase();
           if (regions.map(r => r.toLowerCase()).includes(normalizedRegion)) {
             region = normalizedRegion;
           }
         }
-        // With one group per region, use region as group id.
         const groupId = region;
-
+  
         const birthYear = startDate.getFullYear();
         const deathYear = endDate.getFullYear();
-
-        // Build content HTML; layout is controlled via CSS.
+  
+        // Build content HTML; using simple text here.
         const contentHTML = `${formattedName} (${birthYear} - ${deathYear})`;
-
-        /*
-        const contentHTML = `
-          <div class="figure-content">
-            <div class="name-container">
-              <span class="figure-name">${formattedName}</span>
-            </div>
-            <span class="birth-year">${birthYear}</span>
-            <span class="death-year">${deathYear}</span>
-          </div>`;
-          */
-
+  
         items.push({
           id: doc.id,
           group: groupId,
@@ -160,14 +149,14 @@ document.addEventListener('DOMContentLoaded', function() {
           style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 2px 3px; height: 60px;"
         });
       });
-
+  
       console.log("Timeline items:", items);
-      const timeline = new vis.Timeline(container, items, groups, options);
+      timeline = new vis.Timeline(container, items, groups, options);
     })
     .catch(error => {
       console.error("Error loading historical figures:", error);
     });
-
+  
   // Show/hide the "Add Historical Figure" form based on authentication.
   firebase.auth().onAuthStateChanged(user => {
     const figureFormSection = document.getElementById('figure-form-section');
@@ -175,24 +164,24 @@ document.addEventListener('DOMContentLoaded', function() {
       figureFormSection.classList.toggle('hidden', !user);
     }
   });
-
+  
   // Event listener for the "Add Historical Figure" form.
   const figureForm = document.getElementById("figureForm");
   if (figureForm) {
     figureForm.addEventListener("submit", (e) => {
       e.preventDefault();
-
+  
       const name = document.getElementById("figureName").value.trim();
       const categoryCheckboxes = document.querySelectorAll('input[name="figureCategory"]:checked');
       const groupsArr = Array.from(categoryCheckboxes).map(cb => cb.value);
-
+  
       const dateOfBirth = document.getElementById("dateOfBirth").value.trim();
       const dateOfDeath = document.getElementById("dateOfDeath").value.trim();
       const nationality = document.getElementById("nationality").value.trim();
       const description = document.getElementById("description").value.trim();
       const imageUrl = document.getElementById("imageUrl").value.trim();
       const region = document.getElementById("figureRegion").value.trim();
-
+  
       const newFigure = {
         name: name,
         groups: groupsArr,
@@ -203,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
         imageUrl: imageUrl,
         region: region
       };
-
+  
       firebase.firestore().collection("historicalFigures").add(newFigure)
         .then(() => {
           document.getElementById("figureFeedback").innerText = "Historical figure added successfully!";
@@ -216,21 +205,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
   }
-});
-
-
-firebase.firestore().collection("globalEvents")
-  .get()
-  .then(snapshot => {
-    snapshot.forEach(doc => {
-      const event = doc.data();
-      if (event.eventDate) {
-        const eventDate = new Date(event.eventDate);
-        // Add a custom time marker with the document ID as an identifier.
-        timeline.addCustomTime(eventDate, doc.id);
-      }
+  
+  // Retrieve global events from Firestore and add custom time markers.
+  firebase.firestore().collection("globalEvents")
+    .get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        const event = doc.data();
+        if (event.eventDate && timeline) {
+          const eventDate = new Date(event.eventDate);
+          timeline.addCustomTime(eventDate, doc.id);
+        }
+      });
+    })
+    .catch(error => {
+      console.error("Error loading global events:", error);
     });
-  })
-  .catch(error => {
-    console.error("Error loading global events:", error);
-  });
+});
