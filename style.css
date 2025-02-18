@@ -89,6 +89,10 @@ nav a {
   padding: 20px;
   margin: 0;
 }
+
+.vis-item {
+  z-index: 10 !important;
+}
 /*
 #timeline-container .vis-item-content .figure-content {
   position: relative;
@@ -286,5 +290,7 @@ If you experience layout issues, consider adjusting or removing this property.
 
 .vis-custom-time {
   background-color: orange!important; /* Choose a color */ 
-  width: 8px !important; /* Adjust the thickness as needed */
+  width: 2px !important; /* Adjust the thickness as needed */
+  z-index: 1 !important;  
 }
+
