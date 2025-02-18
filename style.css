@@ -285,6 +285,6 @@ If you experience layout issues, consider adjusting or removing this property.
 
 
 .vis-custom-time {
-  background-color: orange; /* Choose a color */
-  width: 8px; /* Adjust the thickness as needed */
+  background-color: orange!important; /* Choose a color */ 
+  width: 8px !important; /* Adjust the thickness as needed */
 }
