@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     max: new Date("2025-12-31"),
     stack: true, // Enable stacking to prevent overlapping
     //groupOrder: 'content',
+    groupMinHeight: 60, // Adjust this value to change the minimum height of region rows.
     tooltip: { delay: 100, followMouse: true },
     margin: { item: { horizontal: 0, vertical: 5 } }
   };
@@ -216,3 +217,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+
+firebase.firestore().collection("globalEvents")
+  .get()
+  .then(snapshot => {
+    snapshot.forEach(doc => {
+      const event = doc.data();
+      if (event.eventDate) {
+        const eventDate = new Date(event.eventDate);
+        // Add a custom time marker with the document ID as an identifier.
+        timeline.addCustomTime(eventDate, doc.id);
+      }
+    });
+  })
+  .catch(error => {
+    console.error("Error loading global events:", error);
+  });
