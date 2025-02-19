@@ -90,9 +90,7 @@ nav a {
   margin: 0;
 }
 
-.vis-item {
-  z-index: 10 !important;
-}
+
 /*
 #timeline-container .vis-item-content .figure-content {
   position: relative;
@@ -294,3 +292,8 @@ If you experience layout issues, consider adjusting or removing this property.
   z-index: 1 !important;  
 }
 
+
+
+.vis-item {
+  z-index: 10 !important;
+}
