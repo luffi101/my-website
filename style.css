@@ -289,11 +289,18 @@ If you experience layout issues, consider adjusting or removing this property.
   z-index: 10 !important;
 }
 
-.vis-custom-time {
-  background-color: orange!important; /* Choose a color */ 
-  width: 2px !important; /* Adjust the thickness as needed */
-  z-index: 1 !important;  
+#timeline-container .vis-custom-time {
+  background-color: orange !important;
+  width: 2px !important;
+  z-index: 1 !important;
 }
-
-
+#timeline-container .vis-custom-time > .vis-custom-time-marker {
+  background-color: inherit !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  padding: 3px 5px !important;
+  top: 0 !important;
+  white-space: nowrap !important;
+  z-index: inherit !important;
+}
 
