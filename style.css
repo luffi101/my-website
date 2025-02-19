@@ -285,6 +285,9 @@ If you experience layout issues, consider adjusting or removing this property.
   display: none;
 }
 
+.vis-item {
+  z-index: 10 !important;
+}
 
 .vis-custom-time {
   background-color: orange!important; /* Choose a color */ 
@@ -294,6 +297,3 @@ If you experience layout issues, consider adjusting or removing this property.
 
 
 
-.vis-item {
-  z-index: 10 !important;
-}
