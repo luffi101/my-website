@@ -303,3 +303,8 @@ body #timeline-container .vis-custom-time > .vis-custom-time-marker {
   white-space: nowrap !important;
   z-index: -1 !important;
 }
+
+
+.vis-label.vis-group-level-0 {
+  height: 60px !important;
+}
