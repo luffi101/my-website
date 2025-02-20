@@ -153,6 +153,18 @@ document.addEventListener('DOMContentLoaded', function() {
   
       console.log("Timeline items:", items);
       timeline = new vis.Timeline(container, items, groups, options);
+
+      // Adjust group label heights dynamically:
+      setTimeout(function() {
+        const groupLabels = document.querySelectorAll('.vis-labelset .vis-label');
+        const groupsElements = document.querySelectorAll('.vis-group');
+        groupLabels.forEach((label, index) => {
+          if (groupsElements[index]) {
+            label.style.height = groupsElements[index].offsetHeight + 'px';
+          }
+        });
+      }, 0);
+
     })
     .catch(error => {
       console.error("Error loading historical figures:", error);
