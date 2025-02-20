@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     stack: true,
     groupOrder: 'content',
     groupMinHeight: 60,
+    groupLabelHeight: 60,  // added this line
     tooltip: { delay: 100, followMouse: true },
     margin: { item: { horizontal: 0, vertical: 5 } }
   };
