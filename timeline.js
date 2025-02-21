@@ -259,26 +259,31 @@ document.getElementById("csvImportForm").addEventListener("submit", function(e) 
     skipEmptyLines: true,
     complete: function(results) {
       console.log("Parsed CSV data:", results.data);
+
       if (dataType === "historicalFigures") {
         // Process each row as a historical figure.
         results.data.forEach(row => {
-          // Expecting CSV columns like: name, dateOfBirth, dateOfDeath, region, category (or groups)
-          // You can adjust field names as needed.
+          // Expected CSV columns: dateOfBirth, dateOfDeath, description, groups, imageURL, name, nationality, region
           const name = row.name;
           const dateOfBirth = row.dateOfBirth;
           const dateOfDeath = row.dateOfDeath;
+          const description = row.description;
+          // Convert groups field into an array (if it's a comma-separated string)
+          const groupsField = row.groups;
+          const groupsArr = groupsField ? groupsField.split(",").map(s => s.trim()) : [];
+          const imageURL = row.imageURL;
+          const nationality = row.nationality;
           const region = row.region || "unknown";
-          const groupsArr = row.category ? [row.category] : ["politics & military"];
-          // Additional fields (e.g., nationality, description, imageUrl) can be processed similarly.
           
-          // You might choose to add these records to Firestore:
           firebase.firestore().collection("historicalFigures").add({
             name: name,
-            groups: groupsArr,
             dateOfBirth: dateOfBirth,
             dateOfDeath: dateOfDeath,
+            description: description,
+            groups: groupsArr,
+            imageURL: imageURL,
+            nationality: nationality,
             region: region
-            // Add any additional fields as needed.
           }).then(() => {
             console.log(`Added historical figure: ${name}`);
           }).catch(error => {
@@ -288,16 +293,26 @@ document.getElementById("csvImportForm").addEventListener("submit", function(e) 
       } else if (dataType === "globalEvents") {
         // Process each row as a global event.
         results.data.forEach(row => {
-          // Expecting CSV columns like: eventName, eventDate, (optionally eventDescription)
+          // Expecting CSV columns: category, createdOn, description, eventDate, eventName, imgURL, region, significance
           const eventName = row.eventName;
           const eventDate = row.eventDate;
-          // You might add additional processing here.
+          const description = row.description;
+          const category = row.category;
+          const region = row.region;
+          const significance = row.significance;
           
-          // Optionally, add these events to Firestore:
+          // Use current date for createdOn (or format as needed)
+          const createdOn = new Date().toISOString().slice(0, 10); // YYYY-MM-DD format
+      
           firebase.firestore().collection("globalEvents").add({
             eventName: eventName,
-            eventDate: eventDate
-            // Add additional fields if necessary.
+            eventDate: eventDate,
+            description: description,
+            category: category,
+            region: region,
+            significance: significance,
+            createdOn: createdOn
+            // imgURL is not populated
           }).then(() => {
             console.log(`Added global event: ${eventName}`);
           }).catch(error => {
@@ -305,6 +320,7 @@ document.getElementById("csvImportForm").addEventListener("submit", function(e) 
           });
         });
       }
+      
       document.getElementById("csvFeedback").innerText = "CSV import completed successfully.";
       // Optionally, reload the page or update the timeline dynamically.
       // window.location.reload();
