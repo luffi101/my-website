@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     min: new Date("0001-01-01"),
     max: new Date("2025-12-31"),
     stack: true,
-    groupOrder: 'content',
+    //groupOrder: 'content',
     groupMinHeight: 60,
     groupLabelHeight: 60,  // added this line
     tooltip: { delay: 100, followMouse: true },
