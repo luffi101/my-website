@@ -154,16 +154,18 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log("Timeline items:", items);
       timeline = new vis.Timeline(container, items, groups, options);
 
-      // Adjust group label heights dynamically:
-      setTimeout(function() {
+      // Adjust group label heights dynamically on timeline redraw.
+      timeline.on('redraw', function () {
         const groupLabels = document.querySelectorAll('.vis-labelset .vis-label');
         const groupsElements = document.querySelectorAll('.vis-group');
         groupLabels.forEach((label, index) => {
           if (groupsElements[index]) {
-            label.style.height = groupsElements[index].offsetHeight + 'px';
+            const newHeight = groupsElements[index].offsetHeight;
+            label.style.height = newHeight + 'px';
+            label.style.lineHeight = newHeight + 'px';
           }
         });
-      }, 0);
+      });
 
     })
     .catch(error => {
