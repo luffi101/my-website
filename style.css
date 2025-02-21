@@ -136,7 +136,7 @@ nav a {
 
 /* Ensure groups have a minimum height */
 .vis-group {
-  min-height: 60px;
+  /*min-height: 60px; */
   /*Note: Setting a min-height on .vis-group (e.g., min-height: 60px) 
 can cause misalignment between the region header rows and the rows containing figures.
 If you experience layout issues, consider adjusting or removing this property.
