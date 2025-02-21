@@ -171,6 +171,37 @@ document.addEventListener('DOMContentLoaded', function() {
     .catch(error => {
       console.error("Error loading historical figures:", error);
     });
+
+    // Define the function to update global event labels.
+  function updateGlobalEventLabels() {
+    const containerRect = container.getBoundingClientRect();
+    const labelsContainer = document.getElementById('global-events-labels');
+    if (!labelsContainer) return; // Ensure container exists
+
+    // Clear existing labels.
+    labelsContainer.innerHTML = '';
+
+    // Select all custom time marker elements.
+    const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
+    markerElements.forEach(marker => {
+      const markerRect = marker.getBoundingClientRect();
+      const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
+      const labelText = marker.getAttribute('data-label') || 'Global Event';
+
+      const label = document.createElement('div');
+      label.className = 'global-event-label';
+      label.innerText = labelText;
+      label.style.left = leftPos + 'px';
+      label.style.top = '0px';
+      labelsContainer.appendChild(label);
+    });
+  }
+
+  // Attach the global event label update function to timeline events.
+  timeline.on('rangechanged', updateGlobalEventLabels);
+
+  // Optionally, call it once after a short delay.
+  setTimeout(updateGlobalEventLabels, 500);
   
   // Show/hide the "Add Historical Figure" form and CSV import form based on authentication.
   firebase.auth().onAuthStateChanged(user => {
@@ -235,6 +266,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (event.eventDate && timeline) {
           const eventDate = new Date(event.eventDate);
           timeline.addCustomTime(eventDate, doc.id);
+
+          // Delay slightly to ensure the marker is rendered.
+          setTimeout(() => {
+            const markerElement = document.querySelector(`#timeline-container .vis-custom-time[data-id="${doc.id}"]`);
+            if (markerElement) {
+              markerElement.setAttribute('data-label', event.eventName);
+            }
+          }, 200);          
         }
       });
     })
