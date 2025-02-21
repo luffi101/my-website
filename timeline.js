@@ -172,11 +172,16 @@ document.addEventListener('DOMContentLoaded', function() {
       console.error("Error loading historical figures:", error);
     });
   
-  // Show/hide the "Add Historical Figure" form based on authentication.
+  // Show/hide the "Add Historical Figure" form and CSV import form based on authentication.
   firebase.auth().onAuthStateChanged(user => {
     const figureFormSection = document.getElementById('figure-form-section');
     if (figureFormSection) {
       figureFormSection.classList.toggle('hidden', !user);
+    }
+  
+    const csvImportSection = document.getElementById('csv-import-section');
+    if (csvImportSection) {
+      csvImportSection.classList.toggle('hidden', !user);
     }
   });
   
@@ -236,4 +241,77 @@ document.addEventListener('DOMContentLoaded', function() {
     .catch(error => {
       console.error("Error loading global events:", error);
     });
+});
+
+// CSV Import Functionality
+document.getElementById("csvImportForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  const fileInput = document.getElementById("csvFile");
+  const dataType = document.getElementById("csvDataType").value; // "historicalFigures" or "globalEvents"
+  const file = fileInput.files[0];
+  if (!file) {
+    document.getElementById("csvFeedback").innerText = "Please select a CSV file.";
+    return;
+  }
+
+  Papa.parse(file, {
+    header: true, // Assumes the CSV file has headers
+    skipEmptyLines: true,
+    complete: function(results) {
+      console.log("Parsed CSV data:", results.data);
+      if (dataType === "historicalFigures") {
+        // Process each row as a historical figure.
+        results.data.forEach(row => {
+          // Expecting CSV columns like: name, dateOfBirth, dateOfDeath, region, category (or groups)
+          // You can adjust field names as needed.
+          const name = row.name;
+          const dateOfBirth = row.dateOfBirth;
+          const dateOfDeath = row.dateOfDeath;
+          const region = row.region || "unknown";
+          const groupsArr = row.category ? [row.category] : ["politics & military"];
+          // Additional fields (e.g., nationality, description, imageUrl) can be processed similarly.
+          
+          // You might choose to add these records to Firestore:
+          firebase.firestore().collection("historicalFigures").add({
+            name: name,
+            groups: groupsArr,
+            dateOfBirth: dateOfBirth,
+            dateOfDeath: dateOfDeath,
+            region: region
+            // Add any additional fields as needed.
+          }).then(() => {
+            console.log(`Added historical figure: ${name}`);
+          }).catch(error => {
+            console.error("Error adding historical figure:", error);
+          });
+        });
+      } else if (dataType === "globalEvents") {
+        // Process each row as a global event.
+        results.data.forEach(row => {
+          // Expecting CSV columns like: eventName, eventDate, (optionally eventDescription)
+          const eventName = row.eventName;
+          const eventDate = row.eventDate;
+          // You might add additional processing here.
+          
+          // Optionally, add these events to Firestore:
+          firebase.firestore().collection("globalEvents").add({
+            eventName: eventName,
+            eventDate: eventDate
+            // Add additional fields if necessary.
+          }).then(() => {
+            console.log(`Added global event: ${eventName}`);
+          }).catch(error => {
+            console.error("Error adding global event:", error);
+          });
+        });
+      }
+      document.getElementById("csvFeedback").innerText = "CSV import completed successfully.";
+      // Optionally, reload the page or update the timeline dynamically.
+      // window.location.reload();
+    },
+    error: function(err) {
+      console.error("Error parsing CSV:", err);
+      document.getElementById("csvFeedback").innerText = "Error parsing CSV file.";
+    }
+  });
 });

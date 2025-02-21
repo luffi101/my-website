@@ -59,6 +59,24 @@
     <div id="timeline-container"></div>
   </section>
   
+  <!-- CSV Import Section -->
+  <section id="csv-import-section" class="container hidden">
+    <h2>Import CSV Data</h2>
+    <form id="csvImportForm">
+      <label for="csvDataType">Data Type:</label>
+      <select id="csvDataType" name="csvDataType">
+        <option value="historicalFigures">Historical Figures</option>
+        <option value="globalEvents">Global Events</option>
+      </select>
+      <br><br>
+      <label for="csvFile">CSV File:</label>
+      <input type="file" id="csvFile" name="csvFile" accept=".csv" required>
+      <br><br>
+      <button type="submit">Import CSV</button>
+    </form>
+    <div id="csvFeedback"></div>
+  </section>
+
   <!-- New Historical Figure Form (only visible when logged in) -->
   <section id="figure-form-section" class="container hidden">
     <h2>Add New Historical Figure</h2>
