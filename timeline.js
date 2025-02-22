@@ -166,6 +166,11 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         });
       });
+        // Attach the global event label update function to timeline events.
+      timeline.on('rangechanged', updateGlobalEventLabels);
+
+      // Optionally, call it once after a short delay.
+      setTimeout(updateGlobalEventLabels, 500);
 
     })
     .catch(error => {
@@ -197,11 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Attach the global event label update function to timeline events.
-  timeline.on('rangechanged', updateGlobalEventLabels);
 
-  // Optionally, call it once after a short delay.
-  setTimeout(updateGlobalEventLabels, 500);
   
   // Show/hide the "Add Historical Figure" form and CSV import form based on authentication.
   firebase.auth().onAuthStateChanged(user => {
