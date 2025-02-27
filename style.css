@@ -328,3 +328,21 @@ body #timeline-container .vis-custom-time > .vis-custom-time-marker {
   white-space: nowrap;
   transform: translateX(-50%);
 }
+
+/* bottom-time-axis */
+#bottom-time-axis {
+  position: relative;
+  width: 98%;
+  margin: 10px auto;
+  height: 30px; /* Adjust as needed */
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.bottom-axis-label {
+  font-size: 12px;
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  /* You can add additional styling (padding, color, etc.) if desired */
+}
