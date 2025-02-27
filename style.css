@@ -340,9 +340,12 @@ body #timeline-container .vis-custom-time > .vis-custom-time-marker {
 }
 
 .bottom-axis-label {
+  display: block;
   font-size: 12px;
   position: absolute;
   transform: translateX(-50%);
   white-space: nowrap;
-  /* You can add additional styling (padding, color, etc.) if desired */
+  padding: 2px 4px;
+  background-color: #fff; /* Optional: helps with readability */
+  /* You might add a border or margin if needed */
 }

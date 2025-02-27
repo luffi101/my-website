@@ -165,7 +165,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       });
   
-      // --- Custom Bottom Time Axis Code ---
       function updateBottomTimeAxis() {
         console.log("Updating bottom time axis...");
         // Get current timeline window.
@@ -173,40 +172,44 @@ document.addEventListener('DOMContentLoaded', function() {
         const start = windowRange.start;
         const end = windowRange.end;
         console.log("Timeline window:", start, end);
-  
+      
         const timelineRect = container.getBoundingClientRect();
         const timelineWidth = timelineRect.width;
         console.log("Timeline width:", timelineWidth);
-  
+      
         // Get bottom axis container.
         const bottomAxisContainer = document.getElementById('bottom-time-axis');
         if (!bottomAxisContainer) return;
         bottomAxisContainer.innerHTML = ''; // Clear previous labels
-  
+      
         // Determine range in years.
         const startYear = start.getFullYear();
         const endYear = end.getFullYear();
-  
-        // Decide on interval: every 10 years if range > 50 years, else every year.
+      
+        // Decide on an interval: every 10 years if range > 50, else every year.
         const interval = (endYear - startYear) > 50 ? 10 : 1;
-  
+      
         for (let year = startYear; year <= endYear; year += interval) {
           const labelDate = new Date(year, 0, 1);
           // Only add labels within the window:
           if (labelDate < start || labelDate > end) continue;
-  
+      
           // Calculate left offset proportionally.
           const leftOffset = ((labelDate.getTime() - start.getTime()) / (end.getTime() - start.getTime())) * timelineWidth;
-  
+          
           const labelElem = document.createElement('div');
           labelElem.className = 'bottom-axis-label';
           labelElem.innerText = year;
           labelElem.style.left = leftOffset + 'px';
-          labelElem.style.top = '0px'; // Adjust if needed
-  
+          labelElem.style.top = '0px'; // You can adjust this if needed
+      
+          // Ensure each label is displayed as a block (redundant for div, but explicit):
+          labelElem.style.display = 'block';
+      
           bottomAxisContainer.appendChild(labelElem);
         }
       }
+      
   
       // Call updateBottomTimeAxis once after timeline creation.
       updateBottomTimeAxis();
