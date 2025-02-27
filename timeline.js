@@ -32,11 +32,8 @@ document.addEventListener('DOMContentLoaded', function() {
     min: new Date("0001-01-01"),
     max: new Date("2025-12-31"),
     stack: true,
-    // Remove groupOrder if you want insertion order
+    // Remove unsupported options if necessary:
     // groupOrder: 'content',
-    // If your version does not support these options, remove them:
-    // groupMinHeight: 60,
-    // groupLabelHeight: 60,
     tooltip: { delay: 100, followMouse: true },
     margin: { item: { horizontal: 0, vertical: 5 } }
   };
@@ -170,12 +167,16 @@ document.addEventListener('DOMContentLoaded', function() {
   
       // --- Custom Bottom Time Axis Code ---
       function updateBottomTimeAxis() {
+        console.log("Updating bottom time axis...");
         // Get current timeline window.
         const windowRange = timeline.getWindow();
         const start = windowRange.start;
         const end = windowRange.end;
+        console.log("Timeline window:", start, end);
+  
         const timelineRect = container.getBoundingClientRect();
         const timelineWidth = timelineRect.width;
+        console.log("Timeline width:", timelineWidth);
   
         // Get bottom axis container.
         const bottomAxisContainer = document.getElementById('bottom-time-axis');
@@ -196,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
           // Calculate left offset proportionally.
           const leftOffset = ((labelDate.getTime() - start.getTime()) / (end.getTime() - start.getTime())) * timelineWidth;
-          
+  
           const labelElem = document.createElement('div');
           labelElem.className = 'bottom-axis-label';
           labelElem.innerText = year;
@@ -205,14 +206,13 @@ document.addEventListener('DOMContentLoaded', function() {
   
           bottomAxisContainer.appendChild(labelElem);
         }
-  
-        // Optionally, update global event labels as well.
-        timeline.on('rangechanged', updateGlobalEventLabels);
-        setTimeout(updateGlobalEventLabels, 500);
       }
   
       // Call updateBottomTimeAxis once after timeline creation.
       updateBottomTimeAxis();
+  
+      // Attach updateBottomTimeAxis to timeline range changes (if desired)
+      timeline.on('rangechanged', updateBottomTimeAxis);
   
     })
     .catch(error => {
