@@ -1,0 +1,361 @@
+/* Global Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f7f7f7;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container for main content */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+}
+
+/* Header and Navigation */
+header {
+  position: relative;
+  padding: 10px;
+}
+
+header h1 {
+  margin: 0;
+}
+
+nav a {
+  margin-right: 15px;
+  text-decoration: none;
+  color: #007bff;
+}
+
+/* Authentication Info in Header */
+#auth-info {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* Color Legend Section */
+#legend-section {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  margin: 20px auto;
+  max-width: 800px;
+  padding: 10px;
+}
+
+#legend-section h3 {
+  font-size: 1.2em;
+  margin: 0 0 10px;
+}
+
+#legend-section ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 15px;
+}
+
+#legend-section ul li {
+  display: flex;
+  align-items: center;
+  font-size: 0.9em;
+}
+
+#legend-section .legend-color {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+  border: 1px solid #000;
+}
+
+/* Timeline Specific Styles */
+#timeline-container {
+  width: 98%;
+  height: 1200px; /* Adjust height as needed */
+  border: 2px solid #ccc;
+  margin: 20px auto;
+  font-family: "Times New Roman", Times, serif !important;;
+  font-size: 1em;  
+}
+
+#timeline-section {
+  width: 100%;
+  padding: 20px;
+  margin: 0;
+}
+
+
+/*
+#timeline-container .vis-item-content .figure-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 10px; */ /* Reserve space for birth/death years */ /*
+}
+*/
+/*
+#timeline-container .vis-item-content .name-container {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  text-align: center;
+
+}
+
+#timeline-container .vis-item-content .figure-name {
+  display: block;
+  margin: 0;
+  font-size: 1em;
+  line-height: 1em;
+}
+
+#timeline-container .vis-item-content .birth-year {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  font-size: 0.7em;
+  opacity: 0.8;
+}
+
+#timeline-container .vis-item-content .death-year {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-size: 0.7em;
+  opacity: 0.8;
+}
+  */
+
+/* Ensure groups have a minimum height */
+.vis-group {
+  /*min-height: 60px; */
+  /*Note: Setting a min-height on .vis-group (e.g., min-height: 60px) 
+can cause misalignment between the region header rows and the rows containing figures.
+If you experience layout issues, consider adjusting or removing this property.
+*/
+  padding: 2px;
+}
+
+/* Alternate background colors and borders for groups */
+/*
+.vis-group:nth-child(2n-1) {
+  background-color: #ff000083;
+  border-top: 2px solid #333;
+  border-bottom: 2px solid #333;
+}
+
+.vis-group:nth-child(2n) {
+  background-color: #acffb7;
+  border-bottom: 2px solid #000000;
+  margin-bottom: 10px;
+}
+*/
+/* Hide the label for groups we want hidden */
+.vis-group-label-hidden {
+  visibility: hidden;
+}
+
+/* Historical Figure Form Styles */
+#figure-form-section {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border: 2px solid #ccc;
+}
+
+#figure-form-section .form-group {
+  margin-bottom: 15px;
+}
+
+#figure-form-section label {
+  display: inline-block;
+  width: 150px;
+  vertical-align: top;
+  margin-bottom: 5px;
+}
+
+#figure-form-section input,
+#figure-form-section textarea,
+#figure-form-section select {
+  width: calc(100% - 160px);
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+/* Checkbox Container for Categories */
+.checkbox-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.checkbox-item input[type="checkbox"] {
+  transform: scale(2);
+  margin: 0 5px 0 0;
+  vertical-align: middle;
+}
+
+/* Journal Entry Section Styles */
+#journalForm {
+  margin-bottom: 20px;
+}
+
+#journalForm label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+#journalForm input[type="text"],
+#journalForm textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#journalForm button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#journalForm button:hover {
+  background-color: #45a049;
+}
+
+/* Journal Entries List Styles */
+.journal-entry {
+  border-bottom: 1px solid #ccc;
+  padding: 10px 0;
+}
+
+.journal-entry h3 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.journal-entry p {
+  margin: 5px 0 0;
+}
+
+/* Button Styles for Delete/Add Actions */
+.delete-button {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.add-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+/* Hidden Elements */
+.hidden {
+  display: none;
+}
+
+.vis-item {
+  z-index: 10 !important;
+}
+
+body #timeline-container .vis-custom-time {
+  background-color: orange !important;
+  width: 2px !important;
+  z-index: -1 !important;
+}
+body #timeline-container .vis-custom-time > .vis-custom-time-marker {
+  background-color: inherit !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  padding: 3px 5px !important;
+  top: 0 !important;
+  white-space: nowrap !important;
+  z-index: -1 !important;
+}
+
+/* this inteferes with dynamic height adjustment of the labels
+.vis-label.vis-group-level-0 {
+  height: 60px !important;
+}*/
+
+
+#global-events-labels {
+  position: relative;
+  width: 98%;
+  margin: 10px auto;
+  height: 30px; /* adjust height as needed */
+  border-top: 1px solid #ccc;
+}
+
+.global-event-label {
+  position: absolute;
+  font-size: 12px;
+  background-color: rgba(0,0,0,0.7);
+  color: #fff;
+  padding: 2px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+/* bottom-time-axis */
+#bottom-time-axis {
+  position: relative;
+  width: 98%;
+  margin: 10px auto;
+  height: 30px; /* Adjust as needed */
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.bottom-axis-label {
+  display: block;
+  font-size: 12px;
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 2px 4px;
+  background-color: #fff; /* Optional: helps with readability */
+  /* You might add a border or margin if needed */
+}
+
+
+footer {
+  text-align: center;
+  padding: 10px 0;
+  font-size: 0.9em;
+  color: #555;
+  border-top: 1px solid #ccc;
+  margin-top: 20px;
+}
