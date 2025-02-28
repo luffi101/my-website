@@ -224,20 +224,25 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Define the function to update global event labels.
   function updateGlobalEventLabels() {
+    console.log("updateGlobalEventLabels() called");
     const containerRect = container.getBoundingClientRect();
+    
+    // Ensure the global events labels container matches the timeline container
     const labelsContainer = document.getElementById('global-events-labels');
     if (!labelsContainer) return;
-  
+    labelsContainer.style.width = containerRect.width + "px";
+    labelsContainer.style.left = containerRect.left + "px";
+    
     // Clear existing labels.
     labelsContainer.innerHTML = '';
-  
+    
     // Select all custom time marker elements.
     const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
     markerElements.forEach(marker => {
       const markerRect = marker.getBoundingClientRect();
       const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
       const labelText = marker.getAttribute('data-label') || 'Global Event';
-  
+      
       const label = document.createElement('div');
       label.className = 'global-event-label';
       label.innerText = labelText;
