@@ -150,14 +150,15 @@
     height: 30px; /* Adjust height as needed */
     border-top: 1px solid #ccc;
   }
-  
+
+
   .global-event-label {
     position: absolute;
     font-size: 12px;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.7);  /* dark background */
     color: #fff;
     padding: 2px 4px;
-    border: 1px solid red; /* Added border for visibility */
+    border: 1px solid red;  /* red border for debugging */
     border-radius: 3px;
     white-space: nowrap;
     transform: translateX(-50%);
