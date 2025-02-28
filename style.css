@@ -90,7 +90,7 @@
   #timeline-container {
     width: 98%;
     /*height: 1200px; */ /* Adjust height as needed (commented out) */
-    min-height: 600px; /* or another appropriate value */
+    /* min-height: 600px; *//* or another appropriate value */
     border: 2px solid #ccc;
     margin: 20px auto;
     font-family: "Times New Roman", Times, serif !important;
