@@ -349,3 +349,13 @@ body #timeline-container .vis-custom-time > .vis-custom-time-marker {
   background-color: #fff; /* Optional: helps with readability */
   /* You might add a border or margin if needed */
 }
+
+
+footer {
+  text-align: center;
+  padding: 10px 0;
+  font-size: 0.9em;
+  color: #555;
+  border-top: 1px solid #ccc;
+  margin-top: 20px;
+}
