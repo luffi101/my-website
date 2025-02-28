@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // Helper function to initialize Flatpickr for date inputs
+  // -------------------------------
+  // Helper function: Initialize Flatpickr for date inputs
+  // -------------------------------
   function initDatePicker(selector) {
     flatpickr(selector, {
       dateFormat: "Y-m-d",
@@ -15,15 +17,15 @@ document.addEventListener('DOMContentLoaded', function() {
   initDatePicker("#dateOfBirth");
   initDatePicker("#dateOfDeath");
 
+  // -------------------------------
+  // Define main variables & timeline options
+  // -------------------------------
   const container = document.getElementById('timeline-container');
   const msPerYear = 31557600000; // 365.25 days/year in milliseconds
-
-  // Calculate zoom limits
-  const zoomMin = 201 * msPerYear; // Minimum visible span = 201 years
+  const zoomMin = 201 * msPerYear;
   const containerWidth = container.offsetWidth;
-  const zoomMax = (67 * msPerYear * containerWidth) / 96; // Ensure 67-year block is at least ~96px wide
+  const zoomMax = (67 * msPerYear * containerWidth) / 96;
   
-  // Timeline options
   const options = {
     orientation: 'top',
     showCurrentTime: false,
@@ -32,13 +34,13 @@ document.addEventListener('DOMContentLoaded', function() {
     min: new Date("0001-01-01"),
     max: new Date("2025-12-31"),
     stack: true,
-    // Remove unsupported options if necessary:
-    // groupOrder: 'content',
     tooltip: { delay: 100, followMouse: true },
     margin: { item: { horizontal: 0, vertical: 5 } }
   };
 
-  // Define regions (in desired order)
+  // -------------------------------
+  // Define Regions and Groups (by desired order)
+  // -------------------------------
   const regions = [
     "North America",
     "South America",
@@ -49,14 +51,12 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
   
-  // Create one group per region
-  const groups = regions.map(region => {
-    return { id: region.toLowerCase(), content: region };
-  });
-  // Add an "Unknown" group
+  const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
   groups.push({ id: "unknown", content: "Unknown" });
 
-  // Expertise colors and text colors for historical figures
+  // -------------------------------
+  // Define Expertise Colors for Historical Figures
+  // -------------------------------
   const expertiseColors = {
     "politics & military": "red",
     "science": "blue",
@@ -79,7 +79,9 @@ document.addEventListener('DOMContentLoaded', function() {
     "exploration & discovery": "yellow"
   };
 
+  // -------------------------------
   // Helper functions to format dates and names.
+  // -------------------------------
   function formatDate(dateStr) {
     if (dateStr && dateStr.length === 4) {
       dateStr += "-01-01";
@@ -97,17 +99,20 @@ document.addEventListener('DOMContentLoaded', function() {
     return name;
   }
   
-  // Declare timeline in outer scope.
+  // -------------------------------
+  // Declare timeline variable (to be used globally)
+  // -------------------------------
   let timeline;
 
-  // Retrieve historical figures from Firestore.
+  // -------------------------------
+  // Retrieve Historical Figures and Create Timeline Items
+  // -------------------------------
   firebase.firestore().collection("historicalFigures")
     .get()
     .then(snapshot => {
       const items = [];
       snapshot.forEach(doc => {
         const data = doc.data();
-  
         const startDate = formatDate(data.dateOfBirth);
         const endDate = formatDate(data.dateOfDeath);
         if (!startDate || !endDate) {
@@ -136,7 +141,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const birthYear = startDate.getFullYear();
         const deathYear = endDate.getFullYear();
   
-        // Build content HTML (simple text format)
         const contentHTML = `${formattedName} (${birthYear} - ${deathYear})`;
   
         items.push({
@@ -165,67 +169,58 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       });
   
-      console.log("Timeline created. Calling updateGlobalEventLabels() directly.");
-      updateGlobalEventLabels(); 
-
-      function updateBottomTimeAxis() {
-        console.log("Updating bottom time axis...");
-        // Get current timeline window.
-        const windowRange = timeline.getWindow();
-        const start = windowRange.start;
-        const end = windowRange.end;
-        console.log("Timeline window:", start, end);
-      
-        const timelineRect = container.getBoundingClientRect();
-        const timelineWidth = timelineRect.width;
-        console.log("Timeline width:", timelineWidth);
-      
-        // Get bottom axis container.
-        const bottomAxisContainer = document.getElementById('bottom-time-axis');
-        if (!bottomAxisContainer) return;
-        bottomAxisContainer.innerHTML = ''; // Clear previous labels
-      
-        // Determine range in years.
-        const startYear = start.getFullYear();
-        const endYear = end.getFullYear();
-      
-        // Decide on an interval: every 10 years if range > 50, else every year.
-        const interval = (endYear - startYear) > 50 ? 10 : 1;
-      
-        for (let year = startYear; year <= endYear; year += interval) {
-          const labelDate = new Date(year, 0, 1);
-          // Only add labels within the window:
-          if (labelDate < start || labelDate > end) continue;
-      
-          // Calculate left offset proportionally.
-          const leftOffset = ((labelDate.getTime() - start.getTime()) / (end.getTime() - start.getTime())) * timelineWidth;
-          
-          const labelElem = document.createElement('div');
-          labelElem.className = 'bottom-axis-label';
-          labelElem.innerText = year;
-          labelElem.style.left = leftOffset + 'px';
-          labelElem.style.top = '0px'; // You can adjust this if needed
-      
-          // Ensure each label is displayed as a block (redundant for div, but explicit):
-          labelElem.style.display = 'block';
-      
-          bottomAxisContainer.appendChild(labelElem);
-        }
-      }
-      
-  
-      // Call updateBottomTimeAxis once after timeline creation.
-      updateBottomTimeAxis();
-  
-      // Attach updateBottomTimeAxis to timeline range changes (if desired)
-      timeline.on('rangechanged', updateBottomTimeAxis);
+      // Do not call updateGlobalEventLabels() here,
+      // because global events markers may not be added yet.
   
     })
     .catch(error => {
       console.error("Error loading historical figures:", error);
     });
   
-  // Define the function to update global event labels.
+  // -------------------------------
+  // Retrieve Global Events and Set Up Custom Time Markers
+  // -------------------------------
+  firebase.firestore().collection("globalEvents")
+    .get()
+    .then(snapshot => {
+      const events = [];
+      snapshot.forEach(doc => {
+        const event = doc.data();
+        if (event.eventDate && timeline) {
+          events.push({ id: doc.id, event: event });
+        }
+      });
+
+      // For each global event, add a custom time marker and set its data-label.
+      events.forEach(({ id, event }, index) => {
+        const eventDate = new Date(event.eventDate);
+        timeline.addCustomTime(eventDate, id);
+        // Delay to ensure the marker is rendered.
+        setTimeout(() => {
+          // Use order-based selection if data-id is not automatically set.
+          const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
+          if (markers[index]) {
+            markers[index].setAttribute('data-label', event.eventName);
+            console.log("Set data-label for marker", id, "to", event.eventName);
+          }
+        }, 200);
+      });
+
+      // After ensuring markers are added, call updateGlobalEventLabels().
+      setTimeout(() => {
+        console.log("Global events processed. Calling updateGlobalEventLabels().");
+        updateGlobalEventLabels();
+        // Also attach updateGlobalEventLabels() to timeline range changes.
+        timeline.on('rangechanged', updateGlobalEventLabels);
+      }, 500);
+    })
+    .catch(error => {
+      console.error("Error loading global events:", error);
+    });
+  
+  // -------------------------------
+  // Function: Update Global Event Labels
+  // -------------------------------
   function updateGlobalEventLabels() {
     console.log("updateGlobalEventLabels() called");
     const containerRect = container.getBoundingClientRect();
@@ -238,6 +233,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clear existing labels.
     labelsContainer.innerHTML = '';
     
+    // Ensure the labels container matches the timeline container's width and left offset.
+    labelsContainer.style.width = containerRect.width + "px";
+    labelsContainer.style.left = containerRect.left + "px";
+    
     // Select all custom time marker elements.
     const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
     console.log("Found " + markerElements.length + " custom time markers.");
@@ -246,7 +245,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const markerRect = marker.getBoundingClientRect();
       const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
       const labelText = marker.getAttribute('data-label') || 'Global Event';
-    
+      console.log("Marker label:", labelText, "at left position:", leftPos);
+      
       const label = document.createElement('div');
       label.className = 'global-event-label';
       label.innerText = labelText;
@@ -254,11 +254,11 @@ document.addEventListener('DOMContentLoaded', function() {
       label.style.top = '0px';
       labelsContainer.appendChild(label);
     });
-  }  
-
-
-
-  // Show/hide the "Add Historical Figure" form and CSV import form based on authentication.
+  }
+  
+  // -------------------------------
+  // Authentication-Dependent UI Elements
+  // -------------------------------
   firebase.auth().onAuthStateChanged(user => {
     const figureFormSection = document.getElementById('figure-form-section');
     if (figureFormSection) {
@@ -271,7 +271,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Event listener for the "Add Historical Figure" form.
+  // -------------------------------
+  // Event Listener: Add New Historical Figure Form Submission
+  // -------------------------------
   const figureForm = document.getElementById("figureForm");
   if (figureForm) {
     figureForm.addEventListener("submit", (e) => {
@@ -312,31 +314,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Retrieve global events from Firestore and add custom time markers.
-  firebase.firestore().collection("globalEvents")
-    .get()
-    .then(snapshot => {
-      snapshot.forEach(doc => {
-        const event = doc.data();
-        if (event.eventDate && timeline) {
-          const eventDate = new Date(event.eventDate);
-          timeline.addCustomTime(eventDate, doc.id);
-  
-          // Delay slightly to ensure the marker is rendered.
-          setTimeout(() => {
-            const markerElement = document.querySelector(`#timeline-container .vis-custom-time[data-id="${doc.id}"]`);
-            if (markerElement) {
-              markerElement.setAttribute('data-label', event.eventName);
-            }
-          }, 200);
-        }
-      });
-    })
-    .catch(error => {
-      console.error("Error loading global events:", error);
-    });
-  
+  // -------------------------------
   // CSV Import Functionality
+  // -------------------------------
   document.getElementById("csvImportForm").addEventListener("submit", function(e) {
     e.preventDefault();
     const fileInput = document.getElementById("csvFile");
@@ -424,3 +404,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+

@@ -155,15 +155,14 @@
   .global-event-label {
     position: absolute;
     font-size: 12px;
-    background-color: rgba(0, 0, 0, 0.7);  /* dark background */
+    background-color: rgba(0,0,0,0.7);
     color: #fff;
     padding: 2px 4px;
-    border: 1px solid red;  /* red border for debugging */
+    border: 1px solid red; /* Debugging border */
     border-radius: 3px;
     white-space: nowrap;
     transform: translateX(-50%);
   }
-
   
   /* ============================================================================
      Historical Figure Form Styles (Timeline Page)
