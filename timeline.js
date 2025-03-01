@@ -121,85 +121,89 @@ document.addEventListener('DOMContentLoaded', function() {
   // -------------------------------
   let timeline;
 
-  // -------------------------------
-  // Retrieve Historical Figures & Build Timeline Items
-  // -------------------------------
-  firebase.firestore().collection("historicalFigures")
-    .get()
-    .then(snapshot => {
-      const items = [];
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const startDate = formatDate(data.dateOfBirth);
-        const endDate = formatDate(data.dateOfDeath);
-        if (!startDate || !endDate) {
-          console.warn(`Skipping ${data.name} due to missing or invalid dates.`);
-          return;
+// Retrieve Historical Figures & Build Timeline Items
+firebase.firestore().collection("historicalFigures")
+  .get()
+  .then(snapshot => {
+    const items = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const startDate = formatDate(data.dateOfBirth);
+      const endDate = formatDate(data.dateOfDeath);
+      if (!startDate || !endDate) {
+        console.warn(`Skipping ${data.name} due to missing or invalid dates.`);
+        return;
+      }
+  
+      const expertiseCategory = (data.groups && data.groups.length > 0)
+        ? data.groups[0].trim().toLowerCase()
+        : "politics";
+      const bgColor = expertiseColors[expertiseCategory] || "gray";
+      const textColor = expertiseTextColors[expertiseCategory] || "white";
+      const formattedName = formatName(data.name);
+  
+      let region = "unknown";
+      if (data.region && typeof data.region === "string") {
+        const normalizedRegion = data.region.trim().toLowerCase();
+        if (regions.map(r => r.toLowerCase()).includes(normalizedRegion)) {
+          region = normalizedRegion;
         }
+      }
+      const groupId = region;
   
-        const expertiseCategory = (data.groups && data.groups.length > 0)
-          ? data.groups[0].trim().toLowerCase()
-          : "politics";
-        const bgColor = expertiseColors[expertiseCategory] || "gray";
-        const textColor = expertiseTextColors[expertiseCategory] || "white";
-        const formattedName = formatName(data.name);
+      const birthYear = startDate.getFullYear();
+      const deathYear = endDate.getFullYear();
+      const contentHTML = `${formattedName} (${birthYear} - ${deathYear})`;
   
-        let region = "unknown";
-        if (data.region && typeof data.region === "string") {
-          const normalizedRegion = data.region.trim().toLowerCase();
-          if (regions.map(r => r.toLowerCase()).includes(normalizedRegion)) {
-            region = normalizedRegion;
-          }
-        }
-        const groupId = region;
-  
-        const birthYear = startDate.getFullYear();
-        const deathYear = endDate.getFullYear();
-        const contentHTML = `${formattedName} (${birthYear} - ${deathYear})`;
-  
-        items.push({
-          id: doc.id,
-          group: groupId,
-          content: contentHTML,
-          start: startDate,
-          end: endDate,
-          style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 2px 3px;"
-        });
+      items.push({
+        id: doc.id,
+        group: groupId,
+        content: contentHTML,
+        start: startDate,
+        end: endDate,
+        style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 2px 3px;"
       });
-  
-      console.log("Timeline items:", items);
-      timeline = new vis.Timeline(container, items, groups, options);
-      
-      
-      // -------------------------------
-      // Dynamic Group Label Adjustment
-      // -------------------------------
-      timeline.on('redraw', function () {
-        const groupLabels = document.querySelectorAll('.vis-labelset .vis-label');
-        const groupsElements = document.querySelectorAll('.vis-group');
-        groupLabels.forEach((label, index) => {
-          if (groupsElements[index]) {
-            const newHeight = groupsElements[index].offsetHeight;
-            label.style.height = newHeight + 'px';
-            label.style.lineHeight = newHeight + 'px';
-          }
-        });
-      });
-  
-      // -------------------------------
-      // Call updateGlobalEventLabels() after a delay
-      // (This will update labels in the dummy "global-events" group)
-      // -------------------------------
-      setTimeout(() => {
-        console.log("Global events: calling updateGlobalEventLabels()");
-        updateGlobalEventLabels();
-        timeline.on('rangechanged', updateGlobalEventLabels);
-      }, 500);
-  
-    })
-    .catch(error => {
-      console.error("Error loading historical figures:", error);
     });
+    
+    // Add a dummy item for the global events dummy group
+    // This forces the dummy group row to render, even though the item is invisible.
+    items.push({
+      id: 'dummy-global-event',
+      group: 'global-events',
+      content: '', // No content
+      start: new Date("2025-01-01"),  // Use a date that doesn't interfere with your data
+      end: new Date("2025-01-02"),
+      style: "visibility: hidden;"
+    });
+  
+    console.log("Timeline items:", items);
+    timeline = new vis.Timeline(container, items, groups, options);
+  
+    // Dynamic Group Label Adjustment
+    timeline.on('redraw', function () {
+      const groupLabels = document.querySelectorAll('.vis-labelset .vis-label');
+      const groupsElements = document.querySelectorAll('.vis-group');
+      groupLabels.forEach((label, index) => {
+        if (groupsElements[index]) {
+          const newHeight = groupsElements[index].offsetHeight;
+          label.style.height = newHeight + 'px';
+          label.style.lineHeight = newHeight + 'px';
+        }
+      });
+    });
+  
+    // Call updateGlobalEventLabels() after a delay and attach it to rangechanged.
+    setTimeout(() => {
+      console.log("Global events: calling updateGlobalEventLabels()");
+      updateGlobalEventLabels();
+      timeline.on('rangechanged', updateGlobalEventLabels);
+    }, 500);
+  
+  })
+  .catch(error => {
+    console.error("Error loading historical figures:", error);
+  });
+
   
   // -------------------------------
   // Retrieve Global Events & Add Custom Time Markers
