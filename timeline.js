@@ -58,10 +58,19 @@ document.addEventListener('DOMContentLoaded', function() {
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
   // Add a dummy group for global events.
-  // Here, we force the group's label content to be a span with a known ID.
+  // Here we use a template function so that the dummy group's label renders an element
+  // with ID "dummy-global-container".
   groups.push({
     id: "global-events",
-    content: "<span id='dummy-global-container' class='global-events-dummy'></span>"
+    template: function(group, element, data) {
+      var dummyContainer = document.createElement('div');
+      dummyContainer.className = 'global-events-dummy';
+      dummyContainer.id = "dummy-global-container";
+      dummyContainer.style.height = "30px"; // Adjust as needed
+      dummyContainer.style.position = "relative";
+      console.log("Dummy container created for global events.");
+      return dummyContainer;
+    }
   });
 
   // -------------------------------
