@@ -57,11 +57,11 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // Add a dummy group for global events (this will be the last row)
-  // Here we force the group label to contain an element with class "global-events-dummy"
+  // Add a dummy group for global events.
+  // Here, we force the group's label content to be a span with a known ID.
   groups.push({
     id: "global-events",
-    content: "<div class='global-events-dummy' style='height:30px; position:relative;'></div>"
+    content: "<span id='dummy-global-container' class='global-events-dummy'></span>"
   });
 
   // -------------------------------
@@ -218,7 +218,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const eventDate = new Date(event.eventDate);
         timeline.addCustomTime(eventDate, id);
         setTimeout(() => {
-          // Using order-based mapping:
           const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
           if (markers[index]) {
             markers[index].setAttribute('data-label', event.eventName);
@@ -243,10 +242,10 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateGlobalEventLabels() {
     console.log("updateGlobalEventLabels() called");
     const containerRect = container.getBoundingClientRect();
-    // Select the dummy container from the dummy group's content.
-    const dummyContainer = document.querySelector('.global-events-dummy');
+    // Select the dummy container by its ID.
+    const dummyContainer = document.getElementById('dummy-global-container');
     if (!dummyContainer) {
-      console.log("No global events dummy container found.");
+      console.log("No dummy container found with ID 'dummy-global-container'.");
       return;
     }
     console.log("Dummy container found. Width:", dummyContainer.offsetWidth);
