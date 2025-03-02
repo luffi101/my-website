@@ -61,12 +61,17 @@ document.addEventListener('DOMContentLoaded', function() {
   groups.push({
     id: "global-events",
     content: "",  // No left-side label (or "Global Events" if desired)
-    // Custom group template returns a container to hold labels.
+    // Custom group template returns a container to hold global event labels.
     template: function(group, element, data) {
       var dummyContainer = document.createElement('div');
       dummyContainer.className = 'global-events-dummy';
       dummyContainer.style.height = "30px"; // Adjust as needed
       dummyContainer.style.position = "relative";
+      // Add a hidden placeholder to force rendering
+      var placeholder = document.createElement('span');
+      placeholder.style.visibility = "hidden";
+      placeholder.innerText = "placeholder";
+      dummyContainer.appendChild(placeholder);
       console.log("Dummy container created for global events.");
       return dummyContainer;
     }
@@ -118,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   // -------------------------------
-  // Declare timeline variable
+  // Declare timeline variable (to be used globally)
   // -------------------------------
   let timeline;
 
@@ -168,8 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       });
   
-      // Add a dummy item for the global events dummy group
-      // This forces the dummy group row to render.
+      // Add a dummy item for the global events dummy group to force rendering.
       items.push({
         id: 'dummy-global-event',
         group: 'global-events',
@@ -197,8 +201,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       });
   
-      // Instead of calling updateGlobalEventLabels() immediately,
-      // we'll rely on the global events block to call it after processing.
+      // Call updateGlobalEventLabels() after a delay to update labels in the dummy global events row.
+      setTimeout(() => {
+        console.log("Global events: calling updateGlobalEventLabels()");
+        updateGlobalEventLabels();
+        timeline.on('rangechanged', updateGlobalEventLabels);
+      }, 1000);
   
     })
     .catch(error => {
@@ -219,12 +227,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
   
-      // For each global event, add a custom time marker and set its data-label.
       events.forEach(({ id, event }, index) => {
         const eventDate = new Date(event.eventDate);
         timeline.addCustomTime(eventDate, id);
         setTimeout(() => {
-          // Using order-based mapping:
           const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
           if (markers[index]) {
             markers[index].setAttribute('data-label', event.eventName);
@@ -233,11 +239,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 200);
       });
   
-      // After processing global events, call updateGlobalEventLabels() with a longer delay.
+      // After processing global events, update labels.
       setTimeout(() => {
         console.log("Global events processed. Calling updateGlobalEventLabels().");
         updateGlobalEventLabels();
-        timeline.on('rangechanged', updateGlobalEventLabels);
       }, 1000);
     })
     .catch(error => {
@@ -250,7 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateGlobalEventLabels() {
     console.log("updateGlobalEventLabels() called");
     const containerRect = container.getBoundingClientRect();
-    // Select the dummy container created by the custom group template.
+    // Select the dummy container from the custom group template.
     const dummyContainer = document.querySelector('.global-events-dummy');
     if (!dummyContainer) {
       console.log("No global events dummy container found.");
