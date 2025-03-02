@@ -35,7 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
     max: new Date("2025-12-31"),
     stack: true,
     tooltip: { delay: 100, followMouse: true },
-    margin: { item: { horizontal: 0, vertical: 5 } }
+    margin: { item: { horizontal: 0, vertical: 5 } },
+    groupHeightMode: 'fixed'  // Force groups to maintain a fixed height, even if empty.
   };
 
   // -------------------------------
@@ -58,19 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
   // Add a dummy group for global events.
-  // Here we use a template function so that the dummy group's label renders an element
-  // with ID "dummy-global-container".
+  // We now set its content to include a container with a known ID.
   groups.push({
     id: "global-events",
-    template: function(group, element, data) {
-      var dummyContainer = document.createElement('div');
-      dummyContainer.className = 'global-events-dummy';
-      dummyContainer.id = "dummy-global-container";
-      dummyContainer.style.height = "30px"; // Adjust as needed
-      dummyContainer.style.position = "relative";
-      console.log("Dummy container created for global events.");
-      return dummyContainer;
-    }
+    content: "<div id='dummy-global-container' style='height:30px; position: relative;'>&nbsp;</div>"
   });
 
   // -------------------------------
