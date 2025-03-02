@@ -35,8 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     max: new Date("2025-12-31"),
     stack: true,
     tooltip: { delay: 100, followMouse: true },
-    margin: { item: { horizontal: 0, vertical: 5 } },
-    groupHeightMode: 'fixed'  // Force groups to maintain a fixed height, even if empty.
+    margin: { item: { horizontal: 0, vertical: 5 } }
   };
 
   // -------------------------------
@@ -58,12 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // Add a dummy group for global events.
-  // We now set its content to include a container with a known ID.
-  groups.push({
-    id: "global-events",
-    content: "<div id='dummy-global-container' style='height:30px; position: relative;'>&nbsp;</div>"
-  });
+  // (No dummy group is added here; global event labels will be handled in a separate container)
 
   // -------------------------------
   // Define Expertise Colors for Historical Figures
@@ -161,16 +155,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       });
   
-      // Add a dummy item for the global events dummy group to force rendering.
-      items.push({
-        id: 'dummy-global-event',
-        group: 'global-events',
-        content: '',
-        start: new Date("2025-01-01"),
-        end: new Date("2025-01-02"),
-        style: "visibility: hidden;"
-      });
-  
       console.log("Timeline items:", items);
       timeline = new vis.Timeline(container, items, groups, options);
   
@@ -238,21 +222,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   
   // -------------------------------
-  // Function: Update Global Event Labels in Dummy Group Row
+  // Function: Update Global Event Labels in Separate Container
   // -------------------------------
   function updateGlobalEventLabels() {
     console.log("updateGlobalEventLabels() called");
     const containerRect = container.getBoundingClientRect();
-    // Select the dummy container by its ID.
-    const dummyContainer = document.getElementById('dummy-global-container');
-    if (!dummyContainer) {
-      console.log("No dummy container found with ID 'dummy-global-container'.");
+    // Use the separate container defined in timeline.html
+    const labelsContainer = document.getElementById('global-events-labels');
+    if (!labelsContainer) {
+      console.log("No global events labels container found.");
       return;
     }
-    console.log("Dummy container found. Width:", dummyContainer.offsetWidth);
+    console.log("Global events labels container found. Width:", labelsContainer.offsetWidth);
     
     // Clear existing labels.
-    dummyContainer.innerHTML = '';
+    labelsContainer.innerHTML = '';
     
     // Select all custom time marker elements.
     const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
@@ -269,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
       label.innerText = labelText;
       label.style.left = leftPos + 'px';
       label.style.top = '0px';
-      dummyContainer.appendChild(label);
+      labelsContainer.appendChild(label);
     });
   }
   
