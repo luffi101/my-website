@@ -92,7 +92,7 @@
     /*height: 1200px; */ /* Adjust height as needed (commented out) */
     /* min-height: 600px; *//* or another appropriate value */
     border: 2px solid #ccc;
-    margin: 20px auto;
+    margin: 0px auto;
     font-family: "Times New Roman", Times, serif !important;
     font-size: 1em;  
   }
@@ -145,12 +145,11 @@
      ============================================================================ */
 /* Global Events Labels Container inside the timeline section */
 #global-events-labels {
-  position: relative;           /* establish positioning context */
-  background-color: #f9f9f9;      /* distinct background color */
-  border: 2px solid #ccc;         /* visible border */
-  padding: 10px;                /* inner spacing */
-  margin-top: 10px;             /* space between timeline and labels */
   width: 98%;
+  margin: 10px auto 0; /* top margin for spacing; auto left/right to center */
+  background-color: #f9f9f9;
+  border: 2px solid #ccc;
+  padding: 10px;
   box-sizing: border-box;
 }
 
