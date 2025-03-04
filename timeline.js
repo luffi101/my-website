@@ -35,7 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
     max: new Date("2025-12-31"),
     stack: true,
     tooltip: { delay: 100, followMouse: true },
-    margin: { item: { horizontal: 0, vertical: 5 } }
+    margin: { item: { horizontal: 0, vertical: 5 } },
+    groupHeightMode: 'auto' // default, but you can adjust as needed
   };
 
   // -------------------------------
@@ -52,12 +53,10 @@ document.addEventListener('DOMContentLoaded', function() {
   ];
   
   // Create one group per region
-  const groups = regions.map(region => {
-    return { id: region.toLowerCase(), content: region };
-  });
+  const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // (No dummy group is added here; global event labels will be handled in a separate container)
+  // (No dummy group for global events – we'll use a separate container)
 
   // -------------------------------
   // Define Expertise Colors for Historical Figures
@@ -173,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       });
   
-      // After a delay, update global event labels and attach to rangechanged event.
+      // After a delay, update global event labels and attach update on range changes.
       setTimeout(() => {
         console.log("Global events: calling updateGlobalEventLabels()");
         updateGlobalEventLabels();
@@ -203,6 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const eventDate = new Date(event.eventDate);
         timeline.addCustomTime(eventDate, id);
         setTimeout(() => {
+          // Use order-based mapping to set data-label attributes on the custom time markers
           const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
           if (markers[index]) {
             markers[index].setAttribute('data-label', event.eventName);
@@ -222,12 +222,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   
   // -------------------------------
-  // Function: Update Global Event Labels in Separate Container
+  // Function: Update Global Event Labels in the Separate Container
   // -------------------------------
   function updateGlobalEventLabels() {
     console.log("updateGlobalEventLabels() called");
     const containerRect = container.getBoundingClientRect();
-    // Use the separate container defined in timeline.html
+    // Select the global events labels container (assumed to be in your HTML)
     const labelsContainer = document.getElementById('global-events-labels');
     if (!labelsContainer) {
       console.log("No global events labels container found.");

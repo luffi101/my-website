@@ -143,14 +143,15 @@
   /* ============================================================================
      Global Event Labels (Timeline Page)
      ============================================================================ */
+/* Global Events Labels Container within the timeline section */
   #global-events-labels {
-    position: relative;
-    width: 98%;
-    margin: 10px auto;
-    height: 30px; /* Adjust height as needed */
-    border-top: 1px solid #ccc;
+    background-color: #f9f9f9;  /* light background for contrast */
+    border: 2px solid #ccc;     /* a visible border */
+    padding: 10px;              /* internal spacing */
+    margin-top: 10px;           /* space above the labels container */
+    width: 100%;                /* span full width of timeline-section */
+    box-sizing: border-box;     /* include padding and border in width */
   }
-
 
   .global-event-label {
     position: absolute;
