@@ -35,8 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     max: new Date("2025-12-31"),
     stack: true,
     tooltip: { delay: 100, followMouse: true },
-    margin: { item: { horizontal: 0, vertical: 5 } },
-    groupHeightMode: 'auto' // default, but you can adjust as needed
+    margin: { item: { horizontal: 0, vertical: 5 } }
   };
 
   // -------------------------------
@@ -56,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // (No dummy group for global events – we'll use a separate container)
+  // (Global events labels will be handled in a separate container below the timeline.)
 
   // -------------------------------
   // Define Expertise Colors for Historical Figures
@@ -202,7 +201,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const eventDate = new Date(event.eventDate);
         timeline.addCustomTime(eventDate, id);
         setTimeout(() => {
-          // Use order-based mapping to set data-label attributes on the custom time markers
           const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
           if (markers[index]) {
             markers[index].setAttribute('data-label', event.eventName);
@@ -222,12 +220,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   
   // -------------------------------
-  // Function: Update Global Event Labels in the Separate Container
+  // Function: Update Global Event Labels in the Global Events Labels Container
   // -------------------------------
   function updateGlobalEventLabels() {
     console.log("updateGlobalEventLabels() called");
     const containerRect = container.getBoundingClientRect();
-    // Select the global events labels container (assumed to be in your HTML)
+    // Select the global events labels container (now inside timeline-section)
     const labelsContainer = document.getElementById('global-events-labels');
     if (!labelsContainer) {
       console.log("No global events labels container found.");
@@ -244,6 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     markerElements.forEach(marker => {
       const markerRect = marker.getBoundingClientRect();
+      // Compute left offset relative to timeline-container
       const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
       const labelText = marker.getAttribute('data-label') || 'Global Event';
       console.log("Marker label:", labelText, "at left position:", leftPos);
