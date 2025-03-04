@@ -150,7 +150,7 @@
   border: 2px solid #ccc;         /* visible border */
   padding: 10px;                /* inner spacing */
   margin-top: 10px;             /* space between timeline and labels */
-  width: 100%;
+  width: 98%;
   box-sizing: border-box;
 }
 
