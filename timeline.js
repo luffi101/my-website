@@ -179,73 +179,71 @@ document.addEventListener('DOMContentLoaded', function() {
   // -------------------------------
   // Function: Update Global Events Markers & Their Labels
   // -------------------------------
-  function updateGlobalEventsMarkers() {
-    firebase.firestore().collection("globalEvents")
-      .get()
-      .then(snapshot => {
-        const events = [];
-        snapshot.forEach(doc => {
-          const event = doc.data();
-          if (event.eventDate && event.eventEndDate && timeline) {
-            events.push({ id: doc.id, event: event });
-          }
-        });
-  
-        events.forEach(({ id, event }, index) => {
-          const startDate = new Date(event.eventDate);
-          const endDate = new Date(event.eventEndDate);
-          // Remove any existing marker with the same id to avoid duplicates.
-          try { timeline.removeCustomTime(id); } catch(e) { }
-          // Add a custom time marker at the start date.
-          timeline.addCustomTime(startDate, id);
-          setTimeout(() => {
-            const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
-            // Fallback pixel calculation using the current timeline window:
-            const windowRange = timeline.getWindow();
-            const startTime = windowRange.start.getTime();
-            const endTime = windowRange.end.getTime();
-            const currentContainerWidth = container.getBoundingClientRect().width;
-            const timeSpan = endTime - startTime;
-            const pixelPerMs = currentContainerWidth / timeSpan;
-            const startPx = (startDate.getTime() - startTime) * pixelPerMs;
-            const endPx = (endDate.getTime() - startTime) * pixelPerMs;
-  
-            if (markers[index]) {
-              const marker = markers[index];
-              let computedWidth = endPx - startPx;
-              if (computedWidth < 2) { computedWidth = 2; } // Enforce minimum width of 2px
-  
-              // Update marker style:
-              marker.style.left = startPx + "px";
-              marker.style.width = computedWidth + "px";
-              marker.style.height = "100%";
-              // Add a border to distinguish overlapping markers.
-              marker.style.border = "1px solid black";
-  
-              // Update inner div style.
-              const innerDiv = marker.querySelector('div');
-              if (innerDiv) {
-                innerDiv.style.width = computedWidth + "px";
-                innerDiv.style.left = (-computedWidth / 2) + "px";
-              }
-  
-              // Set the marker's data-label attribute to the eventName.
-              marker.setAttribute('data-label', event.eventName);
-              console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
-            }
-          }, 200);
-        });
-  
-        // After processing markers, update global event labels.
-        setTimeout(() => {
-          console.log("Global events processed. Calling updateGlobalEventLabels().");
-          updateGlobalEventLabels();
-        }, 1000);
-      })
-      .catch(error => {
-        console.error("Error loading global events:", error);
+  function updateGlobalEventLabels() {
+    console.log("updateGlobalEventLabels() called");
+    const containerRect = container.getBoundingClientRect();
+    const labelsContainer = document.getElementById('global-events-labels');
+    if (!labelsContainer) {
+      console.log("No global events labels container found.");
+      return;
+    }
+    console.log("Global events labels container found. Width:", labelsContainer.offsetWidth);
+    
+    // Clear any existing labels.
+    labelsContainer.innerHTML = '';
+    
+    // Get all custom time markers (global event markers).
+    const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
+    console.log("Found " + markerElements.length + " custom time markers.");
+    
+    // Array to store the bounding box info of placed labels.
+    const placedLabels = [];
+    
+    markerElements.forEach(marker => {
+      // Calculate the marker's midpoint relative to the timeline container.
+      const markerRect = marker.getBoundingClientRect();
+      const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
+      const labelText = marker.getAttribute('data-label') || 'Global Event';
+      
+      // Create the label element.
+      const label = document.createElement('div');
+      label.className = 'global-event-label';
+      label.innerText = labelText;
+      label.style.position = 'absolute';
+      label.style.left = leftPos + 'px';
+      
+      // Start at a base top offset.
+      let topOffset = 10;
+      label.style.top = topOffset + 'px';
+      
+      // Append label temporarily so we can measure its dimensions.
+      labelsContainer.appendChild(label);
+      const labelRect = label.getBoundingClientRect();
+      
+      // Check against already placed labels for horizontal overlap.
+      placedLabels.forEach(existing => {
+        // Simple horizontal overlap: if new label's horizontal span overlaps existing label's span.
+        if (!(leftPos + labelRect.width < existing.left || leftPos > existing.left + existing.width)) {
+          // Adjust the top offset: place it just below the overlapping label.
+          topOffset = Math.max(topOffset, existing.top + existing.height + 5);
+        }
       });
+      
+      // Update label's top offset.
+      label.style.top = topOffset + 'px';
+      
+      // Save its bounding box for future collision checks.
+      placedLabels.push({
+        left: leftPos,
+        width: labelRect.width,
+        top: topOffset,
+        height: labelRect.height
+      });
+      
+      console.log("Placed label:", labelText, "at left:", leftPos, "top:", topOffset);
+    });
   }
+  
   
   // -------------------------------
   // Function: Update Global Event Labels in the Global Events Labels Container
