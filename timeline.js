@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // (Global events will be rendered as custom time markers and are not assigned to a separate group.)
+  // Global events remain as custom time markers – not assigned to a separate group
 
   // -------------------------------
   // Define Expertise Colors for Historical Figures
@@ -185,64 +185,76 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   
   // -------------------------------
-  // Retrieve Global Events & Update Their Custom Time Markers
+  // Function: Update Global Events Markers & Labels
   // -------------------------------
-  firebase.firestore().collection("globalEvents")
-    .get()
-    .then(snapshot => {
-      const events = [];
-      snapshot.forEach(doc => {
-        const event = doc.data();
-        // Ensure both eventDate and eventEndDate exist.
-        if (event.eventDate && event.eventEndDate && timeline) {
-          events.push({ id: doc.id, event: event });
-        }
-      });
-  
-      events.forEach(({ id, event }, index) => {
-        const startDate = new Date(event.eventDate);
-        const endDate = new Date(event.eventEndDate);
-        // Add a custom time marker at the start date.
-        timeline.addCustomTime(startDate, id);
-        setTimeout(() => {
-          const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
-          // Assume the markers array order corresponds to events array order.
-          if (markers[index]) {
-            const marker = markers[index];
-            // Compute pixel positions for start and end dates.
-            const startPx = timeline.getPixelFromTime(startDate);
-            const endPx = timeline.getPixelFromTime(endDate);
-            let computedWidth = endPx - startPx;
-            if (computedWidth < 5) { computedWidth = 5; } // Enforce minimum width
-  
-            // Update marker style:
-            marker.style.left = startPx + "px";
-            marker.style.width = computedWidth + "px";
-            marker.style.height = "100%";
-  
-            // Update inner div style (the inner element that vis uses for rendering)
-            const innerDiv = marker.querySelector('div');
-            if (innerDiv) {
-              innerDiv.style.width = computedWidth + "px";
-              innerDiv.style.left = (-computedWidth / 2) + "px";
-            }
-  
-            // Set the marker's data-label attribute to the event name.
-            marker.setAttribute('data-label', event.eventName);
-            console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
+  function updateGlobalEventsMarkers() {
+    // First, retrieve global events from Firestore.
+    firebase.firestore().collection("globalEvents")
+      .get()
+      .then(snapshot => {
+        const events = [];
+        snapshot.forEach(doc => {
+          const event = doc.data();
+          // Ensure both eventDate and eventEndDate exist.
+          if (event.eventDate && event.eventEndDate && timeline) {
+            events.push({ id: doc.id, event: event });
           }
-        }, 200);
-      });
+        });
   
-      // After processing global events, update global event labels.
-      setTimeout(() => {
-        console.log("Global events processed. Calling updateGlobalEventLabels().");
-        updateGlobalEventLabels();
-      }, 1000);
-    })
-    .catch(error => {
-      console.error("Error loading global events:", error);
-    });
+        events.forEach(({ id, event }, index) => {
+          const startDate = new Date(event.eventDate);
+          const endDate = new Date(event.eventEndDate);
+          // Add a custom time marker at the start date.
+          timeline.addCustomTime(startDate, id);
+          // Save the start and end times as data attributes on the marker.
+          setTimeout(() => {
+            const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
+            // Use the index to select the corresponding marker.
+            if (markers[index]) {
+              const marker = markers[index];
+              // Set data attributes so we can recalc later if needed.
+              marker.setAttribute('data-start', startDate.getTime());
+              marker.setAttribute('data-end', endDate.getTime());
+  
+              // Ensure timeline.getPixelFromTime is available.
+              if (typeof timeline.getPixelFromTime !== "function") {
+                console.error("timeline.getPixelFromTime is not available in this version of vis-timeline.");
+                return;
+              }
+              const startPx = timeline.getPixelFromTime(startDate);
+              const endPx = timeline.getPixelFromTime(endDate);
+              let computedWidth = endPx - startPx;
+              if (computedWidth < 5) { computedWidth = 5; } // Enforce minimum width
+  
+              // Update marker style.
+              marker.style.left = startPx + "px";
+              marker.style.width = computedWidth + "px";
+              marker.style.height = "100%";
+  
+              // Update inner div style.
+              const innerDiv = marker.querySelector('div');
+              if (innerDiv) {
+                innerDiv.style.width = computedWidth + "px";
+                innerDiv.style.left = (-computedWidth / 2) + "px";
+              }
+  
+              // Set the marker's data-label attribute to the event name.
+              marker.setAttribute('data-label', event.eventName);
+              console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
+            }
+          }, 200);
+        });
+  
+        // After processing markers, update the global events labels.
+        setTimeout(() => {
+          console.log("Global events processed. Calling updateGlobalEventLabels().");
+          updateGlobalEventLabels();
+        }, 1000);
+      })
+      .catch(error => {
+        console.error("Error loading global events:", error);
+      });
+  }
   
   // -------------------------------
   // Function: Update Global Event Labels in the Global Events Labels Container
@@ -258,13 +270,12 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("Global events labels container found. Width:", labelsContainer.offsetWidth);
     
     labelsContainer.innerHTML = '';
-    // Retrieve all custom time markers
+    // Retrieve all custom time markers.
     const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
     console.log("Found " + markerElements.length + " custom time markers.");
     
     markerElements.forEach(marker => {
       const markerRect = marker.getBoundingClientRect();
-      // Compute the marker's midpoint relative to the timeline container
       const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
       const labelText = marker.getAttribute('data-label') || 'Global Event';
       console.log("Marker label:", labelText, "at left position:", leftPos);
@@ -273,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
       label.className = 'global-event-label';
       label.innerText = labelText;
       label.style.left = leftPos + 'px';
-      label.style.top = '10px';  // Adjust as needed for spacing within the container
+      label.style.top = '10px'; // Adjust spacing as needed
       labelsContainer.appendChild(label);
     });
   }
@@ -283,13 +294,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // -------------------------------
   firebase.auth().onAuthStateChanged(user => {
     const figureFormSection = document.getElementById('figure-form-section');
-    if (figureFormSection) {
-      figureFormSection.classList.toggle('hidden', !user);
-    }
+    if (figureFormSection) figureFormSection.classList.toggle('hidden', !user);
+  
     const csvImportSection = document.getElementById('csv-import-section');
-    if (csvImportSection) {
-      csvImportSection.classList.toggle('hidden', !user);
-    }
+    if (csvImportSection) csvImportSection.classList.toggle('hidden', !user);
   });
   
   // -------------------------------
