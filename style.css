@@ -143,27 +143,29 @@
   /* ============================================================================
      Global Event Labels (Timeline Page)
      ============================================================================ */
-/* Global Events Labels Container inside the timeline section */
-#global-events-labels {
-  width: 98%;
-  margin: 10px auto 0; /* top margin for spacing; auto left/right to center */
-  background-color: #f9f9f9;
-  border: 2px solid #ccc;
-  padding: 10px;
-  box-sizing: border-box;
-}
+  /* Global Events Labels Container inside the timeline section */
+  #global-events-labels {
+    position: relative;           /* Add this so that children are positioned relative to this container */
+    width: 98%;
+    margin: 10px auto 0;          /* Adjust margin for spacing */
+    background-color: #f9f9f9;
+    border: 2px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  
 
-/* Style for individual global event labels */
-.global-event-label {
-  position: absolute;           /* absolute within the labels container */
-  font-size: 12px;
-  background-color: rgba(0,0,0,0.7);
-  color: #fff;
-  padding: 2px 4px;
-  border-radius: 3px;
-  white-space: nowrap;
-  transform: translateX(-50%);  /* center horizontally */
-}
+  /* Style for individual global event labels */
+  .global-event-label {
+    position: absolute;           /* absolute within the labels container */
+    font-size: 12px;
+    background-color: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 2px 4px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transform: translateX(-50%);  /* center horizontally */
+  }
 
   
   /* ============================================================================
