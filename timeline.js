@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
       label.className = 'global-event-label';
       label.innerText = labelText;
       label.style.left = leftPos + 'px';
-      label.style.top = '0px';
+      label.style.top = '10px';
       labelsContainer.appendChild(label);
     });
   }
