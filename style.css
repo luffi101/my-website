@@ -91,7 +91,7 @@
     width: 98%;
     /*height: 1200px; */ /* Adjust height as needed (commented out) */
     /* min-height: 600px; *//* or another appropriate value */
-    border: 2px solid #ccc;
+    border: 2px solid #5c5c5c;
     margin: 0px auto;
     font-family: "Times New Roman", Times, serif !important;
     font-size: 1em;  
@@ -148,7 +148,7 @@
     position: relative;           /* Establish positioning context for absolute children */
     width: 98%;
     margin: 20px auto 30px;       /* Top margin: 10px; auto for left/right centering; bottom margin: 20px (adjust as needed) */
-    background-color: #e4d05f;      /* Light background */
+    background-color: #f1df75;      /* Light background */
     border: 2px solid #505050;         /* Grey border */
     padding: 15px;                /* Increased padding for a larger section */
     box-sizing: border-box;
@@ -165,6 +165,7 @@
     border-radius: 3px;
     white-space: nowrap;
     transform: translateX(-50%);  /* Center the label horizontally */
+    top: 10px;  /* Leaves 10px space from the top edge */
   }
 
   
