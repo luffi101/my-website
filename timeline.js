@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const container = document.getElementById('timeline-container');
   const msPerYear = 31557600000; // 365.25 days/year in milliseconds
   const zoomMin = 201 * msPerYear;
-  const containerWidth = container.offsetWidth;
-  const zoomMax = (67 * msPerYear * containerWidth) / 96;
+  // We'll recalc container width on the fly, so we don't fix it here.
+  const zoomMax = (67 * msPerYear * container.offsetWidth) / 96;
   
   const options = {
     orientation: 'top',
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // Global events remain as custom time markers (not assigned to a separate group).
+  // Global events remain as custom time markers (they are not assigned to a separate group).
 
   // -------------------------------
   // Define Expertise Colors for Historical Figures
@@ -86,14 +86,18 @@ document.addEventListener('DOMContentLoaded', function() {
   // Helper functions: Format Dates and Names
   // -------------------------------
   function formatDate(dateStr) {
-    if (dateStr && dateStr.length === 4) { dateStr += "-01-01"; }
+    if (dateStr && dateStr.length === 4) {
+      dateStr += "-01-01";
+    }
     return dateStr ? new Date(dateStr) : null;
   }
   
   function formatName(name) {
     if (name && name.includes(",")) {
       const parts = name.split(",");
-      if (parts.length >= 2) { return parts[1].trim() + " " + parts[0].trim(); }
+      if (parts.length >= 2) {
+        return parts[1].trim() + " " + parts[0].trim();
+      }
     }
     return name;
   }
@@ -180,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   
   // -------------------------------
-  // Function: Update Global Events Markers (and store event times)
+  // Function: Update Global Events Markers & Their Labels
   // -------------------------------
   function updateGlobalEventsMarkers() {
     firebase.firestore().collection("globalEvents")
@@ -197,30 +201,28 @@ document.addEventListener('DOMContentLoaded', function() {
         events.forEach(({ id, event }, index) => {
           const startDate = new Date(event.eventDate);
           const endDate = new Date(event.eventEndDate);
-          // Remove any existing marker with the same id to avoid duplicates.
+          // Remove existing marker if present.
           try { timeline.removeCustomTime(id); } catch(e) { }
-          // Add a custom time marker at the start date.
+          // Add custom time marker at start date.
           timeline.addCustomTime(startDate, id);
+  
           setTimeout(() => {
             const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
-            // Use the same index (assuming order is preserved)
+            // Use our fallback pixel calculation.
+            const windowRange = timeline.getWindow();
+            const startTime = windowRange.start.getTime();
+            const endTime = windowRange.end.getTime();
+            // Recalculate container width each time.
+            const currentContainerWidth = container.getBoundingClientRect().width;
+            const timeSpan = endTime - startTime;
+            const pixelPerMs = currentContainerWidth / timeSpan;
+            const startPx = (startDate.getTime() - startTime) * pixelPerMs;
+            const endPx = (endDate.getTime() - startTime) * pixelPerMs;
+  
             if (markers[index]) {
               const marker = markers[index];
-              // Save start and end times as data attributes for later recalculation.
-              marker.setAttribute('data-start', startDate.getTime());
-              marker.setAttribute('data-end', endDate.getTime());
-  
-              // Use our fallback pixel calculation.
-              const windowRange = timeline.getWindow();
-              const startTime = windowRange.start.getTime();
-              const endTime = windowRange.end.getTime();
-              const timeSpan = endTime - startTime;
-              const pixelPerMs = containerWidth / timeSpan;
-              const startPx = (startDate.getTime() - startTime) * pixelPerMs;
-              const endPx = (endDate.getTime() - startTime) * pixelPerMs;
-  
               let computedWidth = endPx - startPx;
-              if (computedWidth < 5) { computedWidth = 5; } // Minimum width
+              if (computedWidth < 5) { computedWidth = 5; } // Enforce minimum width
   
               // Update marker style.
               marker.style.left = startPx + "px";
@@ -234,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 innerDiv.style.left = (-computedWidth / 2) + "px";
               }
   
-              // Set the marker's data-label attribute to the eventName.
+              // Set the marker's data-label attribute using the eventName field.
               marker.setAttribute('data-label', event.eventName);
               console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
             }
@@ -266,13 +268,11 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("Global events labels container found. Width:", labelsContainer.offsetWidth);
     
     labelsContainer.innerHTML = '';
-    // Retrieve all custom time markers.
     const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
     console.log("Found " + markerElements.length + " custom time markers.");
     
     markerElements.forEach(marker => {
       const markerRect = marker.getBoundingClientRect();
-      // Compute midpoint relative to the timeline container.
       const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
       const labelText = marker.getAttribute('data-label') || 'Global Event';
       console.log("Marker label:", labelText, "at left position:", leftPos);
@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
       label.className = 'global-event-label';
       label.innerText = labelText;
       label.style.left = leftPos + 'px';
-      label.style.top = '10px'; // Adjust as needed
+      label.style.top = '10px';
       labelsContainer.appendChild(label);
     });
   }
@@ -292,7 +292,6 @@ document.addEventListener('DOMContentLoaded', function() {
   firebase.auth().onAuthStateChanged(user => {
     const figureFormSection = document.getElementById('figure-form-section');
     if (figureFormSection) figureFormSection.classList.toggle('hidden', !user);
-  
     const csvImportSection = document.getElementById('csv-import-section');
     if (csvImportSection) csvImportSection.classList.toggle('hidden', !user);
   });
