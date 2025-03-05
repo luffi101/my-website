@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // Global events remain as custom time markers – not assigned to a separate group.
+  // Global events remain as custom time markers (not assigned to a separate group).
 
   // -------------------------------
   // Define Expertise Colors for Historical Figures
@@ -86,18 +86,14 @@ document.addEventListener('DOMContentLoaded', function() {
   // Helper functions: Format Dates and Names
   // -------------------------------
   function formatDate(dateStr) {
-    if (dateStr && dateStr.length === 4) {
-      dateStr += "-01-01";
-    }
+    if (dateStr && dateStr.length === 4) { dateStr += "-01-01"; }
     return dateStr ? new Date(dateStr) : null;
   }
   
   function formatName(name) {
     if (name && name.includes(",")) {
       const parts = name.split(",");
-      if (parts.length >= 2) {
-        return parts[1].trim() + " " + parts[0].trim();
-      }
+      if (parts.length >= 2) { return parts[1].trim() + " " + parts[0].trim(); }
     }
     return name;
   }
@@ -153,6 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   
       console.log("Historical timeline items:", historicalItems);
+      // Create the timeline with historical figures.
       timeline = new vis.Timeline(container, historicalItems, groups, options);
   
       // -------------------------------
@@ -183,75 +180,77 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   
   // -------------------------------
-  // Retrieve Global Events & Update Their Custom Time Markers
+  // Function: Update Global Events Markers (and store event times)
   // -------------------------------
-  firebase.firestore().collection("globalEvents")
-    .get()
-    .then(snapshot => {
-      const events = [];
-      snapshot.forEach(doc => {
-        const event = doc.data();
-        // Ensure both eventDate and eventEndDate exist.
-        if (event.eventDate && event.eventEndDate && timeline) {
-          events.push({ id: doc.id, event: event });
-        }
-      });
-  
-      events.forEach(({ id, event }, index) => {
-        const startDate = new Date(event.eventDate);
-        const endDate = new Date(event.eventEndDate);
-        // Before adding, remove any existing marker with the same id to avoid duplicates.
-        try {
-          timeline.removeCustomTime(id);
-        } catch(e) {
-          // Ignore if it doesn't exist.
-        }
-        // Add a custom time marker at the start date.
-        timeline.addCustomTime(startDate, id);
-        setTimeout(() => {
-          const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
-          // Fallback: Use our own calculation if getPixelFromTime is not available.
-          const windowRange = timeline.getWindow();
-          const startTime = windowRange.start.getTime();
-          const endTime = windowRange.end.getTime();
-          const timeSpan = endTime - startTime;
-          const pixelPerMs = containerWidth / timeSpan;
-          const startPx = (startDate.getTime() - startTime) * pixelPerMs;
-          const endPx = (endDate.getTime() - startTime) * pixelPerMs;
-  
-          if (markers[index]) {
-            const marker = markers[index];
-            let computedWidth = endPx - startPx;
-            if (computedWidth < 5) { computedWidth = 5; } // Enforce minimum width
-  
-            // Update marker style:
-            marker.style.left = startPx + "px";
-            marker.style.width = computedWidth + "px";
-            marker.style.height = "100%";
-  
-            // Update inner div style.
-            const innerDiv = marker.querySelector('div');
-            if (innerDiv) {
-              innerDiv.style.width = computedWidth + "px";
-              innerDiv.style.left = (-computedWidth / 2) + "px";
-            }
-  
-            // Set the marker's data-label attribute to the eventName.
-            marker.setAttribute('data-label', event.eventName);
-            console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
+  function updateGlobalEventsMarkers() {
+    firebase.firestore().collection("globalEvents")
+      .get()
+      .then(snapshot => {
+        const events = [];
+        snapshot.forEach(doc => {
+          const event = doc.data();
+          if (event.eventDate && event.eventEndDate && timeline) {
+            events.push({ id: doc.id, event: event });
           }
-        }, 200);
-      });
+        });
   
-      // After processing global events, update global event labels.
-      setTimeout(() => {
-        console.log("Global events processed. Calling updateGlobalEventLabels().");
-        updateGlobalEventLabels();
-      }, 1000);
-    })
-    .catch(error => {
-      console.error("Error loading global events:", error);
-    });
+        events.forEach(({ id, event }, index) => {
+          const startDate = new Date(event.eventDate);
+          const endDate = new Date(event.eventEndDate);
+          // Remove any existing marker with the same id to avoid duplicates.
+          try { timeline.removeCustomTime(id); } catch(e) { }
+          // Add a custom time marker at the start date.
+          timeline.addCustomTime(startDate, id);
+          setTimeout(() => {
+            const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
+            // Use the same index (assuming order is preserved)
+            if (markers[index]) {
+              const marker = markers[index];
+              // Save start and end times as data attributes for later recalculation.
+              marker.setAttribute('data-start', startDate.getTime());
+              marker.setAttribute('data-end', endDate.getTime());
+  
+              // Use our fallback pixel calculation.
+              const windowRange = timeline.getWindow();
+              const startTime = windowRange.start.getTime();
+              const endTime = windowRange.end.getTime();
+              const timeSpan = endTime - startTime;
+              const pixelPerMs = containerWidth / timeSpan;
+              const startPx = (startDate.getTime() - startTime) * pixelPerMs;
+              const endPx = (endDate.getTime() - startTime) * pixelPerMs;
+  
+              let computedWidth = endPx - startPx;
+              if (computedWidth < 5) { computedWidth = 5; } // Minimum width
+  
+              // Update marker style.
+              marker.style.left = startPx + "px";
+              marker.style.width = computedWidth + "px";
+              marker.style.height = "100%";
+  
+              // Update inner div style.
+              const innerDiv = marker.querySelector('div');
+              if (innerDiv) {
+                innerDiv.style.width = computedWidth + "px";
+                innerDiv.style.left = (-computedWidth / 2) + "px";
+              }
+  
+              // Set the marker's data-label attribute to the eventName.
+              marker.setAttribute('data-label', event.eventName);
+              console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
+            }
+          }, 200);
+        });
+  
+        // After processing markers, update global event labels.
+        setTimeout(() => {
+          console.log("Global events processed. Calling updateGlobalEventLabels().");
+          updateGlobalEventLabels();
+        }, 1000);
+      })
+      .catch(error => {
+        console.error("Error loading global events:", error);
+      });
+  }
   
   // -------------------------------
   // Function: Update Global Event Labels in the Global Events Labels Container
@@ -273,8 +272,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     markerElements.forEach(marker => {
       const markerRect = marker.getBoundingClientRect();
+      // Compute midpoint relative to the timeline container.
       const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
-      // Retrieve the event name from data-label.
       const labelText = marker.getAttribute('data-label') || 'Global Event';
       console.log("Marker label:", labelText, "at left position:", leftPos);
       
@@ -282,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
       label.className = 'global-event-label';
       label.innerText = labelText;
       label.style.left = leftPos + 'px';
-      label.style.top = '10px'; // Adjust spacing as needed
+      label.style.top = '10px'; // Adjust as needed
       labelsContainer.appendChild(label);
     });
   }
