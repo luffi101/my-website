@@ -260,7 +260,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     console.log("Global events labels container found. Width:", labelsContainer.offsetWidth);
     
+    // Clear existing labels.
     labelsContainer.innerHTML = '';
+    
+    // Retrieve all custom time markers.
     const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
     console.log("Found " + markerElements.length + " custom time markers.");
     
@@ -269,34 +272,38 @@ document.addEventListener('DOMContentLoaded', function() {
     
     markerElements.forEach(marker => {
       const markerRect = marker.getBoundingClientRect();
-      // Compute midpoint relative to timeline container.
-      let leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
+      // Compute the marker's midpoint relative to the timeline container.
+      const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
       const labelText = marker.getAttribute('data-label') || 'Global Event';
-      console.log("Marker label:", labelText, "at left position:", leftPos);
       
       const label = document.createElement('div');
       label.className = 'global-event-label';
       label.innerText = labelText;
       label.style.position = 'absolute';
       label.style.left = leftPos + 'px';
-      // Start with a base top offset.
-      let topOffset = 10;
       
-      // Check for collisions with already placed labels and adjust top offset.
-      placedLabels.forEach(existingLabel => {
-        const existingRect = existingLabel.getBoundingClientRect();
-        // Create a temporary bounding rect for our new label
-        const tempRect = label.getBoundingClientRect();
-        // Simple overlap check (horizontal overlap)
-        if (!(tempRect.right < existingRect.left || tempRect.left > existingRect.right)) {
-          // If overlapping, increase the top offset
+      // Start with an initial top offset.
+      let topOffset = 10;
+      label.style.top = topOffset + 'px';
+      labelsContainer.appendChild(label);
+      
+      // Get the label's bounding rectangle.
+      let labelRect = label.getBoundingClientRect();
+      
+      // Check for horizontal overlap with already placed labels.
+      placedLabels.forEach(existingRect => {
+        // Simple horizontal overlap check.
+        if (!(labelRect.right < existingRect.left || labelRect.left > existingRect.right)) {
+          // If overlapping, push this label further down.
           topOffset = Math.max(topOffset, existingRect.bottom - containerRect.top + 5);
+          label.style.top = topOffset + 'px';
+          // Update the label's bounding rectangle after repositioning.
+          labelRect = label.getBoundingClientRect();
         }
       });
       
-      label.style.top = topOffset + 'px';
-      placedLabels.push(label);
-      labelsContainer.appendChild(label);
+      // Save the label's rect for future collision checks.
+      placedLabels.push(labelRect);
     });
   }
   

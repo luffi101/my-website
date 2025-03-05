@@ -152,7 +152,7 @@
     border: 1px solid #505050;         /* Grey border */
     padding: 10px;                /* Increased padding for a larger section */
     box-sizing: border-box;
-    /*min-height: 50px;      */       /* Optional: ensures a minimum height */ 
+    min-height: 60px;             /* Optional: ensures a minimum height */ 
   }
 
   /* Style for individual global event labels */
