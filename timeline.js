@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   // -------------------------------
-  // Helper: Initialize Flatpickr for date inputs
+  // Helper function: Initialize Flatpickr for date inputs
   // -------------------------------
   function initDatePicker(selector) {
     flatpickr(selector, {
@@ -13,14 +13,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
+  // Initialize date inputs
   initDatePicker("#dateOfBirth");
   initDatePicker("#dateOfDeath");
 
   // -------------------------------
-  // Main Variables & Timeline Options
+  // Define main variables & timeline options
   // -------------------------------
   const container = document.getElementById('timeline-container');
-  const msPerYear = 31557600000;
+  const msPerYear = 31557600000; // 365.25 days/year in milliseconds
   const zoomMin = 201 * msPerYear;
   const containerWidth = container.offsetWidth;
   const zoomMax = (67 * msPerYear * containerWidth) / 96;
@@ -38,21 +39,28 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   // -------------------------------
-  // Define Regions and Groups
+  // Define Regions and Groups (by desired order)
   // -------------------------------
   const regions = [
-    "North America", "South America", "Europe",
-    "Africa", "Middle East", "East Asia", "Australia"
+    "North America",
+    "South America",
+    "Europe",
+    "Africa",
+    "Middle East",
+    "East Asia",
+    "Australia"
   ];
   
   // Create one group per region
-  const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
+  const groups = regions.map(region => {
+    return { id: region.toLowerCase(), content: region };
+  });
+  // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // Dedicated group for global events:
-  groups.push({ id: "global-events", content: "Global Events" });
-  
+  // (Global events will be displayed as custom time markers, not in a dedicated group.)
+
   // -------------------------------
-  // Expertise Colors for Historical Figures
+  // Define Expertise Colors for Historical Figures
   // -------------------------------
   const expertiseColors = {
     "politics & military": "red",
@@ -64,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "social & cultural movement": "orange",
     "exploration & discovery": "sienna"
   };
-  
+
   const expertiseTextColors = {
     "politics & military": "black",
     "science": "white",
@@ -75,36 +83,42 @@ document.addEventListener('DOMContentLoaded', function() {
     "social & cultural movement": "white",
     "exploration & discovery": "yellow"
   };
-  
+
   // -------------------------------
-  // Helper: Format Dates and Names
+  // Helper functions: Format Dates and Names
   // -------------------------------
   function formatDate(dateStr) {
-    if (dateStr && dateStr.length === 4) { dateStr += "-01-01"; }
+    if (dateStr && dateStr.length === 4) {
+      dateStr += "-01-01";
+    }
     return dateStr ? new Date(dateStr) : null;
   }
   
   function formatName(name) {
     if (name && name.includes(",")) {
       const parts = name.split(",");
-      if (parts.length >= 2) { return parts[1].trim() + " " + parts[0].trim(); }
+      if (parts.length >= 2) {
+        return parts[1].trim() + " " + parts[0].trim();
+      }
     }
     return name;
   }
   
   // -------------------------------
-  // Data Loading using Promise.all
+  // Declare timeline variable (to be used globally)
   // -------------------------------
   let timeline;
-  const allItems = [];
   
-  const historicalPromise = firebase.firestore().collection("historicalFigures").get();
-  const globalEventsPromise = firebase.firestore().collection("globalEvents").get();
-  
-  Promise.all([historicalPromise, globalEventsPromise])
-    .then(([historicalSnapshot, globalSnapshot]) => {
-      // Process Historical Figures
-      historicalSnapshot.forEach(doc => {
+  // We'll collect historical figures items here.
+  const historicalItems = [];
+
+  // -------------------------------
+  // Retrieve Historical Figures & Build Timeline Items
+  // -------------------------------
+  firebase.firestore().collection("historicalFigures")
+    .get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
         const data = doc.data();
         const startDate = formatDate(data.dateOfBirth);
         const endDate = formatDate(data.dateOfDeath);
@@ -112,65 +126,46 @@ document.addEventListener('DOMContentLoaded', function() {
           console.warn(`Skipping ${data.name} due to missing or invalid dates.`);
           return;
         }
+  
         const expertiseCategory = (data.groups && data.groups.length > 0)
-          ? data.groups[0].trim().toLowerCase() : "politics";
+          ? data.groups[0].trim().toLowerCase()
+          : "politics";
         const bgColor = expertiseColors[expertiseCategory] || "gray";
         const textColor = expertiseTextColors[expertiseCategory] || "white";
         const formattedName = formatName(data.name);
   
         let region = "unknown";
         if (data.region && typeof data.region === "string") {
-          const normalized = data.region.trim().toLowerCase();
-          if (regions.map(r => r.toLowerCase()).includes(normalized)) {
-            region = normalized;
+          const normalizedRegion = data.region.trim().toLowerCase();
+          if (regions.map(r => r.toLowerCase()).includes(normalizedRegion)) {
+            region = normalizedRegion;
           }
         }
+        const groupId = region;
   
         const birthYear = startDate.getFullYear();
         const deathYear = endDate.getFullYear();
         const contentHTML = `${formattedName} (${birthYear} - ${deathYear})`;
   
-        allItems.push({
+        historicalItems.push({
           id: doc.id,
-          group: region,
+          group: groupId,
           content: contentHTML,
           start: startDate,
           end: endDate,
           style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 2px 3px;"
         });
       });
-      
-      // Process Global Events
-      globalSnapshot.forEach(doc => {
-        const event = doc.data();
-        if (event.eventDate && event.eventEndDate) {
-          const startDate = new Date(event.eventDate);
-          const endDate = new Date(event.eventEndDate);
-          const duration = endDate.getTime() - startDate.getTime();
-          let styleStr = "background-color: orange; color: black; padding: 2px 3px;";
-          // Enforce a minimum width if duration is less than one year.
-          if (duration < msPerYear) {
-            styleStr += " min-width: 5px;";
-          }
-          allItems.push({
-            id: doc.id,
-            group: "global-events",
-            content: event.eventName,
-            start: startDate,
-            end: endDate,
-            style: styleStr
-          });
-          console.log("Added global event item for", event.eventName);
-        }
-      });
-      
-      console.log("Combined timeline items:", allItems);
-      timeline = new vis.Timeline(container, allItems, groups, options);
-      
+  
+      console.log("Historical timeline items:", historicalItems);
+  
+      // Create the timeline with historical figures only.
+      timeline = new vis.Timeline(container, historicalItems, groups, options);
+  
       // -------------------------------
       // Dynamic Group Label Adjustment
       // -------------------------------
-      timeline.on('redraw', function() {
+      timeline.on('redraw', function () {
         const groupLabels = document.querySelectorAll('.vis-labelset .vis-label');
         const groupsElements = document.querySelectorAll('.vis-group');
         groupLabels.forEach((label, index) => {
@@ -181,44 +176,88 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         });
       });
-      
-      // (Optional) If you still want a separate container for global event labels,
-      // you can update that container here by iterating over the global events items.
-      // For example:
-      updateGlobalEventLabels();
-      timeline.on('rangechanged', updateGlobalEventLabels);
+  
+      // After a delay, update global event labels and attach update on range changes.
+      setTimeout(() => {
+        console.log("Global events: calling updateGlobalEventLabels()");
+        updateGlobalEventLabels();
+        timeline.on('rangechanged', updateGlobalEventLabels);
+      }, 1000);
     })
     .catch(error => {
-      console.error("Error loading data:", error);
+      console.error("Error loading historical figures:", error);
     });
   
   // -------------------------------
-  // (Optional) Function: Update Global Event Labels in a Separate Container
+  // Retrieve Global Events & Add Custom Time Markers
+  // -------------------------------
+  firebase.firestore().collection("globalEvents")
+    .get()
+    .then(snapshot => {
+      const events = [];
+      snapshot.forEach(doc => {
+        const event = doc.data();
+        if (event.eventDate && timeline) {
+          events.push({ id: doc.id, event: event });
+        }
+      });
+  
+      events.forEach(({ id, event }, index) => {
+        const eventDate = new Date(event.eventDate);
+        timeline.addCustomTime(eventDate, id);
+        setTimeout(() => {
+          const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
+          if (markers[index]) {
+            markers[index].setAttribute('data-label', event.eventName);
+            console.log("Set data-label for marker", id, "to", event.eventName);
+          }
+        }, 200);
+      });
+  
+      // After processing global events, update labels.
+      setTimeout(() => {
+        console.log("Global events processed. Calling updateGlobalEventLabels().");
+        updateGlobalEventLabels();
+      }, 1000);
+    })
+    .catch(error => {
+      console.error("Error loading global events:", error);
+    });
+  
+  // -------------------------------
+  // Function: Update Global Event Labels in Separate Container
   // -------------------------------
   function updateGlobalEventLabels() {
-    // If you want to update a separate container with labels based on the global events items,
-    // you can use timeline.getPixelFromTime() to compute positions.
-    // For example, if your global events items are in the "global-events" group:
+    console.log("updateGlobalEventLabels() called");
+    const containerRect = container.getBoundingClientRect();
     const labelsContainer = document.getElementById('global-events-labels');
-    if (!labelsContainer) return;
+    if (!labelsContainer) {
+      console.log("No global events labels container found.");
+      return;
+    }
+    console.log("Global events labels container found. Width:", labelsContainer.offsetWidth);
+    
+    // Clear existing labels.
     labelsContainer.innerHTML = '';
     
-    // Filter items in group "global-events"
-    const globalItems = allItems.filter(item => item.group === "global-events");
-    globalItems.forEach(item => {
-      // Compute the midpoint between start and end:
-      const midTime = new Date((item.start.getTime() + item.end.getTime()) / 2);
-      // Use timeline API to convert time to pixel position:
-      const leftPos = timeline.getPixelFromTime(midTime);
+    // Select all custom time marker elements.
+    const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
+    console.log("Found " + markerElements.length + " custom time markers.");
+    
+    markerElements.forEach(marker => {
+      const markerRect = marker.getBoundingClientRect();
+      // Compute the left offset relative to timeline-container.
+      const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
+      const labelText = marker.getAttribute('data-label') || 'Global Event';
+      console.log("Marker label:", labelText, "at left position:", leftPos);
       
       const label = document.createElement('div');
       label.className = 'global-event-label';
-      label.innerText = item.content;
+      label.innerText = labelText;
       label.style.left = leftPos + 'px';
-      label.style.top = '10px';  // adjust as needed
+      label.style.top = '10px'; // Adjusted to leave some space from the top of container
       labelsContainer.appendChild(label);
     });
-    console.log("Updated global event labels for", globalItems.length, "items.");
   }
   
   // -------------------------------
@@ -226,9 +265,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // -------------------------------
   firebase.auth().onAuthStateChanged(user => {
     const figureFormSection = document.getElementById('figure-form-section');
-    if (figureFormSection) figureFormSection.classList.toggle('hidden', !user);
+    if (figureFormSection) {
+      figureFormSection.classList.toggle('hidden', !user);
+    }
     const csvImportSection = document.getElementById('csv-import-section');
-    if (csvImportSection) csvImportSection.classList.toggle('hidden', !user);
+    if (csvImportSection) {
+      csvImportSection.classList.toggle('hidden', !user);
+    }
   });
   
   // -------------------------------
@@ -242,7 +285,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const name = document.getElementById("figureName").value.trim();
       const categoryCheckboxes = document.querySelectorAll('input[name="figureCategory"]:checked');
       const groupsArr = Array.from(categoryCheckboxes).map(cb => cb.value);
-  
       const dateOfBirth = document.getElementById("dateOfBirth").value.trim();
       const dateOfDeath = document.getElementById("dateOfDeath").value.trim();
       const nationality = document.getElementById("nationality").value.trim();
@@ -324,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
           results.data.forEach(row => {
             const eventName = row.eventName;
             const eventDate = row.eventDate;
-            const eventEndDate = row.eventEndDate;
+            const eventEndDate = row.eventEndDate; // New field for end date
             const description = row.description;
             const category = row.category;
             const region = row.region;
