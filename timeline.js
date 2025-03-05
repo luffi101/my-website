@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   // -------------------------------
-  // Helper function: Initialize Flatpickr for date inputs
+  // Helper: Initialize Flatpickr for date inputs
   // -------------------------------
   function initDatePicker(selector) {
     flatpickr(selector, {
@@ -13,15 +13,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Initialize date inputs
   initDatePicker("#dateOfBirth");
   initDatePicker("#dateOfDeath");
 
   // -------------------------------
-  // Define main variables & timeline options
+  // Main Variables & Timeline Options
   // -------------------------------
   const container = document.getElementById('timeline-container');
-  const msPerYear = 31557600000; // 365.25 days/year in milliseconds
+  const msPerYear = 31557600000;
   const zoomMin = 201 * msPerYear;
   const containerWidth = container.offsetWidth;
   const zoomMax = (67 * msPerYear * containerWidth) / 96;
@@ -39,30 +38,21 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   // -------------------------------
-  // Define Regions and Groups (by desired order)
+  // Define Regions and Groups
   // -------------------------------
   const regions = [
-    "North America",
-    "South America",
-    "Europe",
-    "Africa",
-    "Middle East",
-    "East Asia",
-    "Australia"
+    "North America", "South America", "Europe",
+    "Africa", "Middle East", "East Asia", "Australia"
   ];
   
   // Create one group per region
-  const groups = regions.map(region => ({
-    id: region.toLowerCase(), 
-    content: region
-  }));
-  // Add an "Unknown" group for items with no region
+  const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
   groups.push({ id: "unknown", content: "Unknown" });
-  // Add a dedicated group for global events.
+  // Dedicated group for global events:
   groups.push({ id: "global-events", content: "Global Events" });
-
+  
   // -------------------------------
-  // Define Expertise Colors for Historical Figures
+  // Expertise Colors for Historical Figures
   // -------------------------------
   const expertiseColors = {
     "politics & military": "red",
@@ -74,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "social & cultural movement": "orange",
     "exploration & discovery": "sienna"
   };
-
+  
   const expertiseTextColors = {
     "politics & military": "black",
     "science": "white",
@@ -85,42 +75,36 @@ document.addEventListener('DOMContentLoaded', function() {
     "social & cultural movement": "white",
     "exploration & discovery": "yellow"
   };
-
+  
   // -------------------------------
-  // Helper functions: Format Dates and Names
+  // Helper: Format Dates and Names
   // -------------------------------
   function formatDate(dateStr) {
-    if (dateStr && dateStr.length === 4) {
-      dateStr += "-01-01";
-    }
+    if (dateStr && dateStr.length === 4) { dateStr += "-01-01"; }
     return dateStr ? new Date(dateStr) : null;
   }
   
   function formatName(name) {
     if (name && name.includes(",")) {
       const parts = name.split(",");
-      if (parts.length >= 2) {
-        return parts[1].trim() + " " + parts[0].trim();
-      }
+      if (parts.length >= 2) { return parts[1].trim() + " " + parts[0].trim(); }
     }
     return name;
   }
   
   // -------------------------------
-  // Declare timeline variable (to be used globally)
+  // Data Loading using Promise.all
   // -------------------------------
   let timeline;
-  
-  // We'll combine items from historical figures and global events into one array.
   const allItems = [];
-
-  // -------------------------------
-  // Retrieve Historical Figures & Build Timeline Items
-  // -------------------------------
-  firebase.firestore().collection("historicalFigures")
-    .get()
-    .then(snapshot => {
-      snapshot.forEach(doc => {
+  
+  const historicalPromise = firebase.firestore().collection("historicalFigures").get();
+  const globalEventsPromise = firebase.firestore().collection("globalEvents").get();
+  
+  Promise.all([historicalPromise, globalEventsPromise])
+    .then(([historicalSnapshot, globalSnapshot]) => {
+      // Process Historical Figures
+      historicalSnapshot.forEach(doc => {
         const data = doc.data();
         const startDate = formatDate(data.dateOfBirth);
         const endDate = formatDate(data.dateOfDeath);
@@ -128,19 +112,17 @@ document.addEventListener('DOMContentLoaded', function() {
           console.warn(`Skipping ${data.name} due to missing or invalid dates.`);
           return;
         }
-  
         const expertiseCategory = (data.groups && data.groups.length > 0)
-          ? data.groups[0].trim().toLowerCase()
-          : "politics";
+          ? data.groups[0].trim().toLowerCase() : "politics";
         const bgColor = expertiseColors[expertiseCategory] || "gray";
         const textColor = expertiseTextColors[expertiseCategory] || "white";
         const formattedName = formatName(data.name);
   
         let region = "unknown";
         if (data.region && typeof data.region === "string") {
-          const normalizedRegion = data.region.trim().toLowerCase();
-          if (regions.map(r => r.toLowerCase()).includes(normalizedRegion)) {
-            region = normalizedRegion;
+          const normalized = data.region.trim().toLowerCase();
+          if (regions.map(r => r.toLowerCase()).includes(normalized)) {
+            region = normalized;
           }
         }
   
@@ -157,72 +139,86 @@ document.addEventListener('DOMContentLoaded', function() {
           style: "background-color: " + bgColor + "; color: " + textColor + "; padding: 2px 3px;"
         });
       });
-      // Now that historical figures are processed, proceed to load global events.
-      loadGlobalEvents();
+      
+      // Process Global Events
+      globalSnapshot.forEach(doc => {
+        const event = doc.data();
+        if (event.eventDate && event.eventEndDate) {
+          const startDate = new Date(event.eventDate);
+          const endDate = new Date(event.eventEndDate);
+          const duration = endDate.getTime() - startDate.getTime();
+          let styleStr = "background-color: orange; color: black; padding: 2px 3px;";
+          // Enforce a minimum width if duration is less than one year.
+          if (duration < msPerYear) {
+            styleStr += " min-width: 5px;";
+          }
+          allItems.push({
+            id: doc.id,
+            group: "global-events",
+            content: event.eventName,
+            start: startDate,
+            end: endDate,
+            style: styleStr
+          });
+          console.log("Added global event item for", event.eventName);
+        }
+      });
+      
+      console.log("Combined timeline items:", allItems);
+      timeline = new vis.Timeline(container, allItems, groups, options);
+      
+      // -------------------------------
+      // Dynamic Group Label Adjustment
+      // -------------------------------
+      timeline.on('redraw', function() {
+        const groupLabels = document.querySelectorAll('.vis-labelset .vis-label');
+        const groupsElements = document.querySelectorAll('.vis-group');
+        groupLabels.forEach((label, index) => {
+          if (groupsElements[index]) {
+            const newHeight = groupsElements[index].offsetHeight;
+            label.style.height = newHeight + 'px';
+            label.style.lineHeight = newHeight + 'px';
+          }
+        });
+      });
+      
+      // (Optional) If you still want a separate container for global event labels,
+      // you can update that container here by iterating over the global events items.
+      // For example:
+      updateGlobalEventLabels();
+      timeline.on('rangechanged', updateGlobalEventLabels);
     })
     .catch(error => {
-      console.error("Error loading historical figures:", error);
+      console.error("Error loading data:", error);
     });
   
   // -------------------------------
-  // Retrieve Global Events & Build Timeline Items for Global Events
+  // (Optional) Function: Update Global Event Labels in a Separate Container
   // -------------------------------
-  function loadGlobalEvents() {
-    firebase.firestore().collection("globalEvents")
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          const event = doc.data();
-          if (event.eventDate && event.eventEndDate && timeline !== undefined) {
-            const startDate = new Date(event.eventDate);
-            const endDate = new Date(event.eventEndDate);
-            // Calculate the duration
-            const duration = endDate.getTime() - startDate.getTime();
-            // If the duration is less than one year (31557600000 ms), enforce a minimum style.
-            let styleStr = "background-color: orange; color: black; padding: 2px;";
-            if (duration < msPerYear) {
-              styleStr += " min-width: 5px;";
-            }
-            // Create a timeline item for the global event.
-            allItems.push({
-              id: doc.id,
-              group: "global-events",
-              content: event.eventName,
-              start: startDate,
-              end: endDate,
-              style: styleStr
-            });
-            console.log("Global event item added for", event.eventName);
-          }
-        });
-  
-        // Now that both historical figures and global events are processed, create the timeline.
-        console.log("Combined timeline items:", allItems);
-        timeline = new vis.Timeline(container, allItems, groups, options);
-  
-        // -------------------------------
-        // Dynamic Group Label Adjustment
-        // -------------------------------
-        timeline.on('redraw', function () {
-          const groupLabels = document.querySelectorAll('.vis-labelset .vis-label');
-          const groupsElements = document.querySelectorAll('.vis-group');
-          groupLabels.forEach((label, index) => {
-            if (groupsElements[index]) {
-              const newHeight = groupsElements[index].offsetHeight;
-              label.style.height = newHeight + 'px';
-              label.style.lineHeight = newHeight + 'px';
-            }
-          });
-        });
-  
-        // If needed, attach additional events (such as updating labels on range changes)
-        timeline.on('rangechanged', function () {
-          // (Optional: update other dynamic aspects if necessary)
-        });
-      })
-      .catch(error => {
-        console.error("Error loading global events:", error);
-      });
+  function updateGlobalEventLabels() {
+    // If you want to update a separate container with labels based on the global events items,
+    // you can use timeline.getPixelFromTime() to compute positions.
+    // For example, if your global events items are in the "global-events" group:
+    const labelsContainer = document.getElementById('global-events-labels');
+    if (!labelsContainer) return;
+    labelsContainer.innerHTML = '';
+    
+    // Filter items in group "global-events"
+    const globalItems = allItems.filter(item => item.group === "global-events");
+    globalItems.forEach(item => {
+      // Compute the midpoint between start and end:
+      const midTime = new Date((item.start.getTime() + item.end.getTime()) / 2);
+      // Use timeline API to convert time to pixel position:
+      const leftPos = timeline.getPixelFromTime(midTime);
+      
+      const label = document.createElement('div');
+      label.className = 'global-event-label';
+      label.innerText = item.content;
+      label.style.left = leftPos + 'px';
+      label.style.top = '10px';  // adjust as needed
+      labelsContainer.appendChild(label);
+    });
+    console.log("Updated global event labels for", globalItems.length, "items.");
   }
   
   // -------------------------------
@@ -230,14 +226,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // -------------------------------
   firebase.auth().onAuthStateChanged(user => {
     const figureFormSection = document.getElementById('figure-form-section');
-    if (figureFormSection) {
-      figureFormSection.classList.toggle('hidden', !user);
-    }
-  
+    if (figureFormSection) figureFormSection.classList.toggle('hidden', !user);
     const csvImportSection = document.getElementById('csv-import-section');
-    if (csvImportSection) {
-      csvImportSection.classList.toggle('hidden', !user);
-    }
+    if (csvImportSection) csvImportSection.classList.toggle('hidden', !user);
   });
   
   // -------------------------------
@@ -333,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function() {
           results.data.forEach(row => {
             const eventName = row.eventName;
             const eventDate = row.eventDate;
-            const eventEndDate = row.eventEndDate; // new field for end date
+            const eventEndDate = row.eventEndDate;
             const description = row.description;
             const category = row.category;
             const region = row.region;
