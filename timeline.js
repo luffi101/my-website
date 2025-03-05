@@ -55,8 +55,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // Global events remain as custom time markers – they are not added to a separate group.
-  
+  // Global events remain as custom time markers and are not added to any separate group.
+
   // -------------------------------
   // Define Expertise Colors for Historical Figures
   // -------------------------------
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   
       console.log("Historical timeline items:", historicalItems);
-      // Create the timeline with only historical figures first.
+      // Create the timeline with historical figures only.
       timeline = new vis.Timeline(container, historicalItems, groups, options);
   
       // -------------------------------
@@ -187,60 +187,90 @@ document.addEventListener('DOMContentLoaded', function() {
   // -------------------------------
   // Retrieve Global Events & Update Their Custom Time Markers
   // -------------------------------
-// -------------------------------
-// Retrieve Global Events & Update Their Custom Time Markers
-// -------------------------------
-firebase.firestore().collection("globalEvents")
-  .get()
-  .then(snapshot => {
-    const events = [];
-    snapshot.forEach(doc => {
-      const event = doc.data();
-      // Ensure both eventDate and eventEndDate are available.
-      if (event.eventDate && event.eventEndDate && timeline) {
-        events.push({ id: doc.id, event: event });
-      }
-    });
-
-    events.forEach(({ id, event }, index) => {
-      const startDate = new Date(event.eventDate);
-      const endDate = new Date(event.eventEndDate);
-      // Add a custom time marker at the start date
-      timeline.addCustomTime(startDate, id);
-      setTimeout(() => {
-        // Retrieve all custom time markers – assuming the order is preserved
-        const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
-        if (markers[index]) {
-          const marker = markers[index];
-          // Compute pixel positions for start and end dates using the timeline API.
-          const startPx = timeline.getPixelFromTime(startDate);
-          const endPx = timeline.getPixelFromTime(endDate);
-          let computedWidth = endPx - startPx;
-          // Enforce a minimum width of 5px.
-          if (computedWidth < 5) {
-            computedWidth = 5;
-          }
-          // Update the marker style to represent the duration.
-          marker.style.left = startPx + "px";
-          marker.style.width = computedWidth + "px";
-          marker.style.height = "100%";  // Ensure it spans full height
-          // Set the marker's data-label attribute to the event name.
-          marker.setAttribute('data-label', event.eventName);
-          console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
+  firebase.firestore().collection("globalEvents")
+    .get()
+    .then(snapshot => {
+      const events = [];
+      snapshot.forEach(doc => {
+        const event = doc.data();
+        // Ensure both eventDate and eventEndDate exist.
+        if (event.eventDate && event.eventEndDate && timeline) {
+          events.push({ id: doc.id, event: event });
         }
-      }, 200);
+      });
+  
+      events.forEach(({ id, event }, index) => {
+        const startDate = new Date(event.eventDate);
+        const endDate = new Date(event.eventEndDate);
+        // Add a custom time marker at the start date.
+        timeline.addCustomTime(startDate, id);
+        setTimeout(() => {
+          const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
+          if (markers[index]) {
+            const marker = markers[index];
+            // Compute pixel positions for start and end dates.
+            const startPx = timeline.getPixelFromTime(startDate);
+            const endPx = timeline.getPixelFromTime(endDate);
+            let computedWidth = endPx - startPx;
+            if (computedWidth < 5) { computedWidth = 5; } // enforce minimum width
+            // Update marker style.
+            marker.style.left = startPx + "px";
+            marker.style.width = computedWidth + "px";
+            marker.style.height = "100%";
+            // Also update the inner div so that the visible width changes.
+            const innerDiv = marker.querySelector('div');
+            if (innerDiv) {
+              innerDiv.style.width = computedWidth + "px";
+              innerDiv.style.left = (-computedWidth / 2) + "px";
+            }
+            marker.setAttribute('data-label', event.eventName);
+            console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
+          }
+        }, 200);
+      });
+  
+      // After processing global events, update any separate label container.
+      setTimeout(() => {
+        console.log("Global events processed. Calling updateGlobalEventLabels().");
+        updateGlobalEventLabels();
+      }, 1000);
+    })
+    .catch(error => {
+      console.error("Error loading global events:", error);
     });
-
-    // After processing global events, update any separate label container (if used)
-    setTimeout(() => {
-      console.log("Global events processed. Calling updateGlobalEventLabels().");
-      updateGlobalEventLabels();
-    }, 1000);
-  })
-  .catch(error => {
-    console.error("Error loading global events:", error);
-  });
-
+  
+  // -------------------------------
+  // Function: Update Global Event Labels in Separate Container
+  // -------------------------------
+  function updateGlobalEventLabels() {
+    console.log("updateGlobalEventLabels() called");
+    const containerRect = container.getBoundingClientRect();
+    const labelsContainer = document.getElementById('global-events-labels');
+    if (!labelsContainer) {
+      console.log("No global events labels container found.");
+      return;
+    }
+    console.log("Global events labels container found. Width:", labelsContainer.offsetWidth);
+    
+    labelsContainer.innerHTML = '';
+    const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
+    console.log("Found " + markerElements.length + " custom time markers.");
+    
+    markerElements.forEach(marker => {
+      const markerRect = marker.getBoundingClientRect();
+      const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
+      const labelText = marker.getAttribute('data-label') || 'Global Event';
+      console.log("Marker label:", labelText, "at left position:", leftPos);
+      
+      const label = document.createElement('div');
+      label.className = 'global-event-label';
+      label.innerText = labelText;
+      label.style.left = leftPos + 'px';
+      label.style.top = '10px';
+      labelsContainer.appendChild(label);
+    });
+  }
+  
   // -------------------------------
   // Authentication-Dependent UI Elements
   // -------------------------------
