@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const container = document.getElementById('timeline-container');
   const msPerYear = 31557600000; // 365.25 days/year in milliseconds
   const zoomMin = 201 * msPerYear;
-  // We'll recalc container width on the fly, so we don't fix it here.
+  // We recalc container width on the fly in our fallback.
   const zoomMax = (67 * msPerYear * container.offsetWidth) / 96;
   
   const options = {
@@ -51,11 +51,9 @@ document.addEventListener('DOMContentLoaded', function() {
     "Australia"
   ];
   
-  // Create one group per region
   const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
-  // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // Global events remain as custom time markers (they are not assigned to a separate group).
+  // Global events are rendered as custom time markers (not assigned to a separate group).
 
   // -------------------------------
   // Define Expertise Colors for Historical Figures
@@ -86,24 +84,20 @@ document.addEventListener('DOMContentLoaded', function() {
   // Helper functions: Format Dates and Names
   // -------------------------------
   function formatDate(dateStr) {
-    if (dateStr && dateStr.length === 4) {
-      dateStr += "-01-01";
-    }
+    if (dateStr && dateStr.length === 4) { dateStr += "-01-01"; }
     return dateStr ? new Date(dateStr) : null;
   }
   
   function formatName(name) {
     if (name && name.includes(",")) {
       const parts = name.split(",");
-      if (parts.length >= 2) {
-        return parts[1].trim() + " " + parts[0].trim();
-      }
+      if (parts.length >= 2) { return parts[1].trim() + " " + parts[0].trim(); }
     }
     return name;
   }
   
   // -------------------------------
-  // Declare timeline variable (to be used globally)
+  // Declare timeline variable (global)
   // -------------------------------
   let timeline;
 
@@ -153,7 +147,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   
       console.log("Historical timeline items:", historicalItems);
-      // Create the timeline with historical figures.
       timeline = new vis.Timeline(container, historicalItems, groups, options);
   
       // -------------------------------
@@ -201,18 +194,16 @@ document.addEventListener('DOMContentLoaded', function() {
         events.forEach(({ id, event }, index) => {
           const startDate = new Date(event.eventDate);
           const endDate = new Date(event.eventEndDate);
-          // Remove existing marker if present.
+          // Remove any existing marker with the same id to avoid duplicates.
           try { timeline.removeCustomTime(id); } catch(e) { }
-          // Add custom time marker at start date.
+          // Add a custom time marker at the start date.
           timeline.addCustomTime(startDate, id);
-  
           setTimeout(() => {
             const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
-            // Use our fallback pixel calculation.
+            // Fallback pixel calculation using the current timeline window:
             const windowRange = timeline.getWindow();
             const startTime = windowRange.start.getTime();
             const endTime = windowRange.end.getTime();
-            // Recalculate container width each time.
             const currentContainerWidth = container.getBoundingClientRect().width;
             const timeSpan = endTime - startTime;
             const pixelPerMs = currentContainerWidth / timeSpan;
@@ -222,12 +213,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (markers[index]) {
               const marker = markers[index];
               let computedWidth = endPx - startPx;
-              if (computedWidth < 5) { computedWidth = 5; } // Enforce minimum width
+              if (computedWidth < 2) { computedWidth = 2; } // Enforce minimum width of 2px
   
-              // Update marker style.
+              // Update marker style:
               marker.style.left = startPx + "px";
               marker.style.width = computedWidth + "px";
               marker.style.height = "100%";
+              // Add a border to distinguish overlapping markers.
+              marker.style.border = "1px solid black";
   
               // Update inner div style.
               const innerDiv = marker.querySelector('div');
@@ -236,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 innerDiv.style.left = (-computedWidth / 2) + "px";
               }
   
-              // Set the marker's data-label attribute using the eventName field.
+              // Set the marker's data-label attribute to the eventName.
               marker.setAttribute('data-label', event.eventName);
               console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
             }
@@ -271,17 +264,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
     console.log("Found " + markerElements.length + " custom time markers.");
     
+    // Array to store placed label bounding boxes for collision detection.
+    const placedLabels = [];
+    
     markerElements.forEach(marker => {
       const markerRect = marker.getBoundingClientRect();
-      const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
+      // Compute midpoint relative to timeline container.
+      let leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
       const labelText = marker.getAttribute('data-label') || 'Global Event';
       console.log("Marker label:", labelText, "at left position:", leftPos);
       
       const label = document.createElement('div');
       label.className = 'global-event-label';
       label.innerText = labelText;
+      label.style.position = 'absolute';
       label.style.left = leftPos + 'px';
-      label.style.top = '10px';
+      // Start with a base top offset.
+      let topOffset = 10;
+      
+      // Check for collisions with already placed labels and adjust top offset.
+      placedLabels.forEach(existingLabel => {
+        const existingRect = existingLabel.getBoundingClientRect();
+        // Create a temporary bounding rect for our new label
+        const tempRect = label.getBoundingClientRect();
+        // Simple overlap check (horizontal overlap)
+        if (!(tempRect.right < existingRect.left || tempRect.left > existingRect.right)) {
+          // If overlapping, increase the top offset
+          topOffset = Math.max(topOffset, existingRect.bottom - containerRect.top + 5);
+        }
+      });
+      
+      label.style.top = topOffset + 'px';
+      placedLabels.push(label);
       labelsContainer.appendChild(label);
     });
   }

@@ -125,7 +125,7 @@
   
   /* Custom Time Marker Overrides */
   body #timeline-container .vis-custom-time {
-    background-color: orange !important;
+    background-color: rgb(79, 176, 255) !important;
     /* width: 2px !important; */
     z-index: -1 !important;
   }
@@ -147,21 +147,22 @@
   #global-events-labels {
     position: relative;           /* Establish positioning context for absolute children */
     width: 98%;
-    margin: 20px auto 30px;       /* Top margin: 10px; auto for left/right centering; bottom margin: 20px (adjust as needed) */
+    margin: 20px auto 30px;       /* Top margin: 20px; auto for left/right centering; bottom margin: 30px (adjust as needed) */
     background-color: #f1df75;      /* Light background */
-    border: 2px solid #505050;         /* Grey border */
-    padding: 15px;                /* Increased padding for a larger section */
+    border: 1px solid #505050;         /* Grey border */
+    padding: 10px;                /* Increased padding for a larger section */
     box-sizing: border-box;
-    min-height: 50px;             /* Optional: ensures a minimum height */
+    /*min-height: 50px;      */       /* Optional: ensures a minimum height */ 
   }
 
   /* Style for individual global event labels */
   .global-event-label {
     position: absolute;           /* Positioned relative to the labels container */
-    font-size: 16px;              /* Increased font size */
+    font-size: 14px;              /* Increased font size */
     background-color: rgba(0,0,0,0.7);
     color: #fff;
     padding: 4px 6px;             /* Increased padding for a bigger label */
+    border: 1px solid #ccc;
     border-radius: 3px;
     white-space: nowrap;
     transform: translateX(-50%);  /* Center the label horizontally */
