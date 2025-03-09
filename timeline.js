@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // Global events will be rendered as custom time markers (they are not assigned to a separate group).
+  // Global events are rendered as custom time markers and are not assigned to any separate group.
 
   // -------------------------------
   // Define Expertise Colors for Historical Figures
@@ -86,14 +86,18 @@ document.addEventListener('DOMContentLoaded', function() {
   // Helper functions: Format Dates and Names
   // -------------------------------
   function formatDate(dateStr) {
-    if (dateStr && dateStr.length === 4) { dateStr += "-01-01"; }
+    if (dateStr && dateStr.length === 4) { 
+      dateStr += "-01-01"; 
+    }
     return dateStr ? new Date(dateStr) : null;
   }
   
   function formatName(name) {
     if (name && name.includes(",")) {
       const parts = name.split(",");
-      if (parts.length >= 2) { return parts[1].trim() + " " + parts[0].trim(); }
+      if (parts.length >= 2) { 
+        return parts[1].trim() + " " + parts[0].trim(); 
+      }
     }
     return name;
   }
@@ -193,6 +197,9 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         });
   
+        // Define an array of colors for alternating markers.
+        const markerColors = ["orange", "goldenrod", "darkorange", "orangered"];
+  
         events.forEach(({ id, event }, index) => {
           const startDate = new Date(event.eventDate);
           const endDate = new Date(event.eventEndDate);
@@ -200,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
           timeline.addCustomTime(startDate, id);
           setTimeout(() => {
             const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
-            // Fallback pixel calculation based on the timeline window:
+            // Fallback: calculate pixel positions based on the current timeline window.
             const windowRange = timeline.getWindow();
             const startTime = windowRange.start.getTime();
             const endTime = windowRange.end.getTime();
@@ -213,11 +220,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (markers[index]) {
               const marker = markers[index];
               let computedWidth = endPx - startPx;
-              if (computedWidth < 2) { computedWidth = 2; }
+              if (computedWidth < 2) { computedWidth = 2; } // Enforce minimum width
   
               marker.style.left = startPx + "px";
               marker.style.width = computedWidth + "px";
               marker.style.height = "100%";
+              // Apply alternating background color for better distinction.
+              marker.style.backgroundColor = markerColors[index % markerColors.length];
               // Add a border to distinguish overlapping markers.
               marker.style.border = "1px solid black";
   
@@ -227,6 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 innerDiv.style.left = (-computedWidth / 2) + "px";
               }
   
+              // Set the marker's data-label attribute to the eventName.
               marker.setAttribute('data-label', event.eventName);
               console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
             }
