@@ -125,7 +125,7 @@
   
   /* Custom Time Marker Overrides */
   body #timeline-container .vis-custom-time {
-    background-color: rgb(79, 176, 255) !important;
+    background-color: rgb(79, 176, 255);
     /* width: 2px !important; */
     z-index: -1 !important;
   }
