@@ -238,6 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
               // Set the marker's data-label attribute to the eventName.
               marker.setAttribute('data-label', event.eventName);
+              marker.setAttribute('title', event.eventName);
               console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
             }
           }, 200);

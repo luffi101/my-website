@@ -88,7 +88,7 @@
      ============================================================================ */
   /* Timeline container styling */
   #timeline-container {
-    width: 98%;
+    width: 90%;
     /*height: 1200px; */ /* Adjust height as needed (commented out) */
     /* min-height: 600px; *//* or another appropriate value */
     border: 2px solid #5c5c5c;
@@ -146,7 +146,7 @@
   /* Global Events Labels Container inside the timeline section */
   #global-events-labels {
     position: relative;           /* Establish positioning context for absolute children */
-    width: 98%;
+    width: 90%;
     margin: 20px auto 30px;       /* Top margin: 20px; auto for left/right centering; bottom margin: 30px (adjust as needed) */
     background-color: #f1df75;      /* Light background */
     border: 1px solid #505050;         /* Grey border */
