@@ -198,8 +198,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
   
         // Define an array of colors for alternating markers.
-        const markerColors = ["orange", "goldenrod", "darkorange", "orangered"];
-  
+        //const markerColors = ["orange", "goldenrod", "darkorange", "orangered"];
+        const markerColors = ["#a8d5e2", "#d5e8a8", "#f2e3a1", "#e2a8d5"];  
         events.forEach(({ id, event }, index) => {
           const startDate = new Date(event.eventDate);
           const endDate = new Date(event.eventEndDate);
