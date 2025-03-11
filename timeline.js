@@ -358,14 +358,17 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Parsed CSV data:", results.data);
   
         if (dataType === "historicalFigures") {
+          // Process each row as a historical figure.
           results.data.forEach(row => {
+            // Expected CSV columns: name, groups, dateOfBirth, dateOfDeath, nationality, description, imageUrl, region
             const name = row.name;
             const dateOfBirth = row.dateOfBirth;
             const dateOfDeath = row.dateOfDeath;
             const description = row.description;
             const groupsField = row.groups;
             const groupsArr = groupsField ? groupsField.split(",").map(s => s.trim()) : [];
-            const imageURL = row.imageURL;
+            // Use the CSV header "imageUrl" (lowercase 'u')
+            const imageURL = row.imageUrl;  
             const nationality = row.nationality;
             const region = row.region || "unknown";
             
