@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // Global events are rendered as custom time markers and are not assigned to any separate group.
+  // Global events will be rendered as custom time markers and are not assigned to a separate group.
 
   // -------------------------------
   // Define Expertise Colors for Historical Figures
@@ -86,8 +86,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // Helper functions: Format Dates and Names
   // -------------------------------
   function formatDate(dateStr) {
-    if (dateStr && dateStr.length === 4) { 
-      dateStr += "-01-01"; 
+    if (dateStr && dateStr.length === 4) {
+      dateStr += "-01-01";
     }
     return dateStr ? new Date(dateStr) : null;
   }
@@ -95,8 +95,8 @@ document.addEventListener('DOMContentLoaded', function() {
   function formatName(name) {
     if (name && name.includes(",")) {
       const parts = name.split(",");
-      if (parts.length >= 2) { 
-        return parts[1].trim() + " " + parts[0].trim(); 
+      if (parts.length >= 2) {
+        return parts[1].trim() + " " + parts[0].trim();
       }
     }
     return name;
@@ -197,9 +197,9 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         });
   
-        // Define an array of colors for alternating markers.
-        //const markerColors = ["orange", "goldenrod", "darkorange", "orangered"];
-        const markerColors = ["#a8d5e2", "#d5e8a8", "#f2e3a1", "#e2a8d5"];  
+        // Define an array of lighter colors for global event markers.
+        const markerColors = ["#a8d5e2", "#d5e8a8", "#f2e3a1", "#e2a8d5"];
+  
         events.forEach(({ id, event }, index) => {
           const startDate = new Date(event.eventDate);
           const endDate = new Date(event.eventEndDate);
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
           timeline.addCustomTime(startDate, id);
           setTimeout(() => {
             const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
-            // Fallback: calculate pixel positions based on the current timeline window.
+            // Fallback pixel calculation using current timeline window.
             const windowRange = timeline.getWindow();
             const startTime = windowRange.start.getTime();
             const endTime = windowRange.end.getTime();
@@ -221,13 +221,13 @@ document.addEventListener('DOMContentLoaded', function() {
               const marker = markers[index];
               let computedWidth = endPx - startPx;
               if (computedWidth < 2) { computedWidth = 2; } // Enforce minimum width
-  
+              
               marker.style.left = startPx + "px";
               marker.style.width = computedWidth + "px";
               marker.style.height = "100%";
               // Apply alternating background color for better distinction.
               marker.style.backgroundColor = markerColors[index % markerColors.length];
-              // Add a border to distinguish overlapping markers.
+              // Add a border for clarity.
               marker.style.border = "1px solid black";
   
               const innerDiv = marker.querySelector('div');
@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 innerDiv.style.left = (-computedWidth / 2) + "px";
               }
   
-              // Set the marker's data-label attribute to the eventName.
+              // Set marker attributes.
               marker.setAttribute('data-label', event.eventName);
               marker.setAttribute('title', event.eventName);
               console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
@@ -269,22 +269,86 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("Global events labels container found. Width:", labelsContainer.offsetWidth);
     
     labelsContainer.innerHTML = '';
+    
+    // Collect marker data.
     const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
     console.log("Found " + markerElements.length + " custom time markers.");
     
+    let labelData = [];
     markerElements.forEach(marker => {
       const markerRect = marker.getBoundingClientRect();
       const leftPos = markerRect.left - containerRect.left + markerRect.width / 2;
       const labelText = marker.getAttribute('data-label') || 'Global Event';
-      console.log("Marker label:", labelText, "at left position:", leftPos);
-      
+      labelData.push({ left: leftPos, text: labelText });
+    });
+    
+    // Sort label data by horizontal position.
+    labelData.sort((a, b) => a.left - b.left);
+    
+    // Prepare for row assignment to prevent overlapping.
+    const rowHeight = 20; // approximate height of a label (adjust if needed)
+    const rowMargin = 5;  // gap between rows
+    const baseOffset = 10; // base top offset for labels
+    
+    // We'll assign each label a row index.
+    let rows = [];
+    let labelsWithRows = [];
+    
+    // Create a temporary element to measure text width.
+    const tempSpan = document.createElement('span');
+    tempSpan.style.visibility = 'hidden';
+    tempSpan.style.position = 'absolute';
+    tempSpan.style.whiteSpace = 'nowrap';
+    tempSpan.style.fontSize = "14px";  // match .global-event-label font size
+    tempSpan.style.padding = "2px 4px";  // match your label padding
+    document.body.appendChild(tempSpan);
+    
+    labelData.forEach(item => {
+      tempSpan.innerText = item.text;
+      const labelWidth = tempSpan.offsetWidth;
+      // Try to place this label in an existing row.
+      let placedRow = 0;
+      for (let i = 0; i < rows.length; i++) {
+        // If the current row's last label ends with a gap, we can use this row.
+        if (item.left > rows[i] + 5) { // 5px gap
+          placedRow = i;
+          break;
+        }
+        // If none of the rows work, assign to a new row.
+        if (i === rows.length - 1) {
+          placedRow = i + 1;
+        }
+      }
+      // Update the row's rightmost position.
+      const rightPos = item.left + labelWidth;
+      if (placedRow < rows.length) {
+        rows[placedRow] = rightPos;
+      } else {
+        rows.push(rightPos);
+      }
+      labelsWithRows.push({
+        left: item.left,
+        text: item.text,
+        width: labelWidth,
+        row: placedRow
+      });
+    });
+    
+    document.body.removeChild(tempSpan);
+    
+    // Now create and position labels using row information.
+    labelsWithRows.forEach(item => {
       const label = document.createElement('div');
       label.className = 'global-event-label';
-      label.innerText = labelText;
-      label.style.left = leftPos + 'px';
-      label.style.top = '10px';
+      label.innerText = item.text;
+      label.style.position = 'absolute';
+      label.style.left = item.left + 'px';
+      // Calculate top offset based on row index.
+      label.style.top = (baseOffset + item.row * (rowHeight + rowMargin)) + 'px';
       labelsContainer.appendChild(label);
     });
+    
+    console.log("Global event labels assigned:", labelsWithRows);
   }
   
   // -------------------------------
@@ -358,17 +422,14 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Parsed CSV data:", results.data);
   
         if (dataType === "historicalFigures") {
-          // Process each row as a historical figure.
           results.data.forEach(row => {
-            // Expected CSV columns: name, groups, dateOfBirth, dateOfDeath, nationality, description, imageUrl, region
             const name = row.name;
             const dateOfBirth = row.dateOfBirth;
             const dateOfDeath = row.dateOfDeath;
             const description = row.description;
             const groupsField = row.groups;
             const groupsArr = groupsField ? groupsField.split(",").map(s => s.trim()) : [];
-            // Use the CSV header "imageUrl" (lowercase 'u')
-            const imageURL = row.imageUrl;  
+            const imageURL = row.imageURL; // Adjust case if needed.
             const nationality = row.nationality;
             const region = row.region || "unknown";
             
