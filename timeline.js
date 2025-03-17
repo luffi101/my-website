@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // Global events will be rendered as custom time markers and are not assigned to a separate group.
+  // Global events are rendered as custom time markers (not assigned to a separate group).
 
   // -------------------------------
   // Define Expertise Colors for Historical Figures
@@ -197,17 +197,19 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         });
   
-        // Define an array of lighter colors for global event markers.
+        // Define an array of lighter colors for alternating global event markers.
         const markerColors = ["#a8d5e2", "#d5e8a8", "#f2e3a1", "#e2a8d5"];
   
         events.forEach(({ id, event }, index) => {
           const startDate = new Date(event.eventDate);
           const endDate = new Date(event.eventEndDate);
+          // Remove any existing marker with the same id to avoid duplicates.
           try { timeline.removeCustomTime(id); } catch(e) { }
+          // Add a custom time marker at the start date.
           timeline.addCustomTime(startDate, id);
           setTimeout(() => {
             const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
-            // Fallback pixel calculation using current timeline window.
+            // Fallback: calculate pixel positions based on the current timeline window.
             const windowRange = timeline.getWindow();
             const startTime = windowRange.start.getTime();
             const endTime = windowRange.end.getTime();
@@ -221,11 +223,11 @@ document.addEventListener('DOMContentLoaded', function() {
               const marker = markers[index];
               let computedWidth = endPx - startPx;
               if (computedWidth < 2) { computedWidth = 2; } // Enforce minimum width
-              
+  
               marker.style.left = startPx + "px";
               marker.style.width = computedWidth + "px";
               marker.style.height = "100%";
-              // Apply alternating background color for better distinction.
+              // Apply alternating background color.
               marker.style.backgroundColor = markerColors[index % markerColors.length];
               // Add a border for clarity.
               marker.style.border = "1px solid black";
@@ -236,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 innerDiv.style.left = (-computedWidth / 2) + "px";
               }
   
-              // Set marker attributes.
+              // Set the marker's data-label and title attribute to the eventName.
               marker.setAttribute('data-label', event.eventName);
               marker.setAttribute('title', event.eventName);
               console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
@@ -270,10 +272,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     labelsContainer.innerHTML = '';
     
-    // Collect marker data.
+    // Gather marker positions and label texts.
     const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
     console.log("Found " + markerElements.length + " custom time markers.");
-    
     let labelData = [];
     markerElements.forEach(marker => {
       const markerRect = marker.getBoundingClientRect();
@@ -285,41 +286,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // Sort label data by horizontal position.
     labelData.sort((a, b) => a.left - b.left);
     
-    // Prepare for row assignment to prevent overlapping.
-    const rowHeight = 20; // approximate height of a label (adjust if needed)
-    const rowMargin = 5;  // gap between rows
-    const baseOffset = 10; // base top offset for labels
-    
-    // We'll assign each label a row index.
+    // Settings for stacking labels.
+    const rowHeight = 20; // approximate label height (adjust as needed)
+    const rowMargin = 5;  // vertical gap between rows
+    const baseOffset = 10; // base top offset
     let rows = [];
     let labelsWithRows = [];
     
-    // Create a temporary element to measure text width.
+    // Create a temporary element to measure label widths.
     const tempSpan = document.createElement('span');
     tempSpan.style.visibility = 'hidden';
     tempSpan.style.position = 'absolute';
     tempSpan.style.whiteSpace = 'nowrap';
-    tempSpan.style.fontSize = "14px";  // match .global-event-label font size
-    tempSpan.style.padding = "2px 4px";  // match your label padding
+    tempSpan.style.fontSize = "14px";  // should match .global-event-label font size
+    tempSpan.style.padding = "2px 4px";  // should match your label padding
     document.body.appendChild(tempSpan);
     
     labelData.forEach(item => {
       tempSpan.innerText = item.text;
       const labelWidth = tempSpan.offsetWidth;
-      // Try to place this label in an existing row.
       let placedRow = 0;
       for (let i = 0; i < rows.length; i++) {
-        // If the current row's last label ends with a gap, we can use this row.
         if (item.left > rows[i] + 5) { // 5px gap
           placedRow = i;
           break;
         }
-        // If none of the rows work, assign to a new row.
         if (i === rows.length - 1) {
           placedRow = i + 1;
         }
       }
-      // Update the row's rightmost position.
       const rightPos = item.left + labelWidth;
       if (placedRow < rows.length) {
         rows[placedRow] = rightPos;
@@ -333,22 +328,26 @@ document.addEventListener('DOMContentLoaded', function() {
         row: placedRow
       });
     });
-    
     document.body.removeChild(tempSpan);
     
-    // Now create and position labels using row information.
+    // Place labels and compute the maximum bottom position.
+    let maxBottom = 0;
     labelsWithRows.forEach(item => {
       const label = document.createElement('div');
       label.className = 'global-event-label';
       label.innerText = item.text;
       label.style.position = 'absolute';
       label.style.left = item.left + 'px';
-      // Calculate top offset based on row index.
-      label.style.top = (baseOffset + item.row * (rowHeight + rowMargin)) + 'px';
+      const topPos = baseOffset + item.row * (rowHeight + rowMargin);
+      label.style.top = topPos + 'px';
       labelsContainer.appendChild(label);
+      const labelBottom = topPos + rowHeight;
+      if (labelBottom > maxBottom) { maxBottom = labelBottom; }
     });
     
-    console.log("Global event labels assigned:", labelsWithRows);
+    // Dynamically adjust the container's height to fit all labels.
+    labelsContainer.style.height = (maxBottom + 10) + "px";
+    console.log("Global event labels assigned:", labelsWithRows, "Container height set to:", labelsContainer.style.height);
   }
   
   // -------------------------------
@@ -429,7 +428,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const description = row.description;
             const groupsField = row.groups;
             const groupsArr = groupsField ? groupsField.split(",").map(s => s.trim()) : [];
-            const imageURL = row.imageURL; // Adjust case if needed.
+            // Ensure field name matches your CSV header; adjust case if necessary.
+            const imageURL = row.imageURL; 
             const nationality = row.nationality;
             const region = row.region || "unknown";
             
