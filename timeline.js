@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const groups = regions.map(region => ({ id: region.toLowerCase(), content: region }));
   // Add an "Unknown" group for items with no region
   groups.push({ id: "unknown", content: "Unknown" });
-  // Global events are rendered as custom time markers (not assigned to a separate group).
+  // Global events will be rendered as custom time markers (not assigned to a separate group).
 
   // -------------------------------
   // Define Expertise Colors for Historical Figures
@@ -203,9 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
         events.forEach(({ id, event }, index) => {
           const startDate = new Date(event.eventDate);
           const endDate = new Date(event.eventEndDate);
-          // Remove any existing marker with the same id to avoid duplicates.
           try { timeline.removeCustomTime(id); } catch(e) { }
-          // Add a custom time marker at the start date.
           timeline.addCustomTime(startDate, id);
           setTimeout(() => {
             const markers = document.querySelectorAll('#timeline-container .vis-custom-time');
@@ -224,9 +222,12 @@ document.addEventListener('DOMContentLoaded', function() {
               let computedWidth = endPx - startPx;
               if (computedWidth < 2) { computedWidth = 2; } // Enforce minimum width
   
+              // Update marker style based on calculated positions.
               marker.style.left = startPx + "px";
               marker.style.width = computedWidth + "px";
               marker.style.height = "100%";
+              // Allow pointer events so that native tooltips can appear.
+              marker.style.pointerEvents = "auto";
               // Apply alternating background color.
               marker.style.backgroundColor = markerColors[index % markerColors.length];
               // Add a border for clarity.
@@ -238,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 innerDiv.style.left = (-computedWidth / 2) + "px";
               }
   
-              // Set the marker's data-label and title attribute to the eventName.
+              // Set marker attributes so that the eventName appears as a tooltip.
               marker.setAttribute('data-label', event.eventName);
               marker.setAttribute('title', event.eventName);
               console.log("Set data-label for marker", id, "to", event.eventName, "with width", computedWidth);
@@ -272,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     labelsContainer.innerHTML = '';
     
-    // Gather marker positions and label texts.
+    // Gather marker data.
     const markerElements = document.querySelectorAll('#timeline-container .vis-custom-time');
     console.log("Found " + markerElements.length + " custom time markers.");
     let labelData = [];
@@ -330,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     document.body.removeChild(tempSpan);
     
-    // Place labels and compute the maximum bottom position.
+    // Place labels and adjust container height.
     let maxBottom = 0;
     labelsWithRows.forEach(item => {
       const label = document.createElement('div');
@@ -341,12 +342,13 @@ document.addEventListener('DOMContentLoaded', function() {
       const topPos = baseOffset + item.row * (rowHeight + rowMargin);
       label.style.top = topPos + 'px';
       labelsContainer.appendChild(label);
+      
       const labelBottom = topPos + rowHeight;
       if (labelBottom > maxBottom) { maxBottom = labelBottom; }
     });
     
-    // Dynamically adjust the container's height to fit all labels.
-    labelsContainer.style.height = (maxBottom + 10) + "px";
+    // Dynamically adjust the container's height.
+    labelsContainer.style.height = (maxBottom + 10) + "px"; // additional padding if needed
     console.log("Global event labels assigned:", labelsWithRows, "Container height set to:", labelsContainer.style.height);
   }
   
@@ -428,8 +430,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const description = row.description;
             const groupsField = row.groups;
             const groupsArr = groupsField ? groupsField.split(",").map(s => s.trim()) : [];
-            // Ensure field name matches your CSV header; adjust case if necessary.
-            const imageURL = row.imageURL; 
+            const imageURL = row.imageURL; // Adjust field name as needed.
             const nationality = row.nationality;
             const region = row.region || "unknown";
             
