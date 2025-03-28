@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Edit Records</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Firebase SDK (compat versions) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <!-- Firebase Config -->
+  <script src="firebase-config.js"></script>
+  <!-- Admin JS -->
+  <script src="admin.js" defer></script>
+  <style>
+    /* Minimal inline styling; you can move these rules to style.css */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #f2f2f2;
+    }
+    .edit-button {
+      margin: 2px;
+    }
+    #editFormContainer {
+      border: 1px solid #ccc;
+      padding: 15px;
+      background: #f9f9f9;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Admin Panel - Edit Records</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="timeline.html">Timeline</a>
+        <a href="journal.html">Journal</a>
+      </nav>
+      <div id="auth-info"></div>
+    </header>
+    
+    <!-- Global Events Table -->
+    <section id="global-events-section">
+      <h2>Global Events</h2>
+      <table id="globalEventsTable">
+        <thead>
+          <tr>
+            <th>Event Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Region</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows will be inserted dynamically -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Historical Figures Table -->
+    <section id="historical-figures-section">
+      <h2>Historical Figures</h2>
+      <table id="historicalFiguresTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Date of Birth</th>
+            <th>Date of Death</th>
+            <th>Nationality</th>
+            <th>Description</th>
+            <th>Region</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows will be inserted dynamically -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Edit Form Container -->
+    <div id="editFormContainer" style="display: none;">
+      <h3>Edit Record</h3>
+      <!-- Hidden fields to store document ID and collection name -->
+      <input type="hidden" id="docId">
+      <input type="hidden" id="collectionName">
+      
+      <!-- Fields for Global Events -->
+      <div id="globalEventsEditFields" style="display: none;">
+        <label for="editEventName">Event Name:</label>
+        <input type="text" id="editEventName" required><br><br>
+        <label for="editEventDate">Start Date:</label>
+        <input type="date" id="editEventDate" required><br><br>
+        <label for="editEventEndDate">End Date:</label>
+        <input type="date" id="editEventEndDate"><br><br>
+        <label for="editEventDescription">Description:</label>
+        <textarea id="editEventDescription" rows="3" style="width:100%;"></textarea><br><br>
+        <label for="editEventCategory">Category:</label>
+        <input type="text" id="editEventCategory"><br><br>
+        <label for="editEventRegion">Region:</label>
+        <input type="text" id="editEventRegion"><br><br>
+      </div>
+
+      <!-- Fields for Historical Figures -->
+      <div id="historicalFiguresEditFields" style="display: none;">
+        <label for="editName">Name:</label>
+        <input type="text" id="editName" required><br><br>
+        <label for="editDateOfBirth">Date of Birth:</label>
+        <input type="date" id="editDateOfBirth" required><br><br>
+        <label for="editDateOfDeath">Date of Death:</label>
+        <input type="date" id="editDateOfDeath" required><br><br>
+        <label for="editNationality">Nationality:</label>
+        <input type="text" id="editNationality"><br><br>
+        <label for="editDescription">Description:</label>
+        <textarea id="editDescription" rows="3" style="width:100%;"></textarea><br><br>
+        <label for="editRegion">Region:</label>
+        <input type="text" id="editRegion"><br><br>
+      </div>
+
+      <button type="submit" form="editForm">Save Changes</button>
+      <button type="button" onclick="closeEditForm()">Cancel</button>
+      <form id="editForm" style="display:none;"></form>
+    </div>
+  </div>
+</body>
+</html>
