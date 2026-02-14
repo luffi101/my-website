@@ -1,2 +1,3 @@
 node_modules/
-*.log"serviceAccountKey.json" 
+*.log
+serviceAccountKey.json

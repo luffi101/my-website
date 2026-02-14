@@ -1,27 +1,16 @@
 // admin.js
 
-// Helper to escape HTML entities and prevent XSS.
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     // -------------------------------
-    // Authentication Check: Redirect if not logged in or not an admin.
-    // Add authorized admin email addresses here.
+    // Authentication Check: Redirect if not logged in.
     // -------------------------------
-    // TODO: Update this list with your actual admin Google account email(s).
-    const ADMIN_EMAILS = ["luffi.101@gmail.com"];
-
     firebase.auth().onAuthStateChanged(user => {
       if (!user) {
         alert("You must be logged in to access the admin page.");
         window.location.href = "index.html";
-      } else if (!ADMIN_EMAILS.includes(user.email)) {
-        alert("You do not have admin access.");
-        window.location.href = "index.html";
       } else {
+        // Optionally, display user info.
+        document.getElementById("auth-info").innerText = `Logged in as ${user.displayName}`;
         // Load records.
         loadGlobalEvents();
         loadHistoricalFigures();
@@ -41,19 +30,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = doc.data();
             const tr = document.createElement("tr");
             tr.innerHTML = `
-              <td>${escapeHtml(data.eventName)}</td>
-              <td>${escapeHtml(data.eventDate)}</td>
-              <td>${escapeHtml(data.eventEndDate || data.eventDate)}</td>
-              <td>${escapeHtml(data.description)}</td>
-              <td>${escapeHtml(data.category)}</td>
-              <td>${escapeHtml(data.region)}</td>
+              <td>${data.eventName || ""}</td>
+              <td>${data.eventDate || ""}</td>
+              <td>${data.eventEndDate || data.eventDate || ""}</td>
+              <td>${data.description || ""}</td>
+              <td>${data.category || ""}</td>
+              <td>${data.region || ""}</td>
               <td>
-                <button class="edit-button" data-collection="globalEvents" data-docid="${escapeHtml(doc.id)}">Edit</button>
+                <button class="edit-button" onclick="openEditForm('globalEvents', '${doc.id}')">Edit</button>
               </td>
             `;
-            tr.querySelector('.edit-button').addEventListener('click', function() {
-              openEditForm('globalEvents', doc.id);
-            });
             tbody.appendChild(tr);
           });
         })
@@ -75,19 +61,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = doc.data();
             const tr = document.createElement("tr");
             tr.innerHTML = `
-              <td>${escapeHtml(data.name)}</td>
-              <td>${escapeHtml(data.dateOfBirth)}</td>
-              <td>${escapeHtml(data.dateOfDeath)}</td>
-              <td>${escapeHtml(data.nationality)}</td>
-              <td>${escapeHtml(data.description)}</td>
-              <td>${escapeHtml(data.region)}</td>
+              <td>${data.name || ""}</td>
+              <td>${data.dateOfBirth || ""}</td>
+              <td>${data.dateOfDeath || ""}</td>
+              <td>${data.nationality || ""}</td>
+              <td>${data.description || ""}</td>
+              <td>${data.region || ""}</td>
               <td>
-                <button class="edit-button" data-collection="historicalFigures" data-docid="${escapeHtml(doc.id)}">Edit</button>
+                <button class="edit-button" onclick="openEditForm('historicalFigures', '${doc.id}')">Edit</button>
               </td>
             `;
-            tr.querySelector('.edit-button').addEventListener('click', function() {
-              openEditForm('historicalFigures', doc.id);
-            });
             tbody.appendChild(tr);
           });
         })

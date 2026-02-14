@@ -6,15 +6,9 @@ document.addEventListener("DOMContentLoaded", function() {
       
       if (authInfo) {
         if (user) {
-          authInfo.innerHTML = '';
-          const span = document.createElement('span');
-          span.textContent = 'Welcome, ' + user.displayName;
-          const logoutBtn = document.createElement('button');
-          logoutBtn.id = 'logout-button';
-          logoutBtn.textContent = 'Logout';
-          logoutBtn.addEventListener('click', signOut);
-          authInfo.appendChild(span);
-          authInfo.appendChild(logoutBtn);
+          authInfo.innerHTML = `<span>Welcome, ${user.displayName}</span>
+                                <button id="logout-button">Logout</button>`;
+          document.getElementById("logout-button").addEventListener("click", signOut);
         } else {
           authInfo.innerHTML = `<span>Not logged in</span>`;
         }

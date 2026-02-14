@@ -11,8 +11,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <!-- Firebase Config -->
   <script src="firebase-config.js"></script>
-  <!-- Auth -->
-  <script src="auth.js"></script>
   <!-- Admin JS -->
   <script src="admin.js" defer></script>
   <style>
@@ -99,51 +97,46 @@
     <!-- Edit Form Container -->
     <div id="editFormContainer" style="display: none;">
       <h3>Edit Record</h3>
-      <form id="editForm">
-        <!-- Hidden fields to store document ID and collection name -->
-        <input type="hidden" id="docId">
-        <input type="hidden" id="collectionName">
+      <!-- Hidden fields to store document ID and collection name -->
+      <input type="hidden" id="docId">
+      <input type="hidden" id="collectionName">
+      
+      <!-- Fields for Global Events -->
+      <div id="globalEventsEditFields" style="display: none;">
+        <label for="editEventName">Event Name:</label>
+        <input type="text" id="editEventName" required><br><br>
+        <label for="editEventDate">Start Date:</label>
+        <input type="date" id="editEventDate" required><br><br>
+        <label for="editEventEndDate">End Date:</label>
+        <input type="date" id="editEventEndDate"><br><br>
+        <label for="editEventDescription">Description:</label>
+        <textarea id="editEventDescription" rows="3" style="width:100%;"></textarea><br><br>
+        <label for="editEventCategory">Category:</label>
+        <input type="text" id="editEventCategory"><br><br>
+        <label for="editEventRegion">Region:</label>
+        <input type="text" id="editEventRegion"><br><br>
+      </div>
 
-        <!-- Fields for Global Events -->
-        <div id="globalEventsEditFields" style="display: none;">
-          <label for="editEventName">Event Name:</label>
-          <input type="text" id="editEventName" required><br><br>
-          <label for="editEventDate">Start Date:</label>
-          <input type="date" id="editEventDate" required><br><br>
-          <label for="editEventEndDate">End Date:</label>
-          <input type="date" id="editEventEndDate"><br><br>
-          <label for="editEventDescription">Description:</label>
-          <textarea id="editEventDescription" rows="3" style="width:100%;"></textarea><br><br>
-          <label for="editEventCategory">Category:</label>
-          <input type="text" id="editEventCategory"><br><br>
-          <label for="editEventRegion">Region:</label>
-          <input type="text" id="editEventRegion"><br><br>
-        </div>
+      <!-- Fields for Historical Figures -->
+      <div id="historicalFiguresEditFields" style="display: none;">
+        <label for="editName">Name:</label>
+        <input type="text" id="editName" required><br><br>
+        <label for="editDateOfBirth">Date of Birth:</label>
+        <input type="date" id="editDateOfBirth" required><br><br>
+        <label for="editDateOfDeath">Date of Death:</label>
+        <input type="date" id="editDateOfDeath" required><br><br>
+        <label for="editNationality">Nationality:</label>
+        <input type="text" id="editNationality"><br><br>
+        <label for="editDescription">Description:</label>
+        <textarea id="editDescription" rows="3" style="width:100%;"></textarea><br><br>
+        <label for="editRegion">Region:</label>
+        <input type="text" id="editRegion"><br><br>
+      </div>
 
-        <!-- Fields for Historical Figures -->
-        <div id="historicalFiguresEditFields" style="display: none;">
-          <label for="editName">Name:</label>
-          <input type="text" id="editName" required><br><br>
-          <label for="editDateOfBirth">Date of Birth:</label>
-          <input type="date" id="editDateOfBirth" required><br><br>
-          <label for="editDateOfDeath">Date of Death:</label>
-          <input type="date" id="editDateOfDeath" required><br><br>
-          <label for="editNationality">Nationality:</label>
-          <input type="text" id="editNationality"><br><br>
-          <label for="editDescription">Description:</label>
-          <textarea id="editDescription" rows="3" style="width:100%;"></textarea><br><br>
-          <label for="editRegion">Region:</label>
-          <input type="text" id="editRegion"><br><br>
-        </div>
-
-        <button type="submit">Save Changes</button>
-        <button type="button" onclick="closeEditForm()">Cancel</button>
-      </form>
+      <button type="submit" form="editForm">Save Changes</button>
+      <button type="button" onclick="closeEditForm()">Cancel</button>
+      <form id="editForm" style="display:none;"></form>
     </div>
   </div>
-  <footer>
-    <p>&copy; <span id="currentYear"></span> Edward C Yang. All rights reserved.</p>
-  </footer>
-  <script src="common.js"></script>
 </body>
 </html>

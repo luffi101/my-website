@@ -55,39 +55,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         displayDate = dateObj.toLocaleString();
                     }
   
-                    // Build the HTML structure with a boundary container safely.
-                    const boundary = document.createElement('div');
-                    boundary.className = 'journal-entry-boundary';
-                    boundary.style.cssText = 'border: 1px solid #ccc; background: #f9f9f9; padding: 10px; margin-bottom: 15px;';
-
-                    const contentDiv = document.createElement('div');
-                    contentDiv.className = 'journal-entry-content';
-
-                    const dateEl = document.createElement('small');
-                    dateEl.textContent = displayDate;
-
-                    const titleEl = document.createElement('h3');
-                    titleEl.textContent = entry.title;
-
-                    const paraEl = document.createElement('p');
-                    // Preserve newlines safely by splitting and inserting <br> elements.
-                    const lines = entry.content.split('\n');
-                    lines.forEach((line, i) => {
-                      paraEl.appendChild(document.createTextNode(line));
-                      if (i < lines.length - 1) paraEl.appendChild(document.createElement('br'));
-                    });
-
-                    contentDiv.appendChild(dateEl);
-                    contentDiv.appendChild(titleEl);
-                    contentDiv.appendChild(paraEl);
-
-                    const buttonsContainer = document.createElement('div');
-                    buttonsContainer.className = 'journal-entry-buttons';
-                    buttonsContainer.style.marginTop = '10px';
-
-                    boundary.appendChild(contentDiv);
-                    boundary.appendChild(buttonsContainer);
-                    entryItem.appendChild(boundary);
+                    // Replace newline characters with <br> for proper formatting.
+                    const formattedContent = entry.content.replace(/\n/g, "<br>");
+  
+                    // Build the HTML structure with a boundary container.
+                    entryItem.innerHTML = `
+                      <div class="journal-entry-boundary" style="border: 1px solid #ccc; background: #f9f9f9; padding: 10px; margin-bottom: 15px;">
+                        <div class="journal-entry-content">
+                          <small>${displayDate}</small>
+                          <h3>${entry.title}</h3>
+                          <p>${formattedContent}</p>
+                        </div>
+                        <div class="journal-entry-buttons" style="margin-top: 10px;"></div>
+                      </div>
+                    `;
+  
+                    // Get the buttons container within the entry.
+                    const buttonsContainer = entryItem.querySelector('.journal-entry-buttons');
   
                     // If the entry is private and belongs to the logged-in user, add a "Make Public" button.
                     if (entry.isPrivate && userId && entry.uid === userId) {

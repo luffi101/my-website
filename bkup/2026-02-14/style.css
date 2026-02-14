@@ -1,0 +1,358 @@
+/* ============================================================================
+   Global Styles
+   ============================================================================ */
+   body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Container for main content: used by all pages */
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+  }
+  
+  
+  /* ============================================================================
+     Header & Navigation
+     ============================================================================ */
+  header {
+    position: relative;
+    padding: 10px;
+  }
+  
+  header h1 {
+    margin: 0;
+  }
+  
+  nav a {
+    margin-right: 15px;
+    text-decoration: none;
+    color: #007bff;
+  }
+  
+  /* Authentication Info in Header */
+  #auth-info {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  
+  
+  /* ============================================================================
+     Color Legend Section (Timeline Page)
+     ============================================================================ */
+  #legend-section {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    margin: 20px auto;
+    max-width: 800px;
+    padding: 10px;
+  }
+  
+  #legend-section h3 {
+    font-size: 1.2em;
+    margin: 0 0 10px;
+  }
+  
+  #legend-section ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 15px;
+  }
+  
+  #legend-section ul li {
+    display: flex;
+    align-items: center;
+    font-size: 0.9em;
+  }
+  
+  #legend-section .legend-color {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    border: 1px solid #000;
+  }
+  
+  
+  /* ============================================================================
+     Timeline Specific Styles
+     ============================================================================ */
+  /* Timeline container styling */
+  #timeline-container {
+    width: 90%;
+    /*height: 1200px; */ /* Adjust height as needed (commented out) */
+    /* min-height: 600px; *//* or another appropriate value */
+    border: 2px solid #5c5c5c;
+    margin: 0px auto;
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: 1em;  
+  }
+  
+  /* Timeline section wrapper */
+  #timeline-section {
+    width: 100%;
+    padding: 20px;
+    margin: 0;
+  }
+  
+  
+  /* ============================================================================
+     vis.js Timeline Overrides & Group Styles
+     ============================================================================ */
+  /* Ensure groups have proper padding; note: fixed min-height removed to allow dynamic adjustment */
+  .vis-group {
+    padding: 2px;
+  }
+  
+  /* Hide group labels that are meant to be hidden */
+  .vis-group-label-hidden {
+    visibility: hidden;
+  }
+  
+  /* Overrides for timeline items */
+  .vis-item {
+    z-index: 10 !important;
+  }
+  
+  /* Custom Time Marker Overrides */
+  body #timeline-container .vis-custom-time {
+    background-color: rgb(79, 176, 255);
+    /* width: 2px !important; */
+    z-index: -1 !important;
+  }
+  body #timeline-container .vis-custom-time > .vis-custom-time-marker {
+    background-color: inherit !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    padding: 3px 5px !important;
+    top: 0 !important;
+    white-space: nowrap !important;
+    z-index: -1 !important;
+  }
+  
+  
+  /* ============================================================================
+     Global Event Labels (Timeline Page)
+     ============================================================================ */
+  /* Global Events Labels Container inside the timeline section */
+  #global-events-labels {
+    position: relative;           /* Establish positioning context for absolute children */
+    width: 90%;
+    margin: 20px auto 30px;       /* Top margin: 20px; auto for left/right centering; bottom margin: 30px (adjust as needed) */
+    background-color: #f1df75;      /* Light background */
+    border: 1px solid #505050;         /* Grey border */
+    padding: 10px;                /* Increased padding for a larger section */
+    box-sizing: border-box;
+    min-height: 60px;             /* Optional: ensures a minimum height */ 
+  }
+
+  /* Style for individual global event labels */
+  .global-event-label {
+    position: absolute;           /* Positioned relative to the labels container */
+    font-size: 11px;              /* Increased font size */
+    background-color: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 4px 6px;             /* Increased padding for a bigger label */
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    white-space: nowrap;
+    transform: translateX(-50%);  /* Center the label horizontally */
+    top: 10px;  /* Leaves 10px space from the top edge */
+  }
+
+  
+  /* ============================================================================
+     Historical Figure Form Styles (Timeline Page)
+     ============================================================================ */
+  #figure-form-section {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 2px solid #ccc;
+  }
+  
+  #figure-form-section .form-group {
+    margin-bottom: 15px;
+  }
+  
+  #figure-form-section label {
+    display: inline-block;
+    width: 150px;
+    vertical-align: top;
+    margin-bottom: 5px;
+  }
+  
+  #figure-form-section input,
+  #figure-form-section textarea,
+  #figure-form-section select {
+    width: calc(100% - 160px);
+    padding: 5px;
+    box-sizing: border-box;
+  }
+  
+  
+  /* ============================================================================
+     Checkbox and Form Element Styles (Used in Forms Across Pages)
+     ============================================================================ */
+  .checkbox-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+  }
+  
+  .checkbox-item input[type="checkbox"] {
+    transform: scale(2);
+    margin: 0 5px 0 0;
+    vertical-align: middle;
+  }
+  
+  
+  /* ============================================================================
+     Journal Page Styles
+     ============================================================================ */
+  /* Journal Form Styles */
+  #journalForm {
+    margin-bottom: 20px;
+  }
+  
+  #journalForm label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  #journalForm input[type="text"],
+  #journalForm textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  #journalForm button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  #journalForm button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Journal Entries List */
+  .journal-entry {
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+  }
+  
+  .journal-entry h3 {
+    margin: 0;
+    font-size: 1.2em;
+  }
+  
+  .journal-entry p {
+    margin: 5px 0 0;
+  }
+  
+  
+  /* ============================================================================
+     Button Styles for Delete/Add Actions (Common)
+     ============================================================================ */
+  .delete-button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
+  
+  .add-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
+  
+  
+  /* ============================================================================
+     Utility Classes
+     ============================================================================ */
+  .hidden {
+    display: none;
+  }
+  
+  
+  /* ============================================================================
+     Commented Out / Alternative Styles
+     (These styles have been moved here for reference and are currently inactive.)
+     ============================================================================ */
+  /*
+  .vis-label.vis-group-level-0 {
+    height: 60px !important;
+  }
+  
+  .vis-group {
+    min-height: 60px;
+  }
+  
+  .vis-group:nth-child(2n-1) {
+    background-color: #ff000083;
+    border-top: 2px solid #333;
+    border-bottom: 2px solid #333;
+  }
+  
+  .vis-group:nth-child(2n) {
+    background-color: #acffb7;
+    border-bottom: 2px solid #000000;
+    margin-bottom: 10px;
+  }
+  */
+  
+  /* Uncomment the block below if you decide to implement a bottom time axis.
+  #bottom-time-axis {
+    position: relative;
+    width: 98%;
+    margin: 10px auto;
+    height: 30px; /* Adjust as needed *\/
+    border-top: 1px solid #ccc;
+    background-color: #fff;
+  }
+  
+  .bottom-axis-label {
+    display: block;
+    font-size: 12px;
+    position: absolute;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    padding: 2px 4px;
+    background-color: #fff; /* Optional: helps with readability *\/
+    /* You might add a border or margin if needed *\/
+  }
+  */
+  

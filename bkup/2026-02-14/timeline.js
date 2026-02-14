@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     flatpickr(selector, {
       dateFormat: "Y-m-d",
       minDate: "0001-01-01",
-      maxDate: new Date().getFullYear() + "-12-31",
+      maxDate: "2025-12-31",
       altInput: true,
       altFormat: "F j, Y",
       allowInput: true
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     zoomMin: zoomMin,
     zoomMax: zoomMax,
     min: new Date("0001-01-01"),
-    max: new Date(new Date().getFullYear() + "-12-31"),
+    max: new Date("2025-12-31"),
     stack: true,
     tooltip: { delay: 100, followMouse: true },
     margin: { item: { horizontal: 0, vertical: 5 } }
@@ -185,28 +185,17 @@ document.addEventListener('DOMContentLoaded', function() {
   // -------------------------------
   // Function: Update Global Events Markers & Their Labels
   // -------------------------------
-  let cachedGlobalEvents = null;
-
-  function fetchGlobalEvents() {
-    if (cachedGlobalEvents) return Promise.resolve(cachedGlobalEvents);
-    return firebase.firestore().collection("globalEvents")
+  function updateGlobalEventsMarkers() {
+    firebase.firestore().collection("globalEvents")
       .get()
       .then(snapshot => {
         const events = [];
         snapshot.forEach(doc => {
           const event = doc.data();
-          if (event.eventDate && event.eventEndDate) {
+          if (event.eventDate && event.eventEndDate && timeline) {
             events.push({ id: doc.id, event: event });
           }
         });
-        cachedGlobalEvents = events;
-        return events;
-      });
-  }
-
-  function updateGlobalEventsMarkers() {
-    fetchGlobalEvents().then(events => {
-        if (!timeline) return;
   
         // Define an array of lighter colors for alternating global event markers.
         const markerColors = ["#a8d5e2", "#d5e8a8", "#f2e3a1", "#e2a8d5"];
@@ -263,9 +252,10 @@ document.addEventListener('DOMContentLoaded', function() {
           console.log("Global events processed. Calling updateGlobalEventLabels().");
           updateGlobalEventLabels();
         }, 1000);
-    }).catch(error => {
-      console.error("Error loading global events:", error);
-    });
+      })
+      .catch(error => {
+        console.error("Error loading global events:", error);
+      });
   }
   
   // -------------------------------
