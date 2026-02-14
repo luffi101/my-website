@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Historical Figures Timeline</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  
+  <!-- PapaParse -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+  <!-- vis.js CSS/JS from CDN -->
+  <link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+  
+  <!-- Firebase SDK (compat versions) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  
+  <!-- Firebase Config, Auth, and Timeline Script -->
+  <script src="firebase-config.js"></script>
+  <script src="auth.js"></script>
+  <script src="timeline.js" defer></script>
+  <!-- load my customer.css -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Historical Figures Timeline</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="journal.html">Journal</a>
+        <a href="timeline.html">Timeline</a>
+        <a href="admin.html">Admin</a>
+        <a href="timeline.html" style="color: #e67e22; font-weight: bold;">View New Timeline</a>
+      </nav>
+      <!-- Authentication info (status and logout) -->
+      <div id="auth-info"></div>
+    </header>
+  </div>
+  
+  <!-- Legend Section -->
+  <section id="legend-section">
+    <div id="legend">
+      <h3>Color Legend</h3>
+      <ul>
+        <li><span class="legend-color" style="background-color: red;"></span> Politics &amp; Military</li>
+        <li><span class="legend-color" style="background-color: blue;"></span> Science</li>
+        <li><span class="legend-color" style="background-color: green;"></span> Economy</li>
+        <li><span class="legend-color" style="background-color: violet;"></span> Arts, Musics &amp; Cultural</li>
+        <li><span class="legend-color" style="background-color: yellow;"></span> Literature</li>
+        <li><span class="legend-color" style="background-color: indigo;"></span> Philosophy &amp; Religion</li>
+        <li><span class="legend-color" style="background-color: orange;"></span> Social &amp; Cultural Movement</li>
+        <li><span class="legend-color" style="background-color: sienna;"></span> Exploration &amp; Discovery</li>        
+      </ul>
+    </div>
+  </section>
+  
+  <!-- Timeline section -->
+  <section id="timeline-section">
+    <div id="timeline-container"></div>
+    <!-- Global Event Labels Section -->
+    <div id="global-events-labels"></div>
+  </section>
+
+  <!-- Custom Bottom Time Axis -->
+  <!-- <div id="bottom-time-axis"></div> -->
+
+  <!-- Global Event Labels Section -->
+  <!-- <div id="global-events-labels"></div>  -->
+  
+  <!-- CSV Import Section -->
+  <section id="csv-import-section" class="container hidden">
+    <h2>Import CSV Data</h2>
+    <form id="csvImportForm">
+      <label for="csvDataType">Data Type:</label>
+      <select id="csvDataType" name="csvDataType">
+        <option value="historicalFigures">Historical Figures</option>
+        <option value="globalEvents">Global Events</option>
+      </select>
+      <br><br>
+      <label for="csvFile">CSV File:</label>
+      <input type="file" id="csvFile" name="csvFile" accept=".csv" required>
+      <br><br>
+      <button type="submit">Import CSV</button>
+    </form>
+    <div id="csvFeedback"></div>
+  </section>
+
+  <!-- New Historical Figure Form (only visible when logged in) -->
+  <section id="figure-form-section" class="container hidden">
+    <h2>Add New Historical Figure</h2>
+    <form id="figureForm">
+      <div class="form-group">
+        <label for="figureName">Name (Lastname, Firstname):</label>
+        <input type="text" id="figureName" placeholder="e.g., Franklin, Benjamin" required>
+      </div>
+      <div class="form-group">
+        <label>Categories:</label>
+        <div class="checkbox-container">
+          <div class="checkbox-item">
+            <input type="checkbox" id="catPolitics" name="figureCategory" value="Politics &amp; Military">
+            <label for="catPolitics">Politics &amp; Military</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="catScience" name="figureCategory" value="Science">
+            <label for="catScience">Science</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="catEconomy" name="figureCategory" value="Economy">
+            <label for="catEconomy">Economy</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="catArts" name="figureCategory" value="Arts, Musics &amp; Cultural">
+            <label for="catArts">Arts, Musics &amp; Cultural</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="catLiterature" name="figureCategory" value="Literature">
+            <label for="catLiterature">Literature</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="catPhilosophy" name="figureCategory" value="Philosophy &amp; Religion">
+            <label for="catPhilosophy">Philosophy &amp; Religion</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="catSocial" name="figureCategory" value="Social &amp; Cultural Movement">
+            <label for="catSocial">Social &amp; Cultural Movement</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="catExploration" name="figureCategory" value="Exploration &amp; Discovery">
+            <label for="catExploration">Exploration &amp; Discovery</label>
+          </div>          
+        </div>
+      </div>      
+      <div class="form-group">
+        <label for="figureRegion">Region:</label>
+        <select id="figureRegion" required>
+          <option value="">--Select Region--</option>
+          <option value="North America">North America</option>
+          <option value="South America">South America</option>
+          <option value="Europe">Europe</option>
+          <option value="Africa">Africa</option>
+          <option value="Middle East">Middle East</option>
+          <option value="East Asia">East Asia</option>
+          <option value="Australia">Australia</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="dateOfBirth">Date of Birth:</label>
+        <input type="date" id="dateOfBirth" required>
+      </div>
+      <div class="form-group">
+        <label for="dateOfDeath">Date of Death:</label>
+        <input type="date" id="dateOfDeath" required>
+      </div>
+      <div class="form-group">
+        <label for="nationality">Nationality:</label>
+        <input type="text" id="nationality">
+      </div>
+      <div class="form-group">
+        <label for="description" style="vertical-align: top;">Description:</label>
+        <textarea id="description" rows="3" style="width: 500px;" placeholder="Enter description"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="imageUrl">Image URL:</label>
+        <input type="url" id="imageUrl">
+      </div>
+      <button type="submit">Add Historical Figure</button>
+    </form>
+    <div id="figureFeedback"></div>
+  </section>
+  <footer>
+    <p>&copy; <span id="currentYear"></span> Edward C Yang. All rights reserved.</p>
+  </footer>
+  <script src="common.js"></script>
+</body>
+</html>
