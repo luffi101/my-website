@@ -128,10 +128,10 @@ class TimelineManager {
     const yearSpan = this.config.timeRange.end - this.config.timeRange.start;
     const markersHTML = [];
     
-    for (let i = 0; i <= Math.floor(yearSpan / 10); i++) {
-      const year = this.config.timeRange.start + (i * 10);
+    for (let i = 0; i <= Math.floor(yearSpan / 20); i++) {
+      const year = this.config.timeRange.start + (i * 20);
       const position = this.getPosition(year);
-      
+
       markersHTML.push(`
         <div class="year-marker" style="left: ${position}%;">
           <div class="year-tick"></div>
