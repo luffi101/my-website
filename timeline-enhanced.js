@@ -37,7 +37,7 @@ class TimelineManager {
     this.fullEnd = this.config.timeRange.end;
     this.viewStart = this.fullStart;
     this.viewEnd = this.fullEnd;
-    this.minViewSpan = 40;
+    this.minViewSpan = 180;
     this.maxViewSpan = 2600;
 
     // Pan state
