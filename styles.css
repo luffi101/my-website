@@ -243,6 +243,12 @@ body {
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--color-border);
   overflow: hidden;
+  cursor: grab;
+}
+
+.timeline-card.panning {
+  cursor: grabbing;
+  user-select: none;
 }
 
 /* Timeline Header (Years) */
@@ -251,6 +257,8 @@ body {
   height: 3rem;
   background: linear-gradient(to bottom, var(--color-bg-main), white);
   border-bottom: 1px solid var(--color-border);
+  margin-left: 8rem;
+  overflow: hidden;
 }
 
 .year-marker {
@@ -365,18 +373,17 @@ body {
 /* Historical Figure Bars */
 .figure-bar {
   position: absolute;
-  height: 1.25rem;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
   border: 1px solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
   overflow: hidden;
-  z-index: 10;
+  z-index: 2;
 }
 
 .figure-bar:hover {
-  transform: scale(1.05);
+  transform: scaleY(1.15);
   box-shadow: var(--shadow-md);
   z-index: 10;
 }
@@ -580,6 +587,10 @@ body {
   
   .region-label {
     width: 6rem;
+  }
+
+  .timeline-years {
+    margin-left: 6rem;
   }
   
   .legend-items {

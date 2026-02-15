@@ -1,6 +1,6 @@
 /**
  * Historical Timeline - Enhanced JavaScript
- * Handles interactivity, modals, search, and rendering
+ * Handles interactivity, modals, search, pan/zoom, and collision-free stacking
  */
 
 class TimelineManager {
@@ -9,7 +9,7 @@ class TimelineManager {
       timeRange: config.timeRange || { start: 1640, end: 1820 },
       regions: config.regions || [
         'North America',
-        'South America', 
+        'South America',
         'Europe',
         'Africa',
         'Middle East',
@@ -27,21 +27,38 @@ class TimelineManager {
         { name: 'Exploration & Discovery', color: '#DC2626' }
       ]
     };
-    
+
     this.figures = [];
     this.events = [];
     this.filteredFigures = [];
-    this.zoomLevel = 1;
-    
+
+    // Viewport state
+    this.fullStart = this.config.timeRange.start;
+    this.fullEnd = this.config.timeRange.end;
+    this.viewStart = this.fullStart;
+    this.viewEnd = this.fullEnd;
+    this.minViewSpan = 40;
+    this.maxViewSpan = 2600;
+
+    // Pan state
+    this.isPanning = false;
+    this.panStartX = 0;
+    this.panStartViewStart = 0;
+    this.panStartViewEnd = 0;
+    this.panDragDistance = 0;
+
+    // Stacking cache: { regionName: [{ figure, row }] }
+    this.stackingCache = {};
+
     this.init();
   }
-  
+
   init() {
     this.setupEventListeners();
     this.renderLegend();
     this.renderTimelineStructure();
   }
-  
+
   setupEventListeners() {
     // Search functionality
     const searchInput = document.getElementById('timeline-search');
@@ -50,19 +67,31 @@ class TimelineManager {
         this.handleSearch(e.target.value);
       });
     }
-    
+
     // Zoom controls
     const zoomInBtn = document.getElementById('zoom-in');
     const zoomOutBtn = document.getElementById('zoom-out');
-    
+
     if (zoomInBtn) {
-      zoomInBtn.addEventListener('click', () => this.handleZoom(0.25));
+      zoomInBtn.addEventListener('click', () => this.handleZoom(-0.2));
     }
-    
     if (zoomOutBtn) {
-      zoomOutBtn.addEventListener('click', () => this.handleZoom(-0.25));
+      zoomOutBtn.addEventListener('click', () => this.handleZoom(0.2));
     }
-    
+
+    // Mouse wheel zoom on timeline card
+    const timelineCard = document.querySelector('.timeline-card');
+    if (timelineCard) {
+      timelineCard.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.15 : -0.15;
+        // Zoom centered on cursor position
+        const rect = timelineCard.getBoundingClientRect();
+        const fraction = (e.clientX - rect.left) / rect.width;
+        this.handleZoom(delta, fraction);
+      }, { passive: false });
+    }
+
     // Close modal on escape key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -70,25 +99,71 @@ class TimelineManager {
       }
     });
   }
-  
+
+  setupPanListeners() {
+    const timelineCard = document.querySelector('.timeline-card');
+    if (!timelineCard) return;
+
+    timelineCard.style.cursor = 'grab';
+
+    const onMouseDown = (e) => {
+      // Ignore clicks on buttons, modals, etc.
+      if (e.target.closest('.modal-overlay') || e.target.closest('button')) return;
+      this.isPanning = true;
+      this.panStartX = e.clientX;
+      this.panStartViewStart = this.viewStart;
+      this.panStartViewEnd = this.viewEnd;
+      this.panDragDistance = 0;
+      timelineCard.classList.add('panning');
+    };
+
+    const onMouseMove = (e) => {
+      if (!this.isPanning) return;
+      const dx = e.clientX - this.panStartX;
+      this.panDragDistance = Math.abs(dx);
+
+      // Convert pixel delta to year delta
+      const trackEl = document.querySelector('.timeline-track');
+      if (!trackEl) return;
+      const trackWidth = trackEl.getBoundingClientRect().width;
+      const viewSpan = this.panStartViewEnd - this.panStartViewStart;
+      const yearDelta = -(dx / trackWidth) * viewSpan;
+
+      this.viewStart = this.panStartViewStart + yearDelta;
+      this.viewEnd = this.panStartViewEnd + yearDelta;
+      this.clampViewport();
+      this.renderViewport();
+    };
+
+    const onMouseUp = () => {
+      if (!this.isPanning) return;
+      this.isPanning = false;
+      timelineCard.classList.remove('panning');
+    };
+
+    timelineCard.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }
+
   renderLegend() {
     const legendContainer = document.getElementById('legend-items');
     if (!legendContainer) return;
-    
+
     const legendHTML = this.config.categories.map(cat => `
       <div class="legend-item">
         <div class="legend-color" style="background-color: ${cat.color};"></div>
         <span class="legend-text">${cat.name}</span>
       </div>
     `).join('');
-    
+
     legendContainer.innerHTML = legendHTML;
   }
-  
+
   renderTimelineStructure() {
     const timelineGrid = document.getElementById('timeline-grid');
     if (!timelineGrid) return;
-    
+
     const gridHTML = this.config.regions.map(region => `
       <div class="timeline-row" data-region="${region}">
         <div class="row-content">
@@ -100,155 +175,355 @@ class TimelineManager {
             <span class="region-name">${region}</span>
           </div>
           <div class="timeline-track" id="track-${region.replace(/\s+/g, '-')}">
-            ${this.renderGridLines()}
           </div>
         </div>
       </div>
     `).join('');
-    
+
     timelineGrid.innerHTML = gridHTML;
   }
-  
-  renderGridLines() {
-    const yearSpan = this.config.timeRange.end - this.config.timeRange.start;
-    const gridLines = [];
-    
-    for (let i = 0; i <= Math.floor(yearSpan / 10); i++) {
-      const position = (i * 10 / yearSpan) * 100;
-      gridLines.push(`<div class="grid-line" style="left: ${position}%;"></div>`);
-    }
-    
-    return gridLines.join('');
-  }
-  
-  renderYearMarkers() {
-    const yearsContainer = document.getElementById('timeline-years');
-    if (!yearsContainer) return;
-    
-    const yearSpan = this.config.timeRange.end - this.config.timeRange.start;
-    const markersHTML = [];
-    
-    for (let i = 0; i <= Math.floor(yearSpan / 20); i++) {
-      const year = this.config.timeRange.start + (i * 20);
-      const position = this.getPosition(year);
 
-      markersHTML.push(`
-        <div class="year-marker" style="left: ${position}%;">
-          <div class="year-tick"></div>
-          <span class="year-label">${year}</span>
-        </div>
-      `);
+  // --- Viewport-relative positioning ---
+
+  getViewportPosition(year) {
+    const viewSpan = this.viewEnd - this.viewStart;
+    return ((year - this.viewStart) / viewSpan) * 100;
+  }
+
+  getViewportWidth(startYear, endYear) {
+    const viewSpan = this.viewEnd - this.viewStart;
+    return ((endYear - startYear) / viewSpan) * 100;
+  }
+
+  clampViewport() {
+    const span = this.viewEnd - this.viewStart;
+    const absMin = -500;
+    const absMax = 2030;
+
+    if (this.viewStart < absMin) {
+      this.viewStart = absMin;
+      this.viewEnd = absMin + span;
     }
-    
-    yearsContainer.innerHTML = markersHTML.join('');
+    if (this.viewEnd > absMax) {
+      this.viewEnd = absMax;
+      this.viewStart = absMax - span;
+    }
   }
-  
-  // Calculate position percentage based on year
-  getPosition(year) {
-    const yearSpan = this.config.timeRange.end - this.config.timeRange.start;
-    return ((year - this.config.timeRange.start) / yearSpan) * 100;
+
+  // --- Stacking algorithm ---
+
+  computeStacking() {
+    this.stackingCache = {};
+
+    // Group filtered figures by region
+    const byRegion = {};
+    this.filteredFigures.forEach(figure => {
+      if (!byRegion[figure.region]) byRegion[figure.region] = [];
+      byRegion[figure.region].push(figure);
+    });
+
+    // For each region, sort by birth year and greedily assign rows
+    for (const region of Object.keys(byRegion)) {
+      const figures = byRegion[region].slice().sort((a, b) => a.birth - b.birth);
+      const rows = []; // rows[i] = end year of last figure in that row
+
+      const assignments = [];
+      for (const fig of figures) {
+        let placed = false;
+        for (let r = 0; r < rows.length; r++) {
+          // Add a small gap (2 years) to prevent visual overlap
+          if (fig.birth >= rows[r] + 2) {
+            rows[r] = fig.death;
+            assignments.push({ figure: fig, row: r });
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) {
+          rows.push(fig.death);
+          assignments.push({ figure: fig, row: rows.length - 1 });
+        }
+      }
+
+      this.stackingCache[region] = assignments;
+    }
   }
-  
-  // Calculate width percentage based on birth and death years
-  getWidth(birth, death) {
-    const yearSpan = this.config.timeRange.end - this.config.timeRange.start;
-    return ((death - birth) / yearSpan) * 100;
+
+  updateTrackHeights() {
+    const viewSpan = this.viewEnd - this.viewStart;
+    const barHeight = this.getScaledBarHeight();
+    const barGap = 4;
+
+    for (const region of this.config.regions) {
+      const track = document.getElementById(`track-${region.replace(/\s+/g, '-')}`);
+      if (!track) continue;
+
+      const assignments = this.stackingCache[region] || [];
+      let maxRow = 0;
+      assignments.forEach(a => { if (a.row > maxRow) maxRow = a.row; });
+
+      const rowCount = assignments.length > 0 ? maxRow + 1 : 1;
+      const minH = rowCount * (barHeight + barGap) + 16;
+      track.style.minHeight = Math.max(minH, 50) + 'px';
+    }
   }
-  
-  // Render a historical figure on the timeline
-  renderFigure(figure, index) {
+
+  getScaledBarHeight() {
+    const viewSpan = this.viewEnd - this.viewStart;
+    // Scale bar height: larger when zoomed in, smaller when zoomed out
+    if (viewSpan < 100) return 22;
+    if (viewSpan < 300) return 20;
+    if (viewSpan < 600) return 18;
+    if (viewSpan < 1000) return 16;
+    return 14;
+  }
+
+  getScaledFontSize() {
+    const viewSpan = this.viewEnd - this.viewStart;
+    if (viewSpan < 100) return 0.8;
+    if (viewSpan < 300) return 0.75;
+    if (viewSpan < 600) return 0.7;
+    if (viewSpan < 1000) return 0.65;
+    return 0.6;
+  }
+
+  // --- Rendering ---
+
+  renderFigure(figure, row) {
     const track = document.getElementById(`track-${figure.region.replace(/\s+/g, '-')}`);
     if (!track) return;
-    
-    const left = this.getPosition(figure.birth);
-    const width = this.getWidth(figure.birth, figure.death);
-    const top = index * 25 + 10; // Stack figures vertically
-    
+
+    const left = this.getViewportPosition(figure.birth);
+    const width = this.getViewportWidth(figure.birth, figure.death);
+
+    // Viewport culling: skip if completely outside [-5%, 105%]
+    if (left + width < -5 || left > 105) return;
+
+    const barHeight = this.getScaledBarHeight();
+    const barGap = 4;
+    const top = row * (barHeight + barGap) + 8;
+    const fontSize = this.getScaledFontSize();
+
     const figureElement = document.createElement('div');
     figureElement.className = 'figure-bar';
     figureElement.style.left = `${left}%`;
     figureElement.style.width = `${width}%`;
     figureElement.style.top = `${top}px`;
+    figureElement.style.height = `${barHeight}px`;
     figureElement.style.backgroundColor = figure.color;
     figureElement.dataset.figureId = figure.id;
-    
+
+    const yearDisplay = this.formatYear(figure.birth) + '-' + this.formatYear(figure.death);
+
     figureElement.innerHTML = `
-      <div class="figure-content">
+      <div class="figure-content" style="font-size: ${fontSize}rem;">
         <span class="figure-name">${figure.name}</span>
-        <span class="figure-years">(${figure.birth}-${figure.death})</span>
+        <span class="figure-years">(${yearDisplay})</span>
       </div>
     `;
-    
-    figureElement.addEventListener('click', () => this.showFigureModal(figure));
-    
+
+    figureElement.addEventListener('click', (e) => {
+      // Suppress click if it was a pan drag
+      if (this.panDragDistance > 5) return;
+      this.showFigureModal(figure);
+    });
+
     track.appendChild(figureElement);
   }
-  
-  // Render an event marker on the timeline
-  renderEvent(event) {
-    const yearsContainer = document.getElementById('timeline-years');
-    if (!yearsContainer) return;
-    
-    const position = this.getPosition(event.year);
-    
-    const eventElement = document.createElement('div');
-    eventElement.className = 'event-marker';
-    eventElement.style.left = `${position}%`;
-    eventElement.style.backgroundColor = event.color;
-    eventElement.dataset.eventId = event.id;
-    
-    eventElement.innerHTML = `
-      <div class="event-dot" style="background-color: ${event.color};"></div>
-    `;
-    
-    eventElement.addEventListener('click', () => this.showEventModal(event));
-    
-    yearsContainer.appendChild(eventElement);
-  }
-  
-  // Load and render all figures from your Firestore data
-  loadFigures(figures) {
-    this.figures = figures;
-    this.filteredFigures = figures;
-    this.renderAllFigures();
-  }
-  
-  // Load and render all events
-  loadEvents(events) {
-    this.events = events;
-    this.renderYearMarkers();
-    events.forEach(event => this.renderEvent(event));
-  }
-  
+
   renderAllFigures() {
-    // Clear existing figures
+    // Clear existing figure bars from all tracks
     this.config.regions.forEach(region => {
       const track = document.getElementById(`track-${region.replace(/\s+/g, '-')}`);
       if (track) {
-        // Remove all figure bars, keep grid lines
         const figureBars = track.querySelectorAll('.figure-bar');
         figureBars.forEach(bar => bar.remove());
       }
     });
-    
-    // Group figures by region
-    const figuresByRegion = {};
-    this.filteredFigures.forEach(figure => {
-      if (!figuresByRegion[figure.region]) {
-        figuresByRegion[figure.region] = [];
+
+    // Render from stacking cache
+    for (const region of Object.keys(this.stackingCache)) {
+      const assignments = this.stackingCache[region];
+      for (const { figure, row } of assignments) {
+        this.renderFigure(figure, row);
       }
-      figuresByRegion[figure.region].push(figure);
-    });
-    
-    // Render each region's figures
-    Object.keys(figuresByRegion).forEach(region => {
-      figuresByRegion[region].forEach((figure, index) => {
-        this.renderFigure(figure, index);
-      });
+    }
+  }
+
+  renderGridLines() {
+    const viewSpan = this.viewEnd - this.viewStart;
+    let interval;
+    if (viewSpan <= 50) interval = 5;
+    else if (viewSpan <= 150) interval = 10;
+    else if (viewSpan <= 400) interval = 20;
+    else if (viewSpan <= 800) interval = 50;
+    else interval = 100;
+
+    this.config.regions.forEach(region => {
+      const track = document.getElementById(`track-${region.replace(/\s+/g, '-')}`);
+      if (!track) return;
+
+      // Remove old grid lines
+      track.querySelectorAll('.grid-line').forEach(el => el.remove());
+
+      const firstLine = Math.ceil(this.viewStart / interval) * interval;
+      for (let year = firstLine; year <= this.viewEnd; year += interval) {
+        const pos = this.getViewportPosition(year);
+        if (pos < -1 || pos > 101) continue;
+        const line = document.createElement('div');
+        line.className = 'grid-line';
+        line.style.left = `${pos}%`;
+        track.appendChild(line);
+      }
     });
   }
-  
-  // Search functionality
+
+  renderYearMarkers() {
+    const yearsContainer = document.getElementById('timeline-years');
+    if (!yearsContainer) return;
+
+    // Remove only year markers (keep event markers)
+    yearsContainer.querySelectorAll('.year-marker').forEach(el => el.remove());
+
+    const viewSpan = this.viewEnd - this.viewStart;
+    let interval;
+    if (viewSpan <= 50) interval = 5;
+    else if (viewSpan <= 150) interval = 10;
+    else if (viewSpan <= 400) interval = 20;
+    else if (viewSpan <= 800) interval = 50;
+    else interval = 100;
+
+    const firstMarker = Math.ceil(this.viewStart / interval) * interval;
+    const markersHTML = [];
+
+    for (let year = firstMarker; year <= this.viewEnd; year += interval) {
+      const position = this.getViewportPosition(year);
+      if (position < -1 || position > 101) continue;
+      const label = this.formatYear(year);
+      markersHTML.push(`
+        <div class="year-marker" style="left: ${position}%;">
+          <div class="year-tick"></div>
+          <span class="year-label">${label}</span>
+        </div>
+      `);
+    }
+
+    // Preserve event markers
+    const eventMarkers = yearsContainer.querySelectorAll('.event-marker');
+    const eventHTML = Array.from(eventMarkers).map(el => el.outerHTML).join('');
+
+    yearsContainer.innerHTML = markersHTML.join('') + eventHTML;
+
+    // Re-attach event marker click handlers
+    this.reattachEventMarkerListeners();
+  }
+
+  reattachEventMarkerListeners() {
+    const yearsContainer = document.getElementById('timeline-years');
+    if (!yearsContainer) return;
+
+    yearsContainer.querySelectorAll('.event-marker').forEach(marker => {
+      const eventId = marker.dataset.eventId;
+      const event = this.events.find(e => e.id === eventId);
+      if (event) {
+        marker.addEventListener('click', () => this.showEventModal(event));
+      }
+    });
+  }
+
+  renderAllEvents() {
+    const yearsContainer = document.getElementById('timeline-years');
+    if (!yearsContainer) return;
+
+    // Remove old event markers
+    yearsContainer.querySelectorAll('.event-marker').forEach(el => el.remove());
+
+    this.events.forEach(event => {
+      const position = this.getViewportPosition(event.year);
+      // Cull events outside viewport
+      if (position < -2 || position > 102) return;
+
+      const eventElement = document.createElement('div');
+      eventElement.className = 'event-marker';
+      eventElement.style.left = `${position}%`;
+      eventElement.style.backgroundColor = event.color;
+      eventElement.dataset.eventId = event.id;
+
+      eventElement.innerHTML = `
+        <div class="event-dot" style="background-color: ${event.color};"></div>
+      `;
+
+      eventElement.addEventListener('click', () => this.showEventModal(event));
+      yearsContainer.appendChild(eventElement);
+    });
+  }
+
+  formatYear(year) {
+    if (year < 0) return Math.abs(year) + ' BC';
+    return String(year);
+  }
+
+  // --- Master render ---
+
+  renderViewport() {
+    this.renderAllFigures();
+    this.renderGridLines();
+    this.renderYearMarkers();
+    this.renderAllEvents();
+    this.updateTrackHeights();
+    this.updateZoomDisplay();
+  }
+
+  updateZoomDisplay() {
+    const fullSpan = this.fullEnd - this.fullStart;
+    const viewSpan = this.viewEnd - this.viewStart;
+    const percentage = Math.round((fullSpan / viewSpan) * 100);
+
+    const zoomLevelDisplay = document.getElementById('zoom-level');
+    if (zoomLevelDisplay) {
+      zoomLevelDisplay.textContent = `${percentage}%`;
+    }
+  }
+
+  // --- Zoom ---
+
+  handleZoom(delta, centerFraction) {
+    const viewSpan = this.viewEnd - this.viewStart;
+    const change = viewSpan * delta;
+
+    // Default to center if no fraction provided
+    if (centerFraction === undefined) centerFraction = 0.5;
+
+    const newStart = this.viewStart - change * centerFraction;
+    const newEnd = this.viewEnd + change * (1 - centerFraction);
+    const newSpan = newEnd - newStart;
+
+    if (newSpan < this.minViewSpan || newSpan > this.maxViewSpan) return;
+
+    this.viewStart = newStart;
+    this.viewEnd = newEnd;
+    this.clampViewport();
+    this.computeStacking();
+    this.renderViewport();
+  }
+
+  // --- Data loading ---
+
+  loadFigures(figures) {
+    this.figures = figures;
+    this.filteredFigures = figures;
+    this.computeStacking();
+    this.renderViewport();
+    this.setupPanListeners();
+  }
+
+  loadEvents(events) {
+    this.events = events;
+    this.renderViewport();
+  }
+
+  // --- Search ---
+
   handleSearch(searchTerm) {
     if (!searchTerm.trim()) {
       this.filteredFigures = this.figures;
@@ -257,28 +532,29 @@ class TimelineManager {
         figure.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    this.renderAllFigures();
+    this.computeStacking();
+    this.renderViewport();
   }
-  
-  // Zoom functionality (for future implementation)
-  handleZoom(delta) {
-    this.zoomLevel = Math.max(0.5, Math.min(2, this.zoomLevel + delta));
-    
-    const zoomLevelDisplay = document.getElementById('zoom-level');
-    if (zoomLevelDisplay) {
-      zoomLevelDisplay.textContent = `${Math.round(this.zoomLevel * 100)}%`;
-    }
-    
-    // TODO: Implement actual zoom transformation
-    // This would involve scaling the timeline and adjusting positions
+
+  // --- Time range ---
+
+  updateTimeRange(start, end) {
+    this.config.timeRange = { start, end };
+    this.fullStart = start;
+    this.fullEnd = end;
+    this.viewStart = start;
+    this.viewEnd = end;
+    this.renderTimelineStructure();
+    this.computeStacking();
+    this.renderViewport();
   }
-  
-  // Show modal with figure details
+
+  // --- Modals ---
+
   showFigureModal(figure) {
     const modal = this.createModal('figure', figure);
     document.body.appendChild(modal);
-    
-    // Add click outside to close
+
     const overlay = modal.querySelector('.modal-overlay');
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
@@ -286,12 +562,11 @@ class TimelineManager {
       }
     });
   }
-  
-  // Show modal with event details
+
   showEventModal(event) {
     const modal = this.createModal('event', event);
     document.body.appendChild(modal);
-    
+
     const overlay = modal.querySelector('.modal-overlay');
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
@@ -299,11 +574,14 @@ class TimelineManager {
       }
     });
   }
-  
+
   createModal(type, data) {
     const modalDiv = document.createElement('div');
     modalDiv.id = 'timeline-modal';
-    
+
+    const birthDisplay = this.formatYear(data.birth || data.year);
+    const deathDisplay = data.death ? this.formatYear(data.death) : '';
+
     if (type === 'figure') {
       modalDiv.innerHTML = `
         <div class="modal-overlay">
@@ -322,7 +600,7 @@ class TimelineManager {
                       <svg class="modal-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                       </svg>
-                      <span>${data.birth} - ${data.death}</span>
+                      <span>${birthDisplay} - ${deathDisplay}</span>
                     </div>
                     <div class="modal-meta-item">
                       <svg class="modal-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -403,22 +681,15 @@ class TimelineManager {
         </div>
       `;
     }
-    
+
     return modalDiv;
   }
-  
+
   closeModal() {
     const modal = document.getElementById('timeline-modal');
     if (modal) {
       modal.remove();
     }
-  }
-
-  // Update the time range and re-render the grid structure.
-  updateTimeRange(start, end) {
-    this.config.timeRange = { start, end };
-    this.renderTimelineStructure();
-    this.renderYearMarkers();
   }
 }
 
