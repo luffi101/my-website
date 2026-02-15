@@ -358,6 +358,7 @@ body {
   flex: 1;
   position: relative;
   min-height: 5rem;
+  overflow: hidden;
 }
 
 /* Grid Lines */
@@ -386,6 +387,35 @@ body {
   transform: scaleY(1.15);
   box-shadow: var(--shadow-md);
   z-index: 10;
+}
+
+.figure-bar.figure-dot {
+  border-radius: 50%;
+  min-width: 0;
+}
+
+.figure-bar.figure-dot:hover {
+  transform: scale(1.8);
+}
+
+.figure-bar .figure-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-text-primary);
+  color: white;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.65rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.figure-bar:hover .figure-tooltip {
+  display: block;
 }
 
 .figure-content {

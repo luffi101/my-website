@@ -289,15 +289,38 @@ class TimelineManager {
 
   // --- Rendering ---
 
+  // Build abbreviated name variants for a figure
+  getNameVariants(name) {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) {
+      return {
+        full: name,
+        abbreviated: name,
+        initials: name.charAt(0) + '.'
+      };
+    }
+    const firstName = parts[0];
+    const lastName = parts[parts.length - 1];
+    return {
+      full: name,
+      abbreviated: firstName.charAt(0) + '. ' + lastName,
+      initials: firstName.charAt(0) + '.' + lastName.charAt(0) + '.'
+    };
+  }
+
   renderFigure(figure, row) {
     const track = document.getElementById(`track-${figure.region.replace(/\s+/g, '-')}`);
     if (!track) return;
 
     const left = this.getViewportPosition(figure.birth);
-    const width = this.getViewportWidth(figure.birth, figure.death);
+    const widthPct = this.getViewportWidth(figure.birth, figure.death);
 
     // Viewport culling: skip if completely outside [-5%, 105%]
-    if (left + width < -5 || left > 105) return;
+    if (left + widthPct < -5 || left > 105) return;
+
+    // Compute approximate pixel width for tiered display
+    const trackWidth = track.getBoundingClientRect().width || 800;
+    const pixelWidth = (widthPct / 100) * trackWidth;
 
     const barHeight = this.getScaledBarHeight();
     const barGap = 4;
@@ -305,22 +328,72 @@ class TimelineManager {
     const fontSize = this.getScaledFontSize();
 
     const figureElement = document.createElement('div');
-    figureElement.className = 'figure-bar';
-    figureElement.style.left = `${left}%`;
-    figureElement.style.width = `${width}%`;
-    figureElement.style.top = `${top}px`;
-    figureElement.style.height = `${barHeight}px`;
-    figureElement.style.backgroundColor = figure.color;
     figureElement.dataset.figureId = figure.id;
+    figureElement.style.top = `${top}px`;
+    figureElement.style.backgroundColor = figure.color;
 
     const yearDisplay = this.formatYear(figure.birth) + '-' + this.formatYear(figure.death);
+    const variants = this.getNameVariants(figure.name);
 
-    figureElement.innerHTML = `
-      <div class="figure-content" style="font-size: ${fontSize}rem;">
-        <span class="figure-name">${figure.name}</span>
-        <span class="figure-years">(${yearDisplay})</span>
-      </div>
-    `;
+    if (pixelWidth < 8) {
+      // Dot mode: tiny colored circle with hover tooltip
+      figureElement.className = 'figure-bar figure-dot';
+      const dotSize = Math.max(barHeight * 0.6, 6);
+      figureElement.style.left = `${left}%`;
+      figureElement.style.width = `${dotSize}px`;
+      figureElement.style.height = `${dotSize}px`;
+      figureElement.style.top = `${top + (barHeight - dotSize) / 2}px`;
+      figureElement.innerHTML = `<span class="figure-tooltip">${figure.name} (${yearDisplay})</span>`;
+    } else if (pixelWidth < 40) {
+      // Initials mode: show initials with tooltip
+      figureElement.className = 'figure-bar';
+      figureElement.style.left = `${left}%`;
+      figureElement.style.width = `${widthPct}%`;
+      figureElement.style.minWidth = '20px';
+      figureElement.style.height = `${barHeight}px`;
+      figureElement.innerHTML = `
+        <div class="figure-content" style="font-size: ${fontSize}rem; justify-content: center;">
+          <span class="figure-name">${variants.initials}</span>
+        </div>
+        <span class="figure-tooltip">${figure.name} (${yearDisplay})</span>
+      `;
+    } else if (pixelWidth < 80) {
+      // Abbreviated mode: "B. Franklin"
+      figureElement.className = 'figure-bar';
+      figureElement.style.left = `${left}%`;
+      figureElement.style.width = `${widthPct}%`;
+      figureElement.style.height = `${barHeight}px`;
+      figureElement.innerHTML = `
+        <div class="figure-content" style="font-size: ${fontSize}rem;">
+          <span class="figure-name">${variants.abbreviated}</span>
+        </div>
+        <span class="figure-tooltip">${figure.name} (${yearDisplay})</span>
+      `;
+    } else if (pixelWidth < 150) {
+      // Medium mode: abbreviated name + years
+      figureElement.className = 'figure-bar';
+      figureElement.style.left = `${left}%`;
+      figureElement.style.width = `${widthPct}%`;
+      figureElement.style.height = `${barHeight}px`;
+      figureElement.innerHTML = `
+        <div class="figure-content" style="font-size: ${fontSize}rem;">
+          <span class="figure-name">${variants.abbreviated}</span>
+          <span class="figure-years">(${yearDisplay})</span>
+        </div>
+      `;
+    } else {
+      // Full mode: "Benjamin Franklin (1706-1790)"
+      figureElement.className = 'figure-bar';
+      figureElement.style.left = `${left}%`;
+      figureElement.style.width = `${widthPct}%`;
+      figureElement.style.height = `${barHeight}px`;
+      figureElement.innerHTML = `
+        <div class="figure-content" style="font-size: ${fontSize}rem;">
+          <span class="figure-name">${variants.full}</span>
+          <span class="figure-years">(${yearDisplay})</span>
+        </div>
+      `;
+    }
 
     figureElement.addEventListener('click', (e) => {
       // Suppress click if it was a pan drag
