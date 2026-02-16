@@ -3,144 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel - Edit Records</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Admin Panel - Historical Data Management</title>
+  <link rel="stylesheet" href="styles.css">
+
   <!-- Firebase SDK (compat versions) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-  <!-- Firebase Config -->
+
+  <!-- PapaParse for CSV import/export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+  <!-- Firebase Config & Auth -->
   <script src="firebase-config.js"></script>
-  <!-- Auth -->
   <script src="auth.js"></script>
-  <!-- Admin JS -->
-  <script src="admin.js" defer></script>
-  <style>
-    /* Minimal inline styling; you can move these rules to style.css */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background: #f2f2f2;
-    }
-    .edit-button {
-      margin: 2px;
-    }
-    #editFormContainer {
-      border: 1px solid #ccc;
-      padding: 15px;
-      background: #f9f9f9;
-      margin-top: 20px;
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Admin Panel - Edit Records</h1>
-      <nav>
-        <a href="index.html">Home</a>
-        <a href="journal.html">Journal</a>
-        <a href="timeline.html">Timeline</a>
-        <a href="admin.html">Admin</a>
+  <!-- Header -->
+  <header class="timeline-header">
+    <div class="header-top">
+      <div class="header-title">
+        <h1>Admin Panel</h1>
+        <p>Manage historical figures and global events</p>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="journal.html" class="nav-link">Journal</a>
+        <a href="timeline.html" class="nav-link">Timeline</a>
+        <a href="admin.html" class="nav-link active">Admin</a>
       </nav>
       <div id="auth-info"></div>
-    </header>
-    
-    <!-- Global Events Table -->
-    <section id="global-events-section">
-      <h2>Global Events</h2>
-      <table id="globalEventsTable">
-        <thead>
-          <tr>
-            <th>Event Name</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Region</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Rows will be inserted dynamically -->
-        </tbody>
-      </table>
-    </section>
-
-    <!-- Historical Figures Table -->
-    <section id="historical-figures-section">
-      <h2>Historical Figures</h2>
-      <table id="historicalFiguresTable">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Date of Birth</th>
-            <th>Date of Death</th>
-            <th>Nationality</th>
-            <th>Description</th>
-            <th>Region</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Rows will be inserted dynamically -->
-        </tbody>
-      </table>
-    </section>
-
-    <!-- Edit Form Container -->
-    <div id="editFormContainer" style="display: none;">
-      <h3>Edit Record</h3>
-      <form id="editForm">
-        <!-- Hidden fields to store document ID and collection name -->
-        <input type="hidden" id="docId">
-        <input type="hidden" id="collectionName">
-
-        <!-- Fields for Global Events -->
-        <div id="globalEventsEditFields" style="display: none;">
-          <label for="editEventName">Event Name:</label>
-          <input type="text" id="editEventName" required><br><br>
-          <label for="editEventDate">Start Date:</label>
-          <input type="date" id="editEventDate" required><br><br>
-          <label for="editEventEndDate">End Date:</label>
-          <input type="date" id="editEventEndDate"><br><br>
-          <label for="editEventDescription">Description:</label>
-          <textarea id="editEventDescription" rows="3" style="width:100%;"></textarea><br><br>
-          <label for="editEventCategory">Category:</label>
-          <input type="text" id="editEventCategory"><br><br>
-          <label for="editEventRegion">Region:</label>
-          <input type="text" id="editEventRegion"><br><br>
-        </div>
-
-        <!-- Fields for Historical Figures -->
-        <div id="historicalFiguresEditFields" style="display: none;">
-          <label for="editName">Name:</label>
-          <input type="text" id="editName" required><br><br>
-          <label for="editDateOfBirth">Date of Birth:</label>
-          <input type="date" id="editDateOfBirth" required><br><br>
-          <label for="editDateOfDeath">Date of Death:</label>
-          <input type="date" id="editDateOfDeath" required><br><br>
-          <label for="editNationality">Nationality:</label>
-          <input type="text" id="editNationality"><br><br>
-          <label for="editDescription">Description:</label>
-          <textarea id="editDescription" rows="3" style="width:100%;"></textarea><br><br>
-          <label for="editRegion">Region:</label>
-          <input type="text" id="editRegion"><br><br>
-        </div>
-
-        <button type="submit">Save Changes</button>
-        <button type="button" onclick="closeEditForm()">Cancel</button>
-      </form>
     </div>
-  </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="admin-container">
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="figures">Historical Figures</button>
+      <button class="admin-tab" data-tab="events">Global Events</button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="admin-toolbar">
+      <div class="search-container">
+        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <input type="text" id="admin-search" class="search-input" placeholder="Search records...">
+      </div>
+
+      <div class="admin-toolbar-group">
+        <select id="filter-category" class="admin-select">
+          <option value="">All Categories</option>
+          <option value="Politics & Military">Politics & Military</option>
+          <option value="Science">Science</option>
+          <option value="Economy">Economy</option>
+          <option value="Arts, Musics & Cultural">Arts, Musics & Cultural</option>
+          <option value="Literature">Literature</option>
+          <option value="Philosophy & Religion">Philosophy & Religion</option>
+          <option value="Social & Cultural Movement">Social & Cultural Movement</option>
+          <option value="Exploration & Discovery">Exploration & Discovery</option>
+        </select>
+        <select id="filter-region" class="admin-select">
+          <option value="">All Regions</option>
+          <option value="North America">North America</option>
+          <option value="South America">South America</option>
+          <option value="Europe">Europe</option>
+          <option value="Africa">Africa</option>
+          <option value="Middle East">Middle East</option>
+          <option value="East Asia">East Asia</option>
+          <option value="Australia">Australia</option>
+        </select>
+      </div>
+
+      <div class="admin-toolbar-group">
+        <button id="btn-add-new" class="admin-btn admin-btn-primary">+ Add New</button>
+        <label class="admin-file-label" id="csv-import-label">
+          <input type="file" id="csv-file-input" class="admin-file-input" accept=".csv">
+          Import CSV
+        </label>
+        <button id="btn-export-csv" class="admin-btn admin-btn-secondary">Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div id="admin-stats" class="admin-stats"></div>
+
+    <!-- Table -->
+    <div class="admin-table-wrapper">
+      <table class="admin-table">
+        <thead id="admin-thead"></thead>
+        <tbody id="admin-tbody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal Container (populated by JS) -->
+  <div id="modal-container"></div>
+
+  <!-- Admin JS -->
+  <script src="admin.js"></script>
+
   <footer>
     <p>&copy; <span id="currentYear"></span> Edward C Yang. All rights reserved.</p>
   </footer>
