@@ -623,10 +623,6 @@ class AdminManager {
     // Close handlers
     document.getElementById('modal-close-btn').addEventListener('click', () => this.closeModal());
     document.getElementById('modal-cancel-btn').addEventListener('click', () => this.closeModal());
-    document.getElementById('admin-modal').addEventListener('click', (e) => {
-      if (e.target.id === 'admin-modal') this.closeModal();
-    });
-
     // Escape key
     const escHandler = (e) => {
       if (e.key === 'Escape') {
