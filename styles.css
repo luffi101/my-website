@@ -9,26 +9,26 @@
   --color-primary-light: #DBEAFE;
   --color-primary-dark: #1E40AF;
   
-  --color-bg-main: #F8FAFC;
-  --color-bg-card: #FFFFFF;
+  --color-bg-main: #faf9f6;
+  --color-bg-card: #f5f5f0;
   --color-bg-header: #FFFFFF;
-  
+
   --color-text-primary: #1E293B;
   --color-text-secondary: #64748B;
   --color-text-muted: #94A3B8;
-  
-  --color-border: #E2E8F0;
-  --color-border-light: #F1F5F9;
-  
+
+  --color-border: #ddd8d0;
+  --color-border-light: #e8e6e0;
+
   /* Category Colors */
-  --color-politics: #EF4444;
-  --color-science: #3B82F6;
-  --color-economy: #10B981;
-  --color-arts: #EC4899;
-  --color-literature: #FBBF24;
-  --color-philosophy: #8B5CF6;
-  --color-social: #92400E;
-  --color-exploration: #DC2626;
+  --color-politics: #e85d5d;
+  --color-science: #5a92e8;
+  --color-economy: #3dbf8e;
+  --color-arts: #e066a8;
+  --color-literature: #f0be42;
+  --color-philosophy: #9a74e8;
+  --color-social: #a05820;
+  --color-exploration: #14B8A6;
   
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -63,7 +63,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: linear-gradient(to bottom right, #F8FAFC, #F1F5F9);
+  background: linear-gradient(to bottom right, #faf9f6, #f0ede6);
   color: var(--color-text-primary);
   line-height: 1.6;
   min-height: 100vh;
@@ -191,7 +191,7 @@ body {
 
 /* Legend */
 .legend-container {
-  background: white;
+  background: #f5f5f0;
   border-bottom: 1px solid var(--color-border);
   padding: var(--spacing-md) var(--spacing-xl);
 }
@@ -255,7 +255,7 @@ body {
 .timeline-years {
   position: relative;
   height: 3rem;
-  background: linear-gradient(to bottom, var(--color-bg-main), white);
+  background: linear-gradient(to bottom, #faf9f6, #f5f5f0);
   border-bottom: 1px solid var(--color-border);
   margin-left: 8rem;
   overflow: hidden;
@@ -334,7 +334,7 @@ body {
 .region-label {
   width: 8rem;
   flex-shrink: 0;
-  background: var(--color-bg-main);
+  background: #f0ede6;
   border-right: 1px solid var(--color-border);
   padding: var(--spacing-md);
   display: flex;
@@ -374,9 +374,10 @@ body {
 /* Historical Figure Bars */
 .figure-bar {
   position: absolute;
-  border-radius: var(--radius-sm);
+  border-radius: 4px;
   box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
   overflow: hidden;
@@ -419,7 +420,7 @@ body {
 }
 
 .figure-content {
-  padding: 0 var(--spacing-sm);
+  padding: 0 14px;
   height: 100%;
   display: flex;
   align-items: center;
@@ -430,7 +431,7 @@ body {
 .figure-name {
   font-size: 0.75rem;
   font-weight: 500;
-  color: white;
+  color: #1e3a5f;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -438,7 +439,7 @@ body {
 
 .figure-years {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(30, 58, 95, 0.75);
   margin-left: var(--spacing-xs);
   flex-shrink: 0;
 }

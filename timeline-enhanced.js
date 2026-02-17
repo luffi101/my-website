@@ -17,14 +17,14 @@ class TimelineManager {
         'Australia'
       ],
       categories: config.categories || [
-        { name: 'Politics & Military', color: '#EF4444' },
-        { name: 'Science', color: '#3B82F6' },
-        { name: 'Economy', color: '#10B981' },
-        { name: 'Arts, Musics & Cultural', color: '#EC4899' },
-        { name: 'Literature', color: '#FBBF24' },
-        { name: 'Philosophy & Religion', color: '#8B5CF6' },
-        { name: 'Social & Cultural Movement', color: '#92400E' },
-        { name: 'Exploration & Discovery', color: '#DC2626' }
+        { name: 'Politics & Military', color: '#e85d5d' },
+        { name: 'Science', color: '#5a92e8' },
+        { name: 'Economy', color: '#3dbf8e' },
+        { name: 'Arts, Musics & Cultural', color: '#e066a8' },
+        { name: 'Literature', color: '#f0be42' },
+        { name: 'Philosophy & Religion', color: '#9a74e8' },
+        { name: 'Social & Cultural Movement', color: '#a05820' },
+        { name: 'Exploration & Discovery', color: '#14B8A6' }
       ]
     };
 
@@ -222,25 +222,29 @@ class TimelineManager {
       byRegion[figure.region].push(figure);
     });
 
+    // Minimum display span so enlarged short-lived figures don't overlap
+    const minSpan = this.getMinDisplaySpan();
+
     // For each region, sort by birth year and greedily assign rows
     for (const region of Object.keys(byRegion)) {
       const figures = byRegion[region].slice().sort((a, b) => a.birth - b.birth);
-      const rows = []; // rows[i] = end year of last figure in that row
+      const rows = []; // rows[i] = effective end year of last figure in that row
 
       const assignments = [];
       for (const fig of figures) {
+        const effectiveEnd = Math.max(fig.death, fig.birth + minSpan);
         let placed = false;
         for (let r = 0; r < rows.length; r++) {
           // Add a small gap (2 years) to prevent visual overlap
           if (fig.birth >= rows[r] + 2) {
-            rows[r] = fig.death;
+            rows[r] = effectiveEnd;
             assignments.push({ figure: fig, row: r });
             placed = true;
             break;
           }
         }
         if (!placed) {
-          rows.push(fig.death);
+          rows.push(effectiveEnd);
           assignments.push({ figure: fig, row: rows.length - 1 });
         }
       }
@@ -268,23 +272,51 @@ class TimelineManager {
     }
   }
 
+  getMinDisplaySpan() {
+    // Minimum lifespan in years a figure bar will be rendered as.
+    // Adapts to zoom level so buttons stay visible even when very zoomed out.
+    const viewSpan = this.viewEnd - this.viewStart;
+    const trackEl = document.querySelector('.timeline-track');
+    const trackWidth = (trackEl && trackEl.getBoundingClientRect().width) || 800;
+
+    // Adaptive year-based minimum that scales with zoom
+    let minYears;
+    if (viewSpan > 2000) minYears = 150;
+    else if (viewSpan > 1000) minYears = 80;
+    else minYears = 40;
+
+    // Absolute pixel floor — never smaller than 50px
+    const pixelFloorYears = (50 / trackWidth) * viewSpan;
+
+    return Math.max(minYears, pixelFloorYears);
+  }
+
   getScaledBarHeight() {
     const viewSpan = this.viewEnd - this.viewStart;
     // Scale bar height: larger when zoomed in, smaller when zoomed out
-    if (viewSpan < 100) return 22;
-    if (viewSpan < 300) return 20;
-    if (viewSpan < 600) return 18;
-    if (viewSpan < 1000) return 16;
-    return 14;
+    if (viewSpan < 100) return 38;
+    if (viewSpan < 300) return 36;
+    if (viewSpan < 600) return 34;
+    if (viewSpan < 1000) return 34;
+    return 34;
   }
 
   getScaledFontSize() {
     const viewSpan = this.viewEnd - this.viewStart;
-    if (viewSpan < 100) return 0.8;
-    if (viewSpan < 300) return 0.75;
-    if (viewSpan < 600) return 0.7;
-    if (viewSpan < 1000) return 0.65;
-    return 0.6;
+    if (viewSpan < 100) return 1.05;
+    if (viewSpan < 300) return 1.0;
+    if (viewSpan < 600) return 1.0;
+    if (viewSpan < 1000) return 0.925;
+    return 0.875;
+  }
+
+  getTextColor(bgColor) {
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? '#1e3a5f' : '#ffffff';
   }
 
   // --- Rendering ---
@@ -313,7 +345,13 @@ class TimelineManager {
     if (!track) return;
 
     const left = this.getViewportPosition(figure.birth);
-    const widthPct = this.getViewportWidth(figure.birth, figure.death);
+    const naturalWidthPct = this.getViewportWidth(figure.birth, figure.death);
+
+    // Apply minimum display width
+    const minSpan = this.getMinDisplaySpan();
+    const minWidthPct = this.getViewportWidth(0, minSpan);
+    const isStretched = naturalWidthPct < minWidthPct;
+    const widthPct = Math.max(naturalWidthPct, minWidthPct);
 
     // Viewport culling: skip if completely outside [-5%, 105%]
     if (left + widthPct < -5 || left > 105) return;
@@ -334,6 +372,8 @@ class TimelineManager {
 
     const yearDisplay = this.formatYear(figure.birth) + '-' + this.formatYear(figure.death);
     const variants = this.getNameVariants(figure.name);
+    const textColor = this.getTextColor(figure.color);
+    const yearsAlpha = textColor === '#ffffff' ? 'rgba(255,255,255,0.85)' : 'rgba(30,58,95,0.75)';
 
     if (pixelWidth < 8) {
       // Dot mode: tiny colored circle with hover tooltip
@@ -352,8 +392,8 @@ class TimelineManager {
       figureElement.style.minWidth = '20px';
       figureElement.style.height = `${barHeight}px`;
       figureElement.innerHTML = `
-        <div class="figure-content" style="font-size: ${fontSize}rem; justify-content: center;">
-          <span class="figure-name">${variants.initials}</span>
+        <div class="figure-content" style="font-size: ${fontSize}rem; padding: 0 16px; line-height: 1.3; justify-content: center;">
+          <span class="figure-name" style="color: ${textColor};">${variants.initials}</span>
         </div>
         <span class="figure-tooltip">${figure.name} (${yearDisplay})</span>
       `;
@@ -364,8 +404,8 @@ class TimelineManager {
       figureElement.style.width = `${widthPct}%`;
       figureElement.style.height = `${barHeight}px`;
       figureElement.innerHTML = `
-        <div class="figure-content" style="font-size: ${fontSize}rem;">
-          <span class="figure-name">${variants.abbreviated}</span>
+        <div class="figure-content" style="font-size: ${fontSize}rem; padding: 0 16px; line-height: 1.3;">
+          <span class="figure-name" style="color: ${textColor};">${variants.abbreviated}</span>
         </div>
         <span class="figure-tooltip">${figure.name} (${yearDisplay})</span>
       `;
@@ -376,9 +416,9 @@ class TimelineManager {
       figureElement.style.width = `${widthPct}%`;
       figureElement.style.height = `${barHeight}px`;
       figureElement.innerHTML = `
-        <div class="figure-content" style="font-size: ${fontSize}rem;">
-          <span class="figure-name">${variants.abbreviated}</span>
-          <span class="figure-years">(${yearDisplay})</span>
+        <div class="figure-content" style="font-size: ${fontSize}rem; padding: 0 16px; line-height: 1.3;">
+          <span class="figure-name" style="color: ${textColor};">${variants.abbreviated}</span>
+          <span class="figure-years" style="color: ${yearsAlpha};">(${yearDisplay})</span>
         </div>
       `;
     } else {
@@ -388,11 +428,16 @@ class TimelineManager {
       figureElement.style.width = `${widthPct}%`;
       figureElement.style.height = `${barHeight}px`;
       figureElement.innerHTML = `
-        <div class="figure-content" style="font-size: ${fontSize}rem;">
-          <span class="figure-name">${variants.full}</span>
-          <span class="figure-years">(${yearDisplay})</span>
+        <div class="figure-content" style="font-size: ${fontSize}rem; padding: 0 16px; line-height: 1.3;">
+          <span class="figure-name" style="color: ${textColor};">${variants.full}</span>
+          <span class="figure-years" style="color: ${yearsAlpha};">(${yearDisplay})</span>
         </div>
       `;
+    }
+
+    // Visual indicator for buttons stretched beyond actual lifespan
+    if (isStretched && !figureElement.classList.contains('figure-dot')) {
+      figureElement.style.borderStyle = 'dashed';
     }
 
     figureElement.addEventListener('click', (e) => {
