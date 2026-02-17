@@ -73,15 +73,18 @@
 
     <!-- Legend -->
     <div class="legend-container">
-        <div class="legend-items">
-            <span class="legend-label">Categories:</span>
-            <div id="legend-items"></div>
-        </div>
+        <div class="legend-items" id="legend-items"></div>
+        <div id="filter-status" class="filter-status"></div>
     </div>
 
     <!-- Main Timeline -->
     <main class="timeline-main">
         <div class="timeline-card">
+            <!-- Viewport Indicator -->
+            <div id="viewport-indicator" class="viewport-indicator">
+                <span id="viewport-range" class="viewport-range-text"></span>
+            </div>
+
             <!-- Timeline Years Header -->
             <div id="timeline-years" class="timeline-years">
                 <!-- Year markers inserted by JavaScript -->
@@ -90,6 +93,14 @@
             <!-- Timeline Grid -->
             <div id="timeline-grid" class="timeline-grid">
                 <!-- Timeline rows inserted by JavaScript -->
+            </div>
+
+            <!-- Bottom Time Axis -->
+            <div id="timeline-years-bottom" class="timeline-years timeline-years-bottom">
+                <!-- Year markers inserted by JavaScript -->
+            </div>
+            <div id="viewport-indicator-bottom" class="viewport-indicator viewport-indicator-bottom">
+                <span id="viewport-range-bottom" class="viewport-range-text"></span>
             </div>
         </div>
     </main>

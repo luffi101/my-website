@@ -31,6 +31,7 @@ class TimelineManager {
     this.figures = [];
     this.events = [];
     this.filteredFigures = [];
+    this.activeCategory = null; // null = show all
 
     // Viewport state
     this.fullStart = this.config.timeRange.start;
@@ -38,7 +39,7 @@ class TimelineManager {
     this.viewStart = this.fullStart;
     this.viewEnd = this.fullEnd;
     this.minViewSpan = 180;
-    this.maxViewSpan = 2600;
+    this.maxViewSpan = 1000;
 
     // Pan state
     this.isPanning = false;
@@ -150,14 +151,64 @@ class TimelineManager {
     const legendContainer = document.getElementById('legend-items');
     if (!legendContainer) return;
 
-    const legendHTML = this.config.categories.map(cat => `
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: ${cat.color};"></div>
-        <span class="legend-text">${cat.name}</span>
-      </div>
-    `).join('');
+    const showAllBtn = `<button class="legend-item legend-show-all${!this.activeCategory ? ' legend-item-active' : ''}" data-category="__all__">Show All</button>`;
 
-    legendContainer.innerHTML = legendHTML;
+    const itemsHTML = this.config.categories.map(cat => {
+      const isActive = this.activeCategory === cat.name;
+      return `
+        <button class="legend-item legend-filter-btn${isActive ? ' legend-item-active' : ''}" data-category="${cat.name}">
+          <div class="legend-color" style="background-color: ${cat.color};"></div>
+          <span class="legend-text">${cat.name}</span>
+        </button>
+      `;
+    }).join('');
+
+    legendContainer.innerHTML = showAllBtn + itemsHTML;
+
+    // Attach click handlers
+    legendContainer.querySelectorAll('[data-category]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset.category;
+        if (cat === '__all__' || this.activeCategory === cat) {
+          this.activeCategory = null;
+        } else {
+          this.activeCategory = cat;
+        }
+        this.applyFilters();
+        this.renderLegend();
+      });
+    });
+
+    // Update filter status text
+    this.updateFilterStatus();
+  }
+
+  updateFilterStatus() {
+    const el = document.getElementById('filter-status');
+    if (!el) return;
+    if (!this.activeCategory) {
+      el.textContent = `Showing: All categories (${this.filteredFigures.length} figures)`;
+    } else {
+      el.textContent = `Showing: ${this.activeCategory} (${this.filteredFigures.length} figures)`;
+    }
+  }
+
+  applyFilters() {
+    const searchInput = document.getElementById('timeline-search');
+    const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+    let result = this.figures;
+
+    if (this.activeCategory) {
+      result = result.filter(f => f.category === this.activeCategory);
+    }
+    if (searchTerm) {
+      result = result.filter(f => f.name.toLowerCase().includes(searchTerm));
+    }
+
+    this.filteredFigures = result;
+    this.computeStacking();
+    this.renderViewport();
   }
 
   renderTimelineStructure() {
@@ -279,11 +330,8 @@ class TimelineManager {
     const trackEl = document.querySelector('.timeline-track');
     const trackWidth = (trackEl && trackEl.getBoundingClientRect().width) || 800;
 
-    // Adaptive year-based minimum that scales with zoom
-    let minYears;
-    if (viewSpan > 2000) minYears = 150;
-    else if (viewSpan > 1000) minYears = 80;
-    else minYears = 40;
+    // Year-based minimum (viewport capped at 1000 years)
+    const minYears = 40;
 
     // Absolute pixel floor — never smaller than 50px
     const pixelFloorYears = (50 / trackWidth) * viewSpan;
@@ -472,10 +520,9 @@ class TimelineManager {
     const viewSpan = this.viewEnd - this.viewStart;
     let interval;
     if (viewSpan <= 50) interval = 5;
-    else if (viewSpan <= 150) interval = 10;
-    else if (viewSpan <= 400) interval = 20;
-    else if (viewSpan <= 800) interval = 50;
-    else interval = 100;
+    else if (viewSpan <= 200) interval = 10;
+    else if (viewSpan <= 500) interval = 25;
+    else interval = 50;
 
     this.config.regions.forEach(region => {
       const track = document.getElementById(`track-${region.replace(/\s+/g, '-')}`);
@@ -498,18 +545,19 @@ class TimelineManager {
 
   renderYearMarkers() {
     const yearsContainer = document.getElementById('timeline-years');
+    const yearsBottom = document.getElementById('timeline-years-bottom');
     if (!yearsContainer) return;
 
     // Remove only year markers (keep event markers)
     yearsContainer.querySelectorAll('.year-marker').forEach(el => el.remove());
+    if (yearsBottom) yearsBottom.querySelectorAll('.year-marker').forEach(el => el.remove());
 
     const viewSpan = this.viewEnd - this.viewStart;
     let interval;
     if (viewSpan <= 50) interval = 5;
-    else if (viewSpan <= 150) interval = 10;
-    else if (viewSpan <= 400) interval = 20;
-    else if (viewSpan <= 800) interval = 50;
-    else interval = 100;
+    else if (viewSpan <= 200) interval = 10;
+    else if (viewSpan <= 500) interval = 25;
+    else interval = 50;
 
     const firstMarker = Math.ceil(this.viewStart / interval) * interval;
     const markersHTML = [];
@@ -526,11 +574,14 @@ class TimelineManager {
       `);
     }
 
+    const markersStr = markersHTML.join('');
+
     // Preserve event markers
     const eventMarkers = yearsContainer.querySelectorAll('.event-marker');
     const eventHTML = Array.from(eventMarkers).map(el => el.outerHTML).join('');
 
-    yearsContainer.innerHTML = markersHTML.join('') + eventHTML;
+    yearsContainer.innerHTML = markersStr + eventHTML;
+    if (yearsBottom) yearsBottom.innerHTML = markersStr;
 
     // Re-attach event marker click handlers
     this.reattachEventMarkerListeners();
@@ -590,6 +641,20 @@ class TimelineManager {
     this.renderAllEvents();
     this.updateTrackHeights();
     this.updateZoomDisplay();
+    this.updateViewportIndicator();
+    this.updateFilterStatus();
+  }
+
+  updateViewportIndicator() {
+    const startLabel = this.formatYear(Math.round(this.viewStart));
+    const endLabel = this.formatYear(Math.round(this.viewEnd));
+    const span = Math.round(this.viewEnd - this.viewStart);
+    const text = `Viewing: ${startLabel} – ${endLabel}  (${span} years)`;
+
+    const top = document.getElementById('viewport-range');
+    const bottom = document.getElementById('viewport-range-bottom');
+    if (top) top.textContent = text;
+    if (bottom) bottom.textContent = text;
   }
 
   updateZoomDisplay() {
@@ -643,15 +708,7 @@ class TimelineManager {
   // --- Search ---
 
   handleSearch(searchTerm) {
-    if (!searchTerm.trim()) {
-      this.filteredFigures = this.figures;
-    } else {
-      this.filteredFigures = this.figures.filter(figure =>
-        figure.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    this.computeStacking();
-    this.renderViewport();
+    this.applyFilters();
   }
 
   // --- Time range ---
