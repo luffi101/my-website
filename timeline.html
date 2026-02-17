@@ -216,8 +216,8 @@
                 // Add padding to the time range.
                 if (minYear === Infinity) minYear = 1600;
                 if (maxYear === -Infinity) maxYear = 2000;
-                minYear = Math.floor(minYear / 10) * 10 - 10;
-                maxYear = Math.ceil(maxYear / 10) * 10 + 10;
+                minYear = Math.floor(minYear / 50) * 50 - 50;
+                maxYear = Math.ceil(maxYear / 50) * 50 + 50;
 
                 // Initialize the TimelineManager with computed time range.
                 timelineManager = new TimelineManager({

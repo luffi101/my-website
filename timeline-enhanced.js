@@ -258,8 +258,8 @@ class TimelineManager {
 
   clampViewport() {
     const span = this.viewEnd - this.viewStart;
-    const absMin = -500;
-    const absMax = 2030;
+    const absMin = this.fullStart;
+    const absMax = this.fullEnd;
 
     if (this.viewStart < absMin) {
       this.viewStart = absMin;
