@@ -109,6 +109,9 @@ class AdminManager {
 
     // CSV Export
     document.getElementById('btn-export-csv').addEventListener('click', () => this.exportCSV());
+
+    // Delete All
+    document.getElementById('btn-delete-all').addEventListener('click', () => this.openDeleteAllConfirm());
   }
 
   // ---- Data Loading ----
@@ -617,6 +620,83 @@ class AdminManager {
     document.getElementById('admin-modal').addEventListener('click', (e) => {
       if (e.target.id === 'admin-modal') this.closeModal();
     });
+  }
+
+  openDeleteAllConfirm() {
+    const data = this.activeTab === 'figures' ? this.figures : this.events;
+    const count = data.length;
+    const label = this.activeTab === 'figures' ? 'historical figures' : 'global events';
+    const collection = this.activeTab === 'figures' ? 'historicalFigures' : 'globalEvents';
+
+    if (count === 0) {
+      this.showToast('No records to delete.', 'error');
+      return;
+    }
+
+    const html = `
+      <div class="modal-overlay" id="admin-modal">
+        <div class="modal-content" style="max-width: 28rem;">
+          <div class="admin-confirm-body">
+            <div class="admin-confirm-icon" style="background:#fee2e2;color:#dc2626;">!</div>
+            <div class="admin-confirm-title">Delete All Records</div>
+            <div class="admin-confirm-text">
+              Delete all <strong>${count}</strong> ${label}? This cannot be undone.
+            </div>
+            <div id="delete-all-progress" style="display:none;margin-bottom:1rem;">
+              <div style="background:#e5e7eb;border-radius:4px;height:8px;overflow:hidden;">
+                <div id="delete-all-bar" style="background:#dc2626;height:100%;width:0%;transition:width 0.2s;"></div>
+              </div>
+              <div id="delete-all-status" style="font-size:0.85rem;color:var(--color-text-muted);margin-top:0.5rem;text-align:center;"></div>
+            </div>
+            <div id="delete-all-buttons" style="display:flex;gap:0.5rem;justify-content:center;">
+              <button class="admin-btn admin-btn-secondary" id="modal-cancel-btn">Cancel</button>
+              <button class="admin-btn admin-btn-danger" id="confirm-delete-all-btn">Delete All ${count} Records</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    document.getElementById('modal-container').innerHTML = html;
+
+    document.getElementById('modal-cancel-btn').addEventListener('click', () => this.closeModal());
+    document.getElementById('confirm-delete-all-btn').addEventListener('click', () => {
+      this.deleteAllRecords(collection, count);
+    });
+
+    document.getElementById('admin-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'admin-modal') this.closeModal();
+    });
+  }
+
+  async deleteAllRecords(collection, total) {
+    const buttonsEl = document.getElementById('delete-all-buttons');
+    const progressEl = document.getElementById('delete-all-progress');
+    const barEl = document.getElementById('delete-all-bar');
+    const statusEl = document.getElementById('delete-all-status');
+
+    buttonsEl.style.display = 'none';
+    progressEl.style.display = 'block';
+
+    try {
+      const snapshot = await this.db.collection(collection).get();
+      let deleted = 0;
+
+      for (const doc of snapshot.docs) {
+        await doc.ref.delete();
+        deleted++;
+        const pct = Math.round((deleted / total) * 100);
+        barEl.style.width = pct + '%';
+        statusEl.textContent = `Deleting... ${deleted} / ${total}`;
+      }
+
+      this.closeModal();
+      this.showToast(`Deleted ${deleted} records successfully!`, 'success');
+      await this.loadAll();
+    } catch (error) {
+      console.error('Error deleting all records:', error);
+      statusEl.textContent = 'Error: ' + error.message;
+      this.showToast('Error deleting records: ' + error.message, 'error');
+    }
   }
 
   attachModalListeners(docId, type) {
