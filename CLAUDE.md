@@ -63,7 +63,7 @@ name, dateOfBirth, dateOfDeath, nationality, description, region, groups, imageU
 - Primary: #3B82F6
 - Font sizes: 16px buttons, 14px labels
 - Min button height: 34px
-- Max viewport span: 1000 years
+- Max viewport span: 800 years
 - Min viewport span: 150 years
 
 ## Git Workflow

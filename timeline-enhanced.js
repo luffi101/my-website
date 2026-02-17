@@ -40,7 +40,7 @@ class TimelineManager {
     this.viewStart = this.fullStart;
     this.viewEnd = this.fullEnd;
     this.minViewSpan = 180;
-    this.maxViewSpan = 1000;
+    this.maxViewSpan = 800;
 
     // Pan state
     this.isPanning = false;

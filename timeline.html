@@ -127,12 +127,18 @@
             return categoryColorMap[category.trim().toLowerCase()] || '#6B7280';
         }
 
-        // Extract year from a date string like "1706-01-17" or "1706".
+        // Extract year from a date string like "1706-01-17", "1706", or "-100-07-12".
         function extractYear(dateStr) {
             if (!dateStr) return null;
-            if (dateStr.length === 4) return parseInt(dateStr, 10);
-            const d = new Date(dateStr);
-            return isNaN(d.getTime()) ? null : d.getFullYear();
+            const str = dateStr.trim();
+            if (str.startsWith('-')) {
+                // BC date: "-100-07-12" or "-100"
+                const parts = str.substring(1).split('-');
+                return -parseInt(parts[0], 10);
+            }
+            // AD date: "1685-03-31" or "1685"
+            const parts = str.split('-');
+            return parseInt(parts[0], 10);
         }
 
         // Format name from "Lastname, Firstname" to "Firstname Lastname".
