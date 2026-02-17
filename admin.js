@@ -822,6 +822,7 @@ class AdminManager {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
+      encoding: 'UTF-8',
       complete: async (results) => {
         let count = 0;
         const collection = type === 'figures' ? 'historicalFigures' : 'globalEvents';
