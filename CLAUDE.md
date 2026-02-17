@@ -64,7 +64,7 @@ name, dateOfBirth, dateOfDeath, nationality, description, region, groups, imageU
 - Font sizes: 16px buttons, 14px labels
 - Min button height: 34px
 - Max viewport span: 800 years
-- Min viewport span: 150 years
+- Min viewport span: 150 years (zoom in limit)
 
 ## Git Workflow
 - Main branch: main (or master)

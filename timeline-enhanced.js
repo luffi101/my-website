@@ -37,10 +37,19 @@ class TimelineManager {
     // Viewport state
     this.fullStart = this.config.timeRange.start;
     this.fullEnd = this.config.timeRange.end;
-    this.viewStart = this.fullStart;
-    this.viewEnd = this.fullEnd;
-    this.minViewSpan = 180;
+    this.minViewSpan = 150;
     this.maxViewSpan = 800;
+
+    // Clamp initial viewport to maxViewSpan, centered on midpoint
+    const dataSpan = this.fullEnd - this.fullStart;
+    if (dataSpan > this.maxViewSpan) {
+      const mid = (this.fullStart + this.fullEnd) / 2;
+      this.viewStart = mid - this.maxViewSpan / 2;
+      this.viewEnd = mid + this.maxViewSpan / 2;
+    } else {
+      this.viewStart = this.fullStart;
+      this.viewEnd = this.fullEnd;
+    }
 
     // Pan state
     this.isPanning = false;
@@ -523,7 +532,8 @@ class TimelineManager {
     if (viewSpan <= 50) interval = 5;
     else if (viewSpan <= 200) interval = 10;
     else if (viewSpan <= 500) interval = 25;
-    else interval = 50;
+    else if (viewSpan <= 1000) interval = 50;
+    else interval = 100;
 
     this.config.regions.forEach(region => {
       const track = document.getElementById(`track-${region.replace(/\s+/g, '-')}`);
@@ -558,7 +568,8 @@ class TimelineManager {
     if (viewSpan <= 50) interval = 5;
     else if (viewSpan <= 200) interval = 10;
     else if (viewSpan <= 500) interval = 25;
-    else interval = 50;
+    else if (viewSpan <= 1000) interval = 50;
+    else interval = 100;
 
     const firstMarker = Math.ceil(this.viewStart / interval) * interval;
     const markersHTML = [];
@@ -678,11 +689,20 @@ class TimelineManager {
     // Default to center if no fraction provided
     if (centerFraction === undefined) centerFraction = 0.5;
 
-    const newStart = this.viewStart - change * centerFraction;
-    const newEnd = this.viewEnd + change * (1 - centerFraction);
-    const newSpan = newEnd - newStart;
+    let newStart = this.viewStart - change * centerFraction;
+    let newEnd = this.viewEnd + change * (1 - centerFraction);
+    let newSpan = newEnd - newStart;
 
-    if (newSpan < this.minViewSpan || newSpan > this.maxViewSpan) return;
+    // Clamp span to limits instead of rejecting
+    if (newSpan < this.minViewSpan) {
+      const center = (newStart + newEnd) / 2;
+      newStart = center - this.minViewSpan / 2;
+      newEnd = center + this.minViewSpan / 2;
+    } else if (newSpan > this.maxViewSpan) {
+      const center = (newStart + newEnd) / 2;
+      newStart = center - this.maxViewSpan / 2;
+      newEnd = center + this.maxViewSpan / 2;
+    }
 
     this.viewStart = newStart;
     this.viewEnd = newEnd;
@@ -718,8 +738,18 @@ class TimelineManager {
     this.config.timeRange = { start, end };
     this.fullStart = start;
     this.fullEnd = end;
-    this.viewStart = start;
-    this.viewEnd = end;
+
+    // Clamp viewport to maxViewSpan, centered on midpoint
+    const dataSpan = end - start;
+    if (dataSpan > this.maxViewSpan) {
+      const mid = (start + end) / 2;
+      this.viewStart = mid - this.maxViewSpan / 2;
+      this.viewEnd = mid + this.maxViewSpan / 2;
+    } else {
+      this.viewStart = start;
+      this.viewEnd = end;
+    }
+
     this.renderTimelineStructure();
     this.computeStacking();
     this.renderViewport();
