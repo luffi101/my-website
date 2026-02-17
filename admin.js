@@ -819,54 +819,65 @@ class AdminManager {
   importCSV(file) {
     const type = this.activeTab;
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      encoding: 'UTF-8',
-      complete: async (results) => {
-        let count = 0;
-        const collection = type === 'figures' ? 'historicalFigures' : 'globalEvents';
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const decoder = new TextDecoder('utf-8');
+      const text = decoder.decode(e.target.result);
 
-        for (const row of results.data) {
-          try {
-            if (type === 'figures') {
-              const groupsArr = row.groups ? row.groups.split(',').map(s => s.trim()) : [];
-              await this.db.collection(collection).add({
-                name: row.name || '',
-                dateOfBirth: row.dateOfBirth || '',
-                dateOfDeath: row.dateOfDeath || '',
-                description: row.description || '',
-                groups: groupsArr,
-                imageURL: row.imageURL || '',
-                nationality: row.nationality || '',
-                region: row.region || 'unknown'
-              });
-            } else {
-              await this.db.collection(collection).add({
-                eventName: row.eventName || '',
-                eventDate: row.eventDate || '',
-                eventEndDate: row.eventEndDate || '',
-                description: row.description || '',
-                category: row.category || '',
-                region: row.region || '',
-                significance: row.significance || '',
-                createdOn: new Date().toISOString().slice(0, 10)
-              });
-            }
-            count++;
-          } catch (error) {
-            console.error('Error importing row:', error);
-          }
-        }
+      const results = Papa.parse(text, {
+        header: true,
+        skipEmptyLines: true
+      });
 
-        this.showToast(`Imported ${count} records successfully!`, 'success');
-        await this.loadAll();
-      },
-      error: (err) => {
-        console.error('Error parsing CSV:', err);
-        this.showToast('Error parsing CSV file.', 'error');
+      if (results.errors.length > 0) {
+        console.error('CSV parse errors:', results.errors);
       }
-    });
+
+      let count = 0;
+      const collection = type === 'figures' ? 'historicalFigures' : 'globalEvents';
+
+      for (const row of results.data) {
+        try {
+          if (type === 'figures') {
+            const groupsArr = row.groups ? row.groups.split(',').map(s => s.trim()) : [];
+            await this.db.collection(collection).add({
+              name: row.name || '',
+              dateOfBirth: row.dateOfBirth || '',
+              dateOfDeath: row.dateOfDeath || '',
+              description: row.description || '',
+              groups: groupsArr,
+              imageURL: row.imageURL || '',
+              nationality: row.nationality || '',
+              region: row.region || 'unknown'
+            });
+          } else {
+            await this.db.collection(collection).add({
+              eventName: row.eventName || '',
+              eventDate: row.eventDate || '',
+              eventEndDate: row.eventEndDate || '',
+              description: row.description || '',
+              category: row.category || '',
+              region: row.region || '',
+              significance: row.significance || '',
+              createdOn: new Date().toISOString().slice(0, 10)
+            });
+          }
+          count++;
+        } catch (error) {
+          console.error('Error importing row:', error);
+        }
+      }
+
+      this.showToast(`Imported ${count} records successfully!`, 'success');
+      await this.loadAll();
+    };
+
+    reader.onerror = () => {
+      console.error('Error reading file:', reader.error);
+      this.showToast('Error reading CSV file.', 'error');
+    };
+
+    reader.readAsArrayBuffer(file);
   }
 
   exportCSV() {
