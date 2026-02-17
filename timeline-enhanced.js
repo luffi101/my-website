@@ -17,13 +17,14 @@ class TimelineManager {
         'Australia'
       ],
       categories: config.categories || [
-        { name: 'Politics & Military', color: '#e85d5d' },
-        { name: 'Science', color: '#5a92e8' },
-        { name: 'Economy', color: '#3dbf8e' },
-        { name: 'Arts, Musics & Cultural', color: '#e066a8' },
-        { name: 'Literature', color: '#f0be42' },
-        { name: 'Philosophy & Religion', color: '#9a74e8' },
-        { name: 'Social & Cultural Movement', color: '#a05820' },
+        { name: 'Politics & Military', color: '#EF4444' },
+        { name: 'Science', color: '#3B82F6' },
+        { name: 'Economy', color: '#10B981' },
+        { name: 'Visual Arts', color: '#EC4899' },
+        { name: 'Music', color: '#F97316' },
+        { name: 'Literature', color: '#FBBF24' },
+        { name: 'Philosophy', color: '#8B5CF6' },
+        { name: 'Religion', color: '#F59E0B' },
         { name: 'Exploration & Discovery', color: '#14B8A6' }
       ]
     };

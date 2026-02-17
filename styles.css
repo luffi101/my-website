@@ -21,13 +21,14 @@
   --color-border-light: #e8e6e0;
 
   /* Category Colors */
-  --color-politics: #e85d5d;
-  --color-science: #5a92e8;
-  --color-economy: #3dbf8e;
-  --color-arts: #e066a8;
-  --color-literature: #f0be42;
-  --color-philosophy: #9a74e8;
-  --color-social: #a05820;
+  --color-politics: #EF4444;
+  --color-science: #3B82F6;
+  --color-economy: #10B981;
+  --color-visual-arts: #EC4899;
+  --color-music: #F97316;
+  --color-literature: #FBBF24;
+  --color-philosophy: #8B5CF6;
+  --color-religion: #F59E0B;
   --color-exploration: #14B8A6;
   
   /* Spacing */

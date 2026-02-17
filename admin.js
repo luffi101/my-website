@@ -30,13 +30,14 @@ class AdminManager {
 
     // Category colors (same as timeline)
     this.categoryColorMap = {
-      'politics & military': '#e85d5d',
-      'science': '#5a92e8',
-      'economy': '#3dbf8e',
-      'arts, musics & cultural': '#e066a8',
-      'literature': '#f0be42',
-      'philosophy & religion': '#9a74e8',
-      'social & cultural movement': '#a05820',
+      'politics & military': '#EF4444',
+      'science': '#3B82F6',
+      'economy': '#10B981',
+      'visual arts': '#EC4899',
+      'music': '#F97316',
+      'literature': '#FBBF24',
+      'philosophy': '#8B5CF6',
+      'religion': '#F59E0B',
       'exploration & discovery': '#14B8A6'
     };
 
@@ -44,10 +45,11 @@ class AdminManager {
       'Politics & Military',
       'Science',
       'Economy',
-      'Arts, Musics & Cultural',
+      'Visual Arts',
+      'Music',
       'Literature',
-      'Philosophy & Religion',
-      'Social & Cultural Movement',
+      'Philosophy',
+      'Religion',
       'Exploration & Discovery'
     ];
 
