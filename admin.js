@@ -823,8 +823,10 @@ class AdminManager {
 
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const decoder = new TextDecoder('utf-8');
-      const text = decoder.decode(e.target.result);
+      const bytes = new Uint8Array(e.target.result);
+
+      // Decode as UTF-8 (replaces any stray invalid bytes with U+FFFD)
+      const text = new TextDecoder('utf-8').decode(bytes);
 
       const results = Papa.parse(text, {
         header: true,
@@ -840,9 +842,10 @@ class AdminManager {
 
       for (const row of results.data) {
         try {
+          let doc;
           if (type === 'figures') {
             const groupsArr = row.groups ? row.groups.split(',').map(s => s.trim()) : [];
-            await this.db.collection(collection).add({
+            doc = {
               name: row.name || '',
               dateOfBirth: row.dateOfBirth || '',
               dateOfDeath: row.dateOfDeath || '',
@@ -851,9 +854,9 @@ class AdminManager {
               imageURL: row.imageURL || '',
               nationality: row.nationality || '',
               region: row.region || 'unknown'
-            });
+            };
           } else {
-            await this.db.collection(collection).add({
+            doc = {
               eventName: row.eventName || '',
               eventDate: row.eventDate || '',
               eventEndDate: row.eventEndDate || '',
@@ -862,8 +865,10 @@ class AdminManager {
               region: row.region || '',
               significance: row.significance || '',
               createdOn: new Date().toISOString().slice(0, 10)
-            });
+            };
           }
+
+          await this.db.collection(collection).add(doc);
           count++;
         } catch (error) {
           console.error('Error importing row:', error);
@@ -875,7 +880,7 @@ class AdminManager {
     };
 
     reader.onerror = () => {
-      console.error('Error reading file:', reader.error);
+      console.error('[CSV Import] Error reading file:', reader.error);
       this.showToast('Error reading CSV file.', 'error');
     };
 
