@@ -837,45 +837,72 @@ class AdminManager {
         console.error('CSV parse errors:', results.errors);
       }
 
+      const total = results.data.length;
+      console.log(`[CSV Import] Parsed ${total} rows. Starting import...`);
+
       let count = 0;
-      const collection = type === 'figures' ? 'historicalFigures' : 'globalEvents';
+      let errors = 0;
+      const collectionName = type === 'figures' ? 'historicalFigures' : 'globalEvents';
+      const BATCH_SIZE = 400; // Firestore limit is 500 per batch
 
-      for (const row of results.data) {
-        try {
-          let doc;
-          if (type === 'figures') {
-            const groupsArr = row.groups ? row.groups.split(',').map(s => s.trim()) : [];
-            doc = {
-              name: row.name || '',
-              dateOfBirth: row.dateOfBirth || '',
-              dateOfDeath: row.dateOfDeath || '',
-              description: row.description || '',
-              groups: groupsArr,
-              imageURL: row.imageURL || '',
-              nationality: row.nationality || '',
-              region: row.region || 'unknown'
-            };
-          } else {
-            doc = {
-              eventName: row.eventName || '',
-              eventDate: row.eventDate || '',
-              eventEndDate: row.eventEndDate || '',
-              description: row.description || '',
-              category: row.category || '',
-              region: row.region || '',
-              significance: row.significance || '',
-              createdOn: new Date().toISOString().slice(0, 10)
-            };
+      for (let i = 0; i < total; i += BATCH_SIZE) {
+        const batch = this.db.batch();
+        const slice = results.data.slice(i, i + BATCH_SIZE);
+        const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+
+        for (let j = 0; j < slice.length; j++) {
+          const row = slice[j];
+          const rowIndex = i + j + 1;
+          try {
+            let doc;
+            if (type === 'figures') {
+              const groupsArr = row.groups ? row.groups.split(',').map(s => s.trim()) : [];
+              doc = {
+                name: row.name || '',
+                dateOfBirth: row.dateOfBirth || '',
+                dateOfDeath: row.dateOfDeath || '',
+                description: row.description || '',
+                groups: groupsArr,
+                imageURL: row.imageURL || '',
+                nationality: row.nationality || '',
+                region: row.region || 'unknown'
+              };
+            } else {
+              doc = {
+                eventName: row.eventName || '',
+                eventDate: row.eventDate || '',
+                eventEndDate: row.eventEndDate || '',
+                description: row.description || '',
+                category: row.category || '',
+                region: row.region || '',
+                significance: row.significance || '',
+                createdOn: new Date().toISOString().slice(0, 10)
+              };
+            }
+
+            const ref = this.db.collection(collectionName).doc();
+            batch.set(ref, doc);
+            count++;
+          } catch (error) {
+            errors++;
+            console.error(`[CSV Import] Error preparing row ${rowIndex} (${row.name}):`, error);
           }
+        }
 
-          await this.db.collection(collection).add(doc);
-          count++;
+        try {
+          await batch.commit();
+          console.log(`[CSV Import] Batch ${batchNum} committed (rows ${i + 1}-${i + slice.length} of ${total})`);
+          this.showToast(`Importing... ${Math.min(i + BATCH_SIZE, total)} of ${total}`, 'success');
         } catch (error) {
-          console.error('Error importing row:', error);
+          errors += slice.length;
+          count -= slice.length;
+          console.error(`[CSV Import] Batch ${batchNum} FAILED:`, error);
+          this.showToast(`Batch ${batchNum} failed: ${error.message}`, 'error');
         }
       }
 
-      this.showToast(`Imported ${count} records successfully!`, 'success');
+      console.log(`[CSV Import] Done. ${count} imported, ${errors} errors out of ${total} total.`);
+      this.showToast(`Imported ${count} of ${total} records${errors ? ` (${errors} errors)` : ''}`, errors ? 'error' : 'success');
       await this.loadAll();
     };
 
