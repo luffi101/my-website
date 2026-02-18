@@ -167,9 +167,9 @@
                 figuresSnapshot.forEach(doc => {
                     const data = doc.data();
                     const birth = extractYear(data.dateOfBirth);
-                    const death = extractYear(data.dateOfDeath);
-                    if (!birth || !death) {
-                        console.warn('Skipping ' + data.name + ' — missing dates.');
+                    const death = extractYear(data.dateOfDeath) || new Date().getFullYear();
+                    if (!birth) {
+                        console.warn('Skipping ' + data.name + ' — missing birth date.');
                         return;
                     }
 
