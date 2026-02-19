@@ -27,6 +27,8 @@ class TimelineManager {
         'Africa',
         'Middle East',
         'East Asia',
+        'South Asia',
+        'Central Asia',
         'Australia'
       ],
       categories: config.categories || [

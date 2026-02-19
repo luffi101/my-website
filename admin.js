@@ -57,7 +57,8 @@ class AdminManager {
 
     this.regions = [
       'North America', 'South America', 'Europe',
-      'Africa', 'Middle East', 'East Asia', 'Australia'
+      'Africa', 'Middle East', 'East Asia',
+      'South Asia', 'Central Asia', 'Australia'
     ];
 
     this.init();
