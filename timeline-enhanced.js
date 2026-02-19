@@ -3,6 +3,18 @@
  * Handles interactivity, modals, search, pan/zoom, and collision-free stacking
  */
 
+const CATEGORY_ORDER = [
+  'Politics & Military',
+  'Science',
+  'Economy',
+  'Visual Arts',
+  'Music',
+  'Literature',
+  'Philosophy',
+  'Religion',
+  'Exploration & Discovery',
+];
+
 class TimelineManager {
   constructor(config) {
     this.config = {
@@ -286,28 +298,40 @@ class TimelineManager {
     // Minimum display span so enlarged short-lived figures don't overlap
     const minSpan = this.getMinDisplaySpan();
 
-    // For each region, sort by birth year and greedily assign rows
+    // For each region, assign rows category-by-category (CATEGORY_ORDER top-to-bottom)
     for (const region of Object.keys(byRegion)) {
-      const figures = byRegion[region].slice().sort((a, b) => a.birth - b.birth);
-      const rows = []; // rows[i] = effective end year of last figure in that row
-
+      const allFigs = byRegion[region];
+      let globalRowOffset = 0;
       const assignments = [];
-      for (const fig of figures) {
-        const effectiveEnd = Math.max(fig.death, fig.birth + minSpan);
-        let placed = false;
-        for (let r = 0; r < rows.length; r++) {
-          // Add a small gap (2 years) to prevent visual overlap
-          if (fig.birth >= rows[r] + 2) {
-            rows[r] = effectiveEnd;
-            assignments.push({ figure: fig, row: r });
-            placed = true;
-            break;
+
+      for (const categoryName of CATEGORY_ORDER) {
+        const catFigs = allFigs
+          .filter(f => f.category === categoryName)
+          .sort((a, b) => a.birth - b.birth);
+
+        if (catFigs.length === 0) continue; // no gap for empty categories
+
+        const rows = []; // per-category collision slots
+
+        for (const fig of catFigs) {
+          const effectiveEnd = Math.max(fig.death, fig.birth + minSpan);
+          let placed = false;
+          for (let r = 0; r < rows.length; r++) {
+            // Add a small gap (2 years) to prevent visual overlap
+            if (fig.birth >= rows[r] + 2) {
+              rows[r] = effectiveEnd;
+              assignments.push({ figure: fig, row: globalRowOffset + r });
+              placed = true;
+              break;
+            }
+          }
+          if (!placed) {
+            rows.push(effectiveEnd);
+            assignments.push({ figure: fig, row: globalRowOffset + rows.length - 1 });
           }
         }
-        if (!placed) {
-          rows.push(effectiveEnd);
-          assignments.push({ figure: fig, row: rows.length - 1 });
-        }
+
+        globalRowOffset += rows.length;
       }
 
       this.stackingCache[region] = assignments;
@@ -425,6 +449,7 @@ class TimelineManager {
 
     const figureElement = document.createElement('div');
     figureElement.dataset.figureId = figure.id;
+    figureElement.dataset.category = figure.category;
     figureElement.style.top = `${top}px`;
     figureElement.style.backgroundColor = figure.color;
 
@@ -612,6 +637,7 @@ class TimelineManager {
     });
   }
 
+  // ── EVENT MARKERS — DO NOT MODIFY (category-order refactor) ──
   renderAllEvents() {
     const yearsContainer = document.getElementById('timeline-years');
     if (!yearsContainer) return;
