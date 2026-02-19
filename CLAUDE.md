@@ -25,6 +25,7 @@ Admin: https://luffi101.github.io/my-website/admin.html
 - Philosophy → #8B5CF6 (purple)
 - Religion → #F59E0B (amber)
 - Exploration & Discovery → #14B8A6 (teal)
+- Sport & Athletics → #06B6D4 (cyan)
 
 ## Regions
 Europe, East Asia, Middle East, North America, South America,

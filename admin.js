@@ -38,7 +38,8 @@ class AdminManager {
       'literature': '#FBBF24',
       'philosophy': '#8B5CF6',
       'religion': '#F59E0B',
-      'exploration & discovery': '#14B8A6'
+      'exploration & discovery': '#14B8A6',
+      'sport & athletics': '#06B6D4'
     };
 
     this.categories = [
@@ -50,7 +51,8 @@ class AdminManager {
       'Literature',
       'Philosophy',
       'Religion',
-      'Exploration & Discovery'
+      'Exploration & Discovery',
+      'Sport & Athletics'
     ];
 
     this.regions = [
@@ -438,8 +440,8 @@ class AdminManager {
                     value="${escapeHtml(figure ? figure.dateOfBirth : '')}">
                 </div>
                 <div class="admin-form-group">
-                  <label class="admin-form-label" for="field-dod">Date of Death</label>
-                  <input class="admin-form-input" type="date" id="field-dod" required
+                  <label class="admin-form-label" for="field-dod">Date of Death <span style="font-weight:400;color:var(--color-text-muted)">(leave blank if alive)</span></label>
+                  <input class="admin-form-input" type="date" id="field-dod"
                     value="${escapeHtml(figure ? figure.dateOfDeath : '')}">
                 </div>
               </div>
@@ -786,7 +788,7 @@ class AdminManager {
     const dob = dobInput.value;
     const dod = dodInput.value;
 
-    if (!dob || !dod) {
+    if (!dob) {
       fill.style.width = '0';
       startLabel.textContent = '';
       endLabel.textContent = '';
@@ -794,7 +796,7 @@ class AdminManager {
     }
 
     const birthYear = new Date(dob).getFullYear();
-    const deathYear = new Date(dod).getFullYear();
+    const deathYear = dod ? new Date(dod).getFullYear() : new Date().getFullYear();
 
     // Use a fixed reference range for preview (1400-2025)
     const rangeStart = 1400;

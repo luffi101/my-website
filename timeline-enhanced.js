@@ -13,6 +13,7 @@ const CATEGORY_CONFIG = [
   { name: 'Philosophy',              color: '#8B5CF6', short: 'Philosophy'  },
   { name: 'Religion',                color: '#F59E0B', short: 'Religion'    },
   { name: 'Exploration & Discovery', color: '#14B8A6', short: 'Exploration' },
+  { name: 'Sport & Athletics',       color: '#06B6D4', short: 'Sport'       },
 ];
 
 class TimelineManager {
@@ -37,7 +38,8 @@ class TimelineManager {
         { name: 'Literature', color: '#FBBF24' },
         { name: 'Philosophy', color: '#8B5CF6' },
         { name: 'Religion', color: '#F59E0B' },
-        { name: 'Exploration & Discovery', color: '#14B8A6' }
+        { name: 'Exploration & Discovery', color: '#14B8A6' },
+        { name: 'Sport & Athletics', color: '#06B6D4' }
       ]
     };
 
