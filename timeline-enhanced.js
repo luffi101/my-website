@@ -3,6 +3,18 @@
  * Handles interactivity, modals, search, pan/zoom, and collision-free stacking
  */
 
+const CATEGORY_CONFIG = [
+  { name: 'Politics & Military',     color: '#EF4444', short: 'Politics'    },
+  { name: 'Science',                 color: '#3B82F6', short: 'Science'     },
+  { name: 'Economy',                 color: '#10B981', short: 'Economy'     },
+  { name: 'Visual Arts',             color: '#EC4899', short: 'Visual Arts' },
+  { name: 'Music',                   color: '#F97316', short: 'Music'       },
+  { name: 'Literature',              color: '#FBBF24', short: 'Literature'  },
+  { name: 'Philosophy',              color: '#8B5CF6', short: 'Philosophy'  },
+  { name: 'Religion',                color: '#F59E0B', short: 'Religion'    },
+  { name: 'Exploration & Discovery', color: '#14B8A6', short: 'Exploration' },
+];
+
 class TimelineManager {
   constructor(config) {
     this.config = {
@@ -134,7 +146,7 @@ class TimelineManager {
       this.panDragDistance = Math.abs(dx);
 
       // Convert pixel delta to year delta
-      const trackEl = document.querySelector('.timeline-track');
+      const trackEl = document.querySelector('.lane-canvas');
       if (!trackEl) return;
       const trackWidth = trackEl.getBoundingClientRect().width;
       const viewSpan = this.panStartViewEnd - this.panStartViewStart;
@@ -218,6 +230,7 @@ class TimelineManager {
 
     this.filteredFigures = result;
     this.computeStacking();
+    this.updateLaneVisibility();
     this.renderViewport();
   }
 
@@ -225,23 +238,100 @@ class TimelineManager {
     const timelineGrid = document.getElementById('timeline-grid');
     if (!timelineGrid) return;
 
-    const gridHTML = this.config.regions.map(region => `
-      <div class="timeline-row" data-region="${region}">
-        <div class="row-content">
-          <div class="region-label">
-            <svg class="region-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
-            <span class="region-name">${region}</span>
-          </div>
-          <div class="timeline-track" id="track-${region.replace(/\s+/g, '-')}">
-          </div>
-        </div>
-      </div>
-    `).join('');
+    timelineGrid.innerHTML = '';
+    this.laneCanvases = {}; // key: 'Region|Category Name'
 
-    timelineGrid.innerHTML = gridHTML;
+    this.config.regions.forEach(region => {
+      const allFigs = this.figures.filter(f => f.region === region);
+      const activeCats = CATEGORY_CONFIG.filter(cat =>
+        allFigs.some(f => f.category === cat.name)
+      );
+
+      // ── Region wrapper ──
+      const regionWrapper = document.createElement('div');
+      regionWrapper.className = 'region-swim-wrapper';
+      regionWrapper.dataset.region = region;
+
+      // ── Collapsible header ──
+      const regionId = 'region-' + region.replace(/\s+/g, '-').toLowerCase();
+      const header = document.createElement('div');
+      header.className = 'region-swim-header';
+      header.dataset.target = regionId;
+      header.innerHTML = `
+        <span class="region-swim-icon">📍</span>
+        <span class="region-swim-name">${region.toUpperCase()}</span>
+        <span class="region-swim-meta">${allFigs.length} figures · ${activeCats.length} categories</span>
+        <span class="region-swim-chevron">▼</span>
+      `;
+      header.addEventListener('click', () => this.toggleRegion(regionId, header));
+      regionWrapper.appendChild(header);
+
+      // ── Lanes container (collapsible) ──
+      const lanesContainer = document.createElement('div');
+      lanesContainer.className = 'region-swim-lanes';
+      lanesContainer.id = regionId;
+
+      // ── One lane per category ──
+      CATEGORY_CONFIG.forEach(cat => {
+        const catFigs = allFigs.filter(f => f.category === cat.name);
+
+        const laneRow = document.createElement('div');
+        laneRow.className = 'lane-row';
+        laneRow.dataset.region = region;
+        laneRow.dataset.category = cat.name;
+        if (catFigs.length === 0) laneRow.style.display = 'none';
+
+        const laneLabel = document.createElement('div');
+        laneLabel.className = 'lane-label';
+        laneLabel.innerHTML = `
+          <div class="lane-dot" style="background:${cat.color}"></div>
+          <span class="lane-label-text">${cat.short}</span>
+        `;
+        laneRow.appendChild(laneLabel);
+
+        const laneCanvas = document.createElement('div');
+        laneCanvas.className = 'lane-canvas';
+        laneCanvas.dataset.region = region;
+        laneCanvas.dataset.category = cat.name;
+        laneRow.appendChild(laneCanvas);
+
+        this.laneCanvases[`${region}|${cat.name}`] = laneCanvas;
+        lanesContainer.appendChild(laneRow);
+      });
+
+      regionWrapper.appendChild(lanesContainer);
+      timelineGrid.appendChild(regionWrapper);
+    });
+  }
+
+  toggleRegion(regionId, headerEl) {
+    const lanes = document.getElementById(regionId);
+    if (!lanes) return;
+    const isCollapsed = lanes.classList.contains('collapsed');
+    if (isCollapsed) {
+      lanes.classList.remove('collapsed');
+      headerEl.classList.remove('is-collapsed');
+    } else {
+      lanes.classList.add('collapsed');
+      headerEl.classList.add('is-collapsed');
+    }
+  }
+
+  updateLaneVisibility() {
+    const showAll = !this.activeCategory;
+    document.querySelectorAll('.region-swim-wrapper').forEach(wrapper => {
+      let visibleLanes = 0;
+      wrapper.querySelectorAll('.lane-row').forEach(laneRow => {
+        const region = laneRow.dataset.region;
+        const catName = laneRow.dataset.category;
+        const hasFigs = this.figures.some(f => f.region === region && f.category === catName);
+        const categoryMatch = showAll || catName === this.activeCategory;
+        const visible = hasFigs && categoryMatch;
+        laneRow.style.display = visible ? '' : 'none';
+        if (visible) visibleLanes++;
+      });
+      wrapper.style.display = visibleLanes > 0 ? '' : 'none';
+    });
   }
 
   // --- Viewport-relative positioning ---
@@ -286,27 +376,36 @@ class TimelineManager {
     // Minimum display span so enlarged short-lived figures don't overlap
     const minSpan = this.getMinDisplaySpan();
 
-    // For each region, sort by birth year and greedily assign rows
+    // For each region, assign rows inside per-category lanes (scoped collision)
     for (const region of Object.keys(byRegion)) {
-      const figures = byRegion[region].slice().sort((a, b) => a.birth - b.birth);
-      const rows = []; // rows[i] = effective end year of last figure in that row
-
+      const allFigs = byRegion[region];
       const assignments = [];
-      for (const fig of figures) {
-        const effectiveEnd = Math.max(fig.death, fig.birth + minSpan);
-        let placed = false;
-        for (let r = 0; r < rows.length; r++) {
-          // Add a small gap (2 years) to prevent visual overlap
-          if (fig.birth >= rows[r] + 2) {
-            rows[r] = effectiveEnd;
-            assignments.push({ figure: fig, row: r });
-            placed = true;
-            break;
+
+      for (const cat of CATEGORY_CONFIG) {
+        const catFigs = allFigs
+          .filter(f => f.category === cat.name)
+          .sort((a, b) => a.birth - b.birth);
+
+        if (catFigs.length === 0) continue;
+
+        const rows = []; // per-lane collision slots
+
+        for (const fig of catFigs) {
+          const effectiveEnd = Math.max(fig.death, fig.birth + minSpan);
+          let placed = false;
+          for (let r = 0; r < rows.length; r++) {
+            // Add a small gap (2 years) to prevent visual overlap
+            if (fig.birth >= rows[r] + 2) {
+              rows[r] = effectiveEnd;
+              assignments.push({ figure: fig, row: r, catName: cat.name });
+              placed = true;
+              break;
+            }
           }
-        }
-        if (!placed) {
-          rows.push(effectiveEnd);
-          assignments.push({ figure: fig, row: rows.length - 1 });
+          if (!placed) {
+            rows.push(effectiveEnd);
+            assignments.push({ figure: fig, row: rows.length - 1, catName: cat.name });
+          }
         }
       }
 
@@ -315,21 +414,29 @@ class TimelineManager {
   }
 
   updateTrackHeights() {
-    const viewSpan = this.viewEnd - this.viewStart;
     const barHeight = this.getScaledBarHeight();
     const barGap = 4;
+    const lanePad = 8;
 
     for (const region of this.config.regions) {
-      const track = document.getElementById(`track-${region.replace(/\s+/g, '-')}`);
-      if (!track) continue;
-
       const assignments = this.stackingCache[region] || [];
-      let maxRow = 0;
-      assignments.forEach(a => { if (a.row > maxRow) maxRow = a.row; });
 
-      const rowCount = assignments.length > 0 ? maxRow + 1 : 1;
-      const minH = rowCount * (barHeight + barGap) + 16;
-      track.style.minHeight = Math.max(minH, 50) + 'px';
+      // Compute max row per category
+      const maxRowPerCat = {};
+      assignments.forEach(a => {
+        if (maxRowPerCat[a.catName] === undefined || a.row > maxRowPerCat[a.catName]) {
+          maxRowPerCat[a.catName] = a.row;
+        }
+      });
+
+      CATEGORY_CONFIG.forEach(cat => {
+        const laneCanvas = this.laneCanvases && this.laneCanvases[`${region}|${cat.name}`];
+        if (!laneCanvas) return;
+        const maxRow = maxRowPerCat[cat.name] !== undefined ? maxRowPerCat[cat.name] : 0;
+        const rowCount = maxRowPerCat[cat.name] !== undefined ? maxRow + 1 : 1;
+        const h = rowCount * (barHeight + barGap) + lanePad * 2;
+        laneCanvas.style.height = Math.max(h, 40) + 'px';
+      });
     }
   }
 
@@ -398,9 +505,9 @@ class TimelineManager {
     };
   }
 
-  renderFigure(figure, row) {
-    const track = document.getElementById(`track-${figure.region.replace(/\s+/g, '-')}`);
-    if (!track) return;
+  renderFigure(figure, row, laneCanvas) {
+    if (!laneCanvas) return;
+    const track = laneCanvas;
 
     const left = this.getViewportPosition(figure.birth);
     const naturalWidthPct = this.getViewportWidth(figure.birth, figure.death);
@@ -425,6 +532,7 @@ class TimelineManager {
 
     const figureElement = document.createElement('div');
     figureElement.dataset.figureId = figure.id;
+    figureElement.dataset.category = figure.category;
     figureElement.style.top = `${top}px`;
     figureElement.style.backgroundColor = figure.color;
 
@@ -508,20 +616,17 @@ class TimelineManager {
   }
 
   renderAllFigures() {
-    // Clear existing figure bars from all tracks
-    this.config.regions.forEach(region => {
-      const track = document.getElementById(`track-${region.replace(/\s+/g, '-')}`);
-      if (track) {
-        const figureBars = track.querySelectorAll('.figure-bar');
-        figureBars.forEach(bar => bar.remove());
-      }
+    // Clear existing figure bars from all lane canvases
+    Object.values(this.laneCanvases || {}).forEach(canvas => {
+      canvas.querySelectorAll('.figure-bar').forEach(bar => bar.remove());
     });
 
-    // Render from stacking cache
+    // Render from stacking cache into the appropriate lane canvas
     for (const region of Object.keys(this.stackingCache)) {
       const assignments = this.stackingCache[region];
-      for (const { figure, row } of assignments) {
-        this.renderFigure(figure, row);
+      for (const { figure, row, catName } of assignments) {
+        const laneCanvas = this.laneCanvases && this.laneCanvases[`${region}|${catName}`];
+        if (laneCanvas) this.renderFigure(figure, row, laneCanvas);
       }
     }
   }
@@ -535,12 +640,9 @@ class TimelineManager {
     else if (viewSpan <= 1000) interval = 50;
     else interval = 100;
 
-    this.config.regions.forEach(region => {
-      const track = document.getElementById(`track-${region.replace(/\s+/g, '-')}`);
-      if (!track) return;
-
+    Object.values(this.laneCanvases || {}).forEach(laneCanvas => {
       // Remove old grid lines
-      track.querySelectorAll('.grid-line').forEach(el => el.remove());
+      laneCanvas.querySelectorAll('.grid-line').forEach(el => el.remove());
 
       const firstLine = Math.ceil(this.viewStart / interval) * interval;
       for (let year = firstLine; year <= this.viewEnd; year += interval) {
@@ -549,7 +651,7 @@ class TimelineManager {
         const line = document.createElement('div');
         line.className = 'grid-line';
         line.style.left = `${pos}%`;
-        track.appendChild(line);
+        laneCanvas.appendChild(line);
       }
     });
   }
@@ -612,6 +714,7 @@ class TimelineManager {
     });
   }
 
+  // ── EVENT MARKERS — DO NOT MODIFY ──
   renderAllEvents() {
     const yearsContainer = document.getElementById('timeline-years');
     if (!yearsContainer) return;
@@ -716,6 +819,7 @@ class TimelineManager {
   loadFigures(figures) {
     this.figures = figures;
     this.filteredFigures = figures;
+    this.renderTimelineStructure(); // rebuild swim lanes with correct figure counts
     this.computeStacking();
     this.renderViewport();
     this.setupPanListeners();

@@ -1167,3 +1167,144 @@ body {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* ══════════════════════════════════════
+   COLLAPSIBLE SWIM LANE LAYOUT
+══════════════════════════════════════ */
+
+.region-swim-wrapper {
+  border-bottom: 3px solid #1a1a2e;
+}
+
+/* Clickable region header */
+.region-swim-header {
+  background: #1a1a2e;
+  color: #fbbf24;
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  position: sticky;
+  left: 0;
+  letter-spacing: 0.3px;
+  transition: background 0.15s;
+}
+
+.region-swim-header:hover {
+  background: #16213e;
+}
+
+.region-swim-icon {
+  font-size: 0.85rem;
+}
+
+.region-swim-name {
+  font-size: 0.9rem;
+}
+
+.region-swim-meta {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  margin-left: auto;
+}
+
+.region-swim-chevron {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 0.2s ease;
+}
+
+/* Rotate chevron when collapsed */
+.region-swim-header.is-collapsed .region-swim-chevron {
+  transform: rotate(-90deg);
+}
+
+/* Collapsible lanes container */
+.region-swim-lanes {
+  overflow: hidden;
+  max-height: 5000px;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
+  opacity: 1;
+}
+
+.region-swim-lanes.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* Individual category lane row */
+.lane-row {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid #e5e0d5;
+  min-height: 44px;
+}
+
+/* Zebra stripe for readability */
+.lane-row:nth-child(even) .lane-canvas {
+  background: rgba(0, 0, 0, 0.018);
+}
+
+/* Left label column — sticky */
+.lane-label {
+  width: 140px;
+  min-width: 140px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 6px 10px 6px 16px;
+  gap: 8px;
+  border-right: 2px solid #e5e0d5;
+  position: sticky;
+  left: 0;
+  z-index: 5;
+}
+
+.lane-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.lane-label-text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #555;
+  line-height: 1.2;
+}
+
+/* Lane drawing area */
+.lane-canvas {
+  flex: 1;
+  position: relative;
+}
+
+/* Figure blocks */
+.figure-bar {
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.figure-bar:hover {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+  z-index: 20;
+}
