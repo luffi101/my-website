@@ -1453,3 +1453,78 @@ body {
 }
 .event-legend-sep { color: #ddd; }
 .event-legend-hint { color: #999; font-style: italic; }
+
+/* ══════════════════════════════════════
+   VIEW MODE TOGGLE
+══════════════════════════════════════ */
+
+.view-toggle {
+  display: flex;
+  background: rgba(0,0,0,0.06);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 3px;
+  border: 1px solid var(--color-border);
+}
+
+.view-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  background: transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.view-toggle-btn:hover {
+  color: var(--color-text-primary);
+  background: rgba(0,0,0,0.05);
+}
+
+.view-toggle-btn.active {
+  background: white;
+  color: var(--color-text-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+/* ══════════════════════════════════════
+   CLASSIC VIEW LAYOUT
+══════════════════════════════════════ */
+
+.classic-region-row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 2px solid var(--color-border);
+  min-height: 48px;
+}
+
+.classic-region-label {
+  width: 140px;
+  min-width: 140px;
+  background: var(--color-bg-card);
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 10px 10px 16px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.5px;
+  border-right: 2px solid var(--color-border);
+  position: sticky;
+  left: 0;
+  z-index: 5;
+}
+
+.classic-canvas {
+  flex: 1;
+  position: relative;
+  background: transparent;
+}

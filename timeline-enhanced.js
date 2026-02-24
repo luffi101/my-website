@@ -66,6 +66,7 @@ class TimelineManager {
     this.events = [];
     this.filteredFigures = [];
     this.activeCategory = null; // null = show all
+    this.viewMode = 'classic'; // 'classic' | 'swimlane'
 
     // Viewport state
     this.fullStart = this.config.timeRange.start;
@@ -142,6 +143,26 @@ class TimelineManager {
         this.closeModal();
       }
     });
+
+    // View mode toggle
+    const viewToggle = document.getElementById('view-toggle');
+    if (viewToggle) {
+      viewToggle.addEventListener('click', (e) => {
+        const btn = e.target.closest('.view-toggle-btn');
+        if (!btn) return;
+        const mode = btn.dataset.mode;
+        if (mode === this.viewMode) return;
+        this.viewMode = mode;
+
+        viewToggle.querySelectorAll('.view-toggle-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.mode === mode);
+        });
+
+        this.renderTimelineStructure();
+        this.computeStacking();
+        this.renderViewport();
+      });
+    }
   }
 
   setupPanListeners() {
@@ -265,22 +286,27 @@ class TimelineManager {
   renderTimelineStructure() {
     const timelineGrid = document.getElementById('timeline-grid');
     if (!timelineGrid) return;
-
     timelineGrid.innerHTML = '';
-    this.laneCanvases = {}; // key: 'Region|Category Name'
+    this.laneCanvases = {};
 
+    if (this.viewMode === 'classic') {
+      this._buildClassicStructure(timelineGrid);
+    } else {
+      this._buildSwimLaneStructure(timelineGrid);
+    }
+  }
+
+  _buildSwimLaneStructure(timelineGrid) {
     this.config.regions.forEach(region => {
       const allFigs = this.figures.filter(f => f.region === region);
       const activeCats = CATEGORY_CONFIG.filter(cat =>
         allFigs.some(f => f.category === cat.name)
       );
 
-      // ── Region wrapper ──
       const regionWrapper = document.createElement('div');
       regionWrapper.className = 'region-swim-wrapper';
       regionWrapper.dataset.region = region;
 
-      // ── Collapsible header ──
       const regionId = 'region-' + region.replace(/\s+/g, '-').toLowerCase();
       const header = document.createElement('div');
       header.className = 'region-swim-header';
@@ -294,12 +320,10 @@ class TimelineManager {
       header.addEventListener('click', () => this.toggleRegion(regionId, header));
       regionWrapper.appendChild(header);
 
-      // ── Lanes container (collapsible) ──
       const lanesContainer = document.createElement('div');
       lanesContainer.className = 'region-swim-lanes';
       lanesContainer.id = regionId;
 
-      // ── One lane per category ──
       CATEGORY_CONFIG.forEach(cat => {
         const catFigs = allFigs.filter(f => f.category === cat.name);
 
@@ -332,6 +356,28 @@ class TimelineManager {
     });
   }
 
+  _buildClassicStructure(timelineGrid) {
+    this.config.regions.forEach(region => {
+      const regionRow = document.createElement('div');
+      regionRow.className = 'classic-region-row';
+      regionRow.dataset.region = region;
+
+      const regionLabel = document.createElement('div');
+      regionLabel.className = 'classic-region-label';
+      regionLabel.textContent = region.toUpperCase();
+      regionRow.appendChild(regionLabel);
+
+      const canvas = document.createElement('div');
+      canvas.className = 'classic-canvas lane-canvas';
+      canvas.dataset.region = region;
+      canvas.dataset.category = '__all__';
+      regionRow.appendChild(canvas);
+
+      this.laneCanvases[`${region}|__classic__`] = canvas;
+      timelineGrid.appendChild(regionRow);
+    });
+  }
+
   toggleRegion(regionId, headerEl) {
     const lanes = document.getElementById(regionId);
     if (!lanes) return;
@@ -346,6 +392,15 @@ class TimelineManager {
   }
 
   updateLaneVisibility() {
+    if (this.viewMode === 'classic') {
+      document.querySelectorAll('.classic-region-row').forEach(row => {
+        const region = row.dataset.region;
+        const hasFigs = this.filteredFigures.some(f => f.region === region);
+        row.style.display = hasFigs ? '' : 'none';
+      });
+      return;
+    }
+
     const showAll = !this.activeCategory;
     document.querySelectorAll('.region-swim-wrapper').forEach(wrapper => {
       let visibleLanes = 0;
@@ -402,45 +457,61 @@ class TimelineManager {
   computeStacking() {
     this.stackingCache = {};
 
-    // Group filtered figures by region
     const byRegion = {};
     this.filteredFigures.forEach(figure => {
       if (!byRegion[figure.region]) byRegion[figure.region] = [];
       byRegion[figure.region].push(figure);
     });
 
-    // Minimum display span so enlarged short-lived figures don't overlap
     const minSpan = this.getMinDisplaySpan();
 
-    // For each region, assign rows inside per-category lanes (scoped collision)
     for (const region of Object.keys(byRegion)) {
       const allFigs = byRegion[region];
       const assignments = [];
 
-      for (const cat of CATEGORY_CONFIG) {
-        const catFigs = allFigs
-          .filter(f => f.category === cat.name)
-          .sort((a, b) => a.birth - b.birth);
-
-        if (catFigs.length === 0) continue;
-
-        const rows = []; // per-lane collision slots
-
-        for (const fig of catFigs) {
+      if (this.viewMode === 'classic') {
+        // Single shared slot pool per region, sorted by birth year
+        const sorted = [...allFigs].sort((a, b) => a.birth - b.birth);
+        const rows = [];
+        for (const fig of sorted) {
           const effectiveEnd = Math.max(fig.death, fig.birth + minSpan);
           let placed = false;
           for (let r = 0; r < rows.length; r++) {
-            // Add a small gap (2 years) to prevent visual overlap
             if (fig.birth >= rows[r] + 2) {
               rows[r] = effectiveEnd;
-              assignments.push({ figure: fig, row: r, catName: cat.name });
+              assignments.push({ figure: fig, row: r, catName: '__classic__' });
               placed = true;
               break;
             }
           }
           if (!placed) {
             rows.push(effectiveEnd);
-            assignments.push({ figure: fig, row: rows.length - 1, catName: cat.name });
+            assignments.push({ figure: fig, row: rows.length - 1, catName: '__classic__' });
+          }
+        }
+      } else {
+        // Per-category stacking (swim lane mode)
+        for (const cat of CATEGORY_CONFIG) {
+          const catFigs = allFigs
+            .filter(f => f.category === cat.name)
+            .sort((a, b) => a.birth - b.birth);
+          if (catFigs.length === 0) continue;
+          const rows = [];
+          for (const fig of catFigs) {
+            const effectiveEnd = Math.max(fig.death, fig.birth + minSpan);
+            let placed = false;
+            for (let r = 0; r < rows.length; r++) {
+              if (fig.birth >= rows[r] + 2) {
+                rows[r] = effectiveEnd;
+                assignments.push({ figure: fig, row: r, catName: cat.name });
+                placed = true;
+                break;
+              }
+            }
+            if (!placed) {
+              rows.push(effectiveEnd);
+              assignments.push({ figure: fig, row: rows.length - 1, catName: cat.name });
+            }
           }
         }
       }
@@ -457,22 +528,31 @@ class TimelineManager {
     for (const region of this.config.regions) {
       const assignments = this.stackingCache[region] || [];
 
-      // Compute max row per category
-      const maxRowPerCat = {};
-      assignments.forEach(a => {
-        if (maxRowPerCat[a.catName] === undefined || a.row > maxRowPerCat[a.catName]) {
-          maxRowPerCat[a.catName] = a.row;
-        }
-      });
-
-      CATEGORY_CONFIG.forEach(cat => {
-        const laneCanvas = this.laneCanvases && this.laneCanvases[`${region}|${cat.name}`];
-        if (!laneCanvas) return;
-        const maxRow = maxRowPerCat[cat.name] !== undefined ? maxRowPerCat[cat.name] : 0;
-        const rowCount = maxRowPerCat[cat.name] !== undefined ? maxRow + 1 : 1;
+      if (this.viewMode === 'classic') {
+        const laneCanvas = this.laneCanvases && this.laneCanvases[`${region}|__classic__`];
+        if (!laneCanvas) continue;
+        const maxRow = assignments.length > 0
+          ? Math.max(...assignments.map(a => a.row))
+          : 0;
+        const rowCount = maxRow + 1;
         const h = rowCount * (barHeight + barGap) + lanePad * 2;
         laneCanvas.style.height = Math.max(h, 40) + 'px';
-      });
+      } else {
+        const maxRowPerCat = {};
+        assignments.forEach(a => {
+          if (maxRowPerCat[a.catName] === undefined || a.row > maxRowPerCat[a.catName]) {
+            maxRowPerCat[a.catName] = a.row;
+          }
+        });
+        CATEGORY_CONFIG.forEach(cat => {
+          const laneCanvas = this.laneCanvases && this.laneCanvases[`${region}|${cat.name}`];
+          if (!laneCanvas) return;
+          const maxRow = maxRowPerCat[cat.name] !== undefined ? maxRowPerCat[cat.name] : 0;
+          const rowCount = maxRowPerCat[cat.name] !== undefined ? maxRow + 1 : 1;
+          const h = rowCount * (barHeight + barGap) + lanePad * 2;
+          laneCanvas.style.height = Math.max(h, 40) + 'px';
+        });
+      }
     }
   }
 
@@ -652,16 +732,19 @@ class TimelineManager {
   }
 
   renderAllFigures() {
-    // Clear existing figure bars from all lane canvases
     Object.values(this.laneCanvases || {}).forEach(canvas => {
       canvas.querySelectorAll('.figure-bar').forEach(bar => bar.remove());
     });
 
-    // Render from stacking cache into the appropriate lane canvas
     for (const region of Object.keys(this.stackingCache)) {
       const assignments = this.stackingCache[region];
       for (const { figure, row, catName } of assignments) {
-        const laneCanvas = this.laneCanvases && this.laneCanvases[`${region}|${catName}`];
+        let laneCanvas;
+        if (this.viewMode === 'classic') {
+          laneCanvas = this.laneCanvases[`${region}|__classic__`];
+        } else {
+          laneCanvas = this.laneCanvases && this.laneCanvases[`${region}|${catName}`];
+        }
         if (laneCanvas) this.renderFigure(figure, row, laneCanvas);
       }
     }
