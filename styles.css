@@ -302,20 +302,46 @@ body {
 
 /* Timeline Header (Years) */
 .timeline-years {
+  display: flex;
+  flex-direction: column;
   position: relative;
-  height: 3rem;
+  margin-bottom: 6px;
   background: linear-gradient(to bottom, #faf9f6, #f5f5f0);
   border-bottom: 1px solid var(--color-border);
   margin-left: 8rem;
-  overflow: hidden;
+  overflow: visible;
+}
+
+/* Axis zone containers */
+.axis-zone-bars {
+  position: relative;
+  min-height: 4px;
+  width: 100%;
+  padding: 4px 0 3px 0;
+}
+.axis-zone-pins {
+  position: relative;
+  height: 32px;
+  width: 100%;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  overflow: visible;
+}
+.axis-zone-ticks {
+  position: relative;
+  height: 22px;
+  width: 100%;
+  border-top: 1px solid var(--color-border);
 }
 
 .year-marker {
   position: absolute;
   top: 0;
-  height: 100%;
+  height: 22px;
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: flex-end;
+  transform: translateX(-50%);
 }
 
 .year-tick {
@@ -338,28 +364,20 @@ body {
 /* Event Markers */
 .event-marker {
   position: absolute;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  opacity: 0.3;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.event-marker:hover {
-  width: 4px;
-  opacity: 0.6;
-}
-
-.event-dot {
-  position: absolute;
-  top: -2px;
-  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  bottom: 0;
+  height: 32px;
   transform: translateX(-50%);
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 50%;
-  border: 2px solid white;
+  cursor: pointer;
+  z-index: 8;
+  overflow: visible;
+}
+
+.event-marker:hover .event-dot {
+  transform: scale(1.5);
 }
 
 /* Timeline Grid */
@@ -1308,3 +1326,130 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
   z-index: 20;
 }
+
+/* ══════════════════════════════════════
+   EVENT DISPLAY UPGRADE (Dir 1+2+4+5)
+══════════════════════════════════════ */
+
+/* Duration bar (sits in axis-zone-bars) */
+.event-bar {
+  position: absolute;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: filter 0.15s;
+  z-index: 6;
+}
+.event-bar:hover {
+  filter: brightness(1.15);
+}
+
+/* Floating tooltip — hidden by default, shown on hover */
+.event-pin-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 15, 30, 0.95);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  padding: 5px 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  z-index: 30;
+}
+.event-pin-tooltip-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+}
+.event-pin-tooltip-year {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+}
+.event-marker:hover .event-pin-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+.event-pin-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(15, 15, 30, 0.95);
+}
+
+/* Thin vertical stem */
+.event-pin-stem {
+  width: 2px;
+  height: 10px;
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+/* Dot at base of pin */
+.event-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.35);
+  flex-shrink: 0;
+  transition: transform 0.15s;
+  margin-bottom: 1px;
+}
+.event-dot-large {
+  width: 10px;
+  height: 10px;
+}
+
+/* Drop line / band through swim lanes */
+.event-drop-line {
+  position: absolute;
+  top: 0; bottom: 0;
+  pointer-events: none;
+}
+
+/* Event type legend bar */
+.event-legend-bar {
+  padding: 6px 24px;
+  background: #fffbeb;
+  border-bottom: 1px solid #fde68a;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.72rem;
+}
+.event-legend-title {
+  font-weight: 700;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+.event-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #555;
+  font-weight: 600;
+}
+.event-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.event-legend-sep { color: #ddd; }
+.event-legend-hint { color: #999; font-style: italic; }

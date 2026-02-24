@@ -74,6 +74,19 @@
         <div id="filter-status" class="filter-status"></div>
     </div>
 
+    <!-- Event type legend -->
+    <div class="event-legend-bar" id="event-legend-bar">
+        <span class="event-legend-title">Events:</span>
+        <span class="event-legend-item"><span class="event-legend-dot" style="background:#EF4444"></span>War</span>
+        <span class="event-legend-item"><span class="event-legend-dot" style="background:#F97316"></span>Political</span>
+        <span class="event-legend-item"><span class="event-legend-dot" style="background:#3B82F6"></span>Scientific</span>
+        <span class="event-legend-item"><span class="event-legend-dot" style="background:#14B8A6"></span>Cultural</span>
+        <span class="event-legend-item"><span class="event-legend-dot" style="background:#10B981"></span>Economic</span>
+        <span class="event-legend-item" style="opacity:0.5"><span class="event-legend-dot" style="background:#F59E0B"></span>General</span>
+        <span class="event-legend-sep">|</span>
+        <span class="event-legend-hint">&#9632; = multi-year span &nbsp; &#9679; = point in time</span>
+    </div>
+
     <!-- Main Timeline -->
     <main class="timeline-main">
         <div class="timeline-card">
@@ -204,12 +217,17 @@
                     if (year < minYear) minYear = year;
                     if (year > maxYear) maxYear = year;
 
+                    const endYear = data.eventEndDate ? extractYear(data.eventEndDate) : null;
+                    const eventCategory = data.eventCategory || data.category || '';
+
                     events.push({
-                        id: doc.id,
-                        name: data.eventName || 'Unknown Event',
-                        year: year,
-                        description: data.description || '',
-                        color: '#F59E0B'
+                        id:            doc.id,
+                        name:          data.eventName || 'Unknown Event',
+                        year:          year,
+                        endYear:       endYear,
+                        description:   data.description || '',
+                        eventCategory: eventCategory,
+                        color:         window.getEventColor(eventCategory)
                     });
                 });
 

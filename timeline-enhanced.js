@@ -16,6 +16,23 @@ const CATEGORY_CONFIG = [
   { name: 'Sport & Athletics',       color: '#06B6D4', short: 'Sport'       },
 ];
 
+const EVENT_CATEGORY_CONFIG = {
+  'War':        { color: '#EF4444', label: 'War & Conflict' },
+  'Political':  { color: '#F97316', label: 'Political'      },
+  'Scientific': { color: '#3B82F6', label: 'Scientific'     },
+  'Cultural':   { color: '#14B8A6', label: 'Cultural'       },
+  'Economic':   { color: '#10B981', label: 'Economic'       },
+  'default':    { color: '#F59E0B', label: 'General'        },
+};
+
+window.getEventColor = function(eventCategory) {
+  if (!eventCategory) return EVENT_CATEGORY_CONFIG.default.color;
+  const key = Object.keys(EVENT_CATEGORY_CONFIG).find(k =>
+    k.toLowerCase() === eventCategory.trim().toLowerCase()
+  );
+  return key ? EVENT_CATEGORY_CONFIG[key].color : EVENT_CATEGORY_CONFIG.default.color;
+};
+
 class TimelineManager {
   constructor(config) {
     this.config = {
@@ -149,10 +166,17 @@ class TimelineManager {
       const dx = e.clientX - this.panStartX;
       this.panDragDistance = Math.abs(dx);
 
-      // Convert pixel delta to year delta
-      const trackEl = document.querySelector('.lane-canvas');
-      if (!trackEl) return;
-      const trackWidth = trackEl.getBoundingClientRect().width;
+      // Find a visible lane canvas — hidden ones return width 0 when a
+      // category filter is active, causing division-by-zero → NaN viewport.
+      let trackEl = null;
+      for (const el of document.querySelectorAll('.lane-canvas')) {
+        if (el.getBoundingClientRect().width > 0) { trackEl = el; break; }
+      }
+      if (!trackEl) trackEl = document.querySelector('.timeline-card');
+
+      const trackWidth = trackEl ? trackEl.getBoundingClientRect().width : 0;
+      if (!trackWidth || trackWidth < 10) return;
+
       const viewSpan = this.panStartViewEnd - this.panStartViewStart;
       const yearDelta = -(dx / trackWidth) * viewSpan;
 
@@ -351,6 +375,14 @@ class TimelineManager {
   }
 
   clampViewport() {
+    // Guard against NaN corruption (e.g. from zero-width track during pan)
+    if (isNaN(this.viewStart) || isNaN(this.viewEnd)) {
+      const mid = (this.fullStart + this.fullEnd) / 2;
+      this.viewStart = mid - this.maxViewSpan / 2;
+      this.viewEnd   = mid + this.maxViewSpan / 2;
+      console.warn('clampViewport: NaN detected, resetting viewport to default.');
+    }
+
     const span = this.viewEnd - this.viewStart;
     const absMin = this.fullStart;
     const absMax = this.fullEnd;
@@ -448,7 +480,7 @@ class TimelineManager {
     // Minimum lifespan in years a figure bar will be rendered as.
     // Adapts to zoom level so buttons stay visible even when very zoomed out.
     const viewSpan = this.viewEnd - this.viewStart;
-    const trackEl = document.querySelector('.timeline-track');
+    const trackEl = document.querySelector('.lane-canvas');
     const trackWidth = (trackEl && trackEl.getBoundingClientRect().width) || 800;
 
     // Year-based minimum (viewport capped at 1000 years)
@@ -694,11 +726,29 @@ class TimelineManager {
 
     const markersStr = markersHTML.join('');
 
-    // Preserve event markers
-    const eventMarkers = yearsContainer.querySelectorAll('.event-marker');
-    const eventHTML = Array.from(eventMarkers).map(el => el.outerHTML).join('');
+    // Preserve existing zone containers or create them
+    let zoneBar   = yearsContainer.querySelector('.axis-zone-bars');
+    let zonePin   = yearsContainer.querySelector('.axis-zone-pins');
+    let zoneTicks = yearsContainer.querySelector('.axis-zone-ticks');
 
-    yearsContainer.innerHTML = markersStr + eventHTML;
+    if (!zoneBar) {
+      zoneBar = document.createElement('div');
+      zoneBar.className = 'axis-zone-bars';
+      yearsContainer.appendChild(zoneBar);
+    }
+    if (!zonePin) {
+      zonePin = document.createElement('div');
+      zonePin.className = 'axis-zone-pins';
+      yearsContainer.appendChild(zonePin);
+    }
+    if (!zoneTicks) {
+      zoneTicks = document.createElement('div');
+      zoneTicks.className = 'axis-zone-ticks';
+      yearsContainer.appendChild(zoneTicks);
+    }
+
+    // Repopulate year ticks — event elements stay in their zones
+    zoneTicks.innerHTML = markersStr;
     if (yearsBottom) yearsBottom.innerHTML = markersStr;
 
     // Re-attach event marker click handlers
@@ -709,6 +759,7 @@ class TimelineManager {
     const yearsContainer = document.getElementById('timeline-years');
     if (!yearsContainer) return;
 
+    // Re-attach to pins
     yearsContainer.querySelectorAll('.event-marker').forEach(marker => {
       const eventId = marker.dataset.eventId;
       const event = this.events.find(e => e.id === eventId);
@@ -716,34 +767,188 @@ class TimelineManager {
         marker.addEventListener('click', () => this.showEventModal(event));
       }
     });
+
+    // Re-attach to duration bars
+    yearsContainer.querySelectorAll('.event-bar').forEach(bar => {
+      const eventId = bar.dataset.eventId;
+      const event = this.events.find(e => e.id === eventId);
+      if (event) {
+        bar.addEventListener('click', () => this.showEventModal(event));
+      }
+    });
   }
 
-  // ── EVENT MARKERS — DO NOT MODIFY ──
+  // ── EVENT MARKERS — DO NOT MODIFY header comment ──
   renderAllEvents() {
     const yearsContainer = document.getElementById('timeline-years');
     if (!yearsContainer) return;
 
-    // Remove old event markers
-    yearsContainer.querySelectorAll('.event-marker').forEach(el => el.remove());
+    // Get zone containers (created by renderYearMarkers)
+    const zoneBar = yearsContainer.querySelector('.axis-zone-bars');
+    const zonePin = yearsContainer.querySelector('.axis-zone-pins');
 
-    this.events.forEach(event => {
-      const position = this.getViewportPosition(event.year);
-      // Cull events outside viewport
-      if (position < -2 || position > 102) return;
+    if (!zoneBar || !zonePin) {
+      console.warn('Axis zone containers not found — run renderYearMarkers first');
+      return;
+    }
 
-      const eventElement = document.createElement('div');
-      eventElement.className = 'event-marker';
-      eventElement.style.left = `${position}%`;
-      eventElement.style.backgroundColor = event.color;
-      eventElement.dataset.eventId = event.id;
+    // Clear only event elements from each zone
+    zoneBar.querySelectorAll('.event-bar').forEach(el => el.remove());
+    zonePin.querySelectorAll('.event-marker').forEach(el => el.remove());
 
-      eventElement.innerHTML = `
-        <div class="event-dot" style="background-color: ${event.color};"></div>
+    // Remove drop lines from lane canvases
+    document.querySelectorAll('.event-drop-line').forEach(el => el.remove());
+
+    const viewSpan = this.viewEnd - this.viewStart;
+    let zoomTier;
+    if (viewSpan > 400)      zoomTier = 'far';
+    else if (viewSpan > 200) zoomTier = 'medium';
+    else                     zoomTier = 'close';
+
+    const durationEvents = this.events.filter(e => e.endYear && e.endYear - e.year >= 3);
+    const pointEvents    = this.events.filter(e => !e.endYear || e.endYear - e.year < 3);
+
+    // ── Duration bars → zoneBar ──
+    const barRows = [];
+    const BAR_H = 14, BAR_GAP = 3, BAR_TOP = 3;
+
+    durationEvents
+      .filter(ev => {
+        const pos = this.getViewportPosition(ev.year);
+        const w   = this.getViewportWidth(ev.year, ev.endYear);
+        return pos + w > -2 && pos < 102;
+      })
+      .forEach(ev => {
+        let rowIdx = 0;
+        while (true) {
+          if (!barRows[rowIdx]) barRows[rowIdx] = [];
+          const l = this.getViewportPosition(ev.year);
+          const w = this.getViewportWidth(ev.year, ev.endYear);
+          const conflict = barRows[rowIdx].some(placed => {
+            const pl = this.getViewportPosition(placed.year);
+            const pw = this.getViewportWidth(placed.year, placed.endYear);
+            return l < pl + pw + 0.3 && l + w > pl - 0.3;
+          });
+          if (!conflict) { barRows[rowIdx].push(ev); ev._barRow = rowIdx; break; }
+          rowIdx++;
+        }
+
+        const left  = this.getViewportPosition(ev.year);
+        const width = Math.max(this.getViewportWidth(ev.year, ev.endYear), 0.5);
+        const top   = BAR_TOP + (ev._barRow || 0) * (BAR_H + BAR_GAP);
+
+        const barEl = document.createElement('div');
+        barEl.className = 'event-bar';
+        barEl.dataset.eventId = ev.id;
+        barEl.style.cssText = `
+          left: ${left}%;
+          width: ${width}%;
+          top: ${top}px;
+          height: ${BAR_H}px;
+          background: ${ev.color};
+          font-size: ${zoomTier === 'far' ? '0' : zoomTier === 'medium' ? '0.58rem' : '0.66rem'};
+          font-weight: 700;
+          color: rgba(255,255,255,0.95);
+          padding: 0 5px;
+          display: flex;
+          align-items: center;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+        `;
+        if (zoomTier !== 'far') {
+          barEl.textContent = zoomTier === 'close' ? ev.name : (ev.shortName || ev.name);
+        }
+        barEl.title = `${ev.name} (${this.formatYear(ev.year)}–${this.formatYear(ev.endYear)})`;
+        barEl.addEventListener('click', () => this.showEventModal(ev));
+        zoneBar.appendChild(barEl);
+
+        if (zoomTier !== 'far') this._renderDropBand(left, width, ev.color);
+      });
+
+    // Update zoneBar height to fit all rows
+    const totalBarRows = barRows.length || 0;
+    zoneBar.style.minHeight = totalBarRows > 0
+      ? (BAR_TOP + totalBarRows * (BAR_H + BAR_GAP) + 4) + 'px'
+      : '4px';
+
+    // ── Point-in-time pins — dot + stem, tooltip on hover ──
+    const visiblePins = pointEvents
+      .map(ev => ({ ev, pos: this.getViewportPosition(ev.year) }))
+      .filter(({ pos }) => pos >= -2 && pos <= 102);
+
+    const dotClass = zoomTier === 'close' ? 'event-dot event-dot-large' : 'event-dot';
+
+    visiblePins.forEach(({ ev, pos }) => {
+      const pinEl = document.createElement('div');
+      pinEl.className = 'event-marker';
+      pinEl.style.left = `${pos}%`;
+      pinEl.dataset.eventId = ev.id;
+
+      pinEl.innerHTML = `
+        <div class="event-pin-tooltip">
+          <span class="event-pin-tooltip-name">${ev.name}</span>
+          <span class="event-pin-tooltip-year">${this.formatYear(ev.year)}</span>
+        </div>
+        <div class="event-pin-stem" style="background:${ev.color};"></div>
+        <div class="${dotClass}" style="background:${ev.color};"></div>
       `;
 
-      eventElement.addEventListener('click', () => this.showEventModal(event));
-      yearsContainer.appendChild(eventElement);
+      pinEl.addEventListener('click', () => this.showEventModal(ev));
+      zonePin.appendChild(pinEl);
+
+      if (zoomTier !== 'far') this._renderDropLine(pos, ev.color);
     });
+  }
+
+  // Render a dashed vertical drop line through all swim lane canvases
+  _renderDropLine(positionPct, color) {
+    document.querySelectorAll('.lane-canvas').forEach(canvas => {
+      const line = document.createElement('div');
+      line.className = 'event-drop-line event-drop-line-point';
+      line.style.cssText = `
+        position: absolute;
+        left: ${positionPct}%;
+        top: 0; bottom: 0;
+        width: 1px;
+        background: repeating-linear-gradient(
+          to bottom,
+          ${color}55 0px, ${color}55 4px,
+          transparent 4px, transparent 8px
+        );
+        pointer-events: none;
+        z-index: 2;
+        transform: translateX(-50%);
+      `;
+      canvas.appendChild(line);
+    });
+  }
+
+  // Render a soft shaded band through all swim lane canvases for duration events
+  _renderDropBand(leftPct, widthPct, color) {
+    document.querySelectorAll('.lane-canvas').forEach(canvas => {
+      const band = document.createElement('div');
+      band.className = 'event-drop-line event-drop-line-band';
+      band.style.cssText = `
+        position: absolute;
+        left: ${leftPct}%;
+        width: ${widthPct}%;
+        top: 0; bottom: 0;
+        background: ${color}12;
+        pointer-events: none;
+        z-index: 1;
+        border-left: 1px solid ${color}40;
+        border-right: 1px solid ${color}40;
+      `;
+      canvas.appendChild(band);
+    });
+  }
+
+  // Truncate a long event name to approx N characters
+  _truncateEventName(name, maxLen) {
+    if (!name || name.length <= maxLen) return name;
+    return name.substring(0, maxLen - 1) + '…';
   }
 
   formatYear(year) {

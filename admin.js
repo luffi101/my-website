@@ -224,7 +224,7 @@ class AdminManager {
 
     // Toggle category filter visibility (only for figures)
     const categoryFilter = document.getElementById('filter-category');
-    categoryFilter.style.display = tab === 'figures' ? '' : '';
+    categoryFilter.style.display = tab === 'figures' ? '' : 'none';
 
     document.querySelectorAll('.admin-tab').forEach(t => {
       t.classList.toggle('active', t.dataset.tab === tab);
@@ -508,9 +508,16 @@ class AdminManager {
     const isEdit = !!event;
     const title = isEdit ? 'Edit Global Event' : 'Add Global Event';
 
-    const categoryOptions = this.categories.map(cat => {
-      const selected = event && event.category === cat ? 'selected' : '';
-      return `<option value="${escapeHtml(cat)}" ${selected}>${escapeHtml(cat)}</option>`;
+    const currentEventCat = event ? (event.eventCategory || event.category || '') : '';
+    const eventCategoryOptions = [
+      { value: 'War',        label: 'War & Conflict' },
+      { value: 'Political',  label: 'Political'      },
+      { value: 'Scientific', label: 'Scientific'     },
+      { value: 'Cultural',   label: 'Cultural'       },
+      { value: 'Economic',   label: 'Economic'       },
+    ].map(({ value, label }) => {
+      const selected = currentEventCat === value ? 'selected' : '';
+      return `<option value="${value}" ${selected}>${label}</option>`;
     }).join('');
 
     const regionOptions = this.regions.map(r => {
@@ -553,7 +560,7 @@ class AdminManager {
                   <label class="admin-form-label" for="field-event-category">Category</label>
                   <select class="admin-form-select" id="field-event-category">
                     <option value="">-- Select Category --</option>
-                    ${categoryOptions}
+                    ${eventCategoryOptions}
                   </select>
                 </div>
                 <div class="admin-form-group">
@@ -749,13 +756,13 @@ class AdminManager {
 
   collectEventFormData() {
     return {
-      eventName: document.getElementById('field-event-name').value.trim(),
-      eventDate: document.getElementById('field-event-date').value,
-      eventEndDate: document.getElementById('field-event-end').value,
-      category: document.getElementById('field-event-category').value,
-      region: document.getElementById('field-event-region').value,
-      description: document.getElementById('field-event-description').value.trim(),
-      significance: document.getElementById('field-event-significance').value.trim()
+      eventName:     document.getElementById('field-event-name').value.trim(),
+      eventDate:     document.getElementById('field-event-date').value,
+      eventEndDate:  document.getElementById('field-event-end').value,
+      eventCategory: document.getElementById('field-event-category').value,
+      region:        document.getElementById('field-event-region').value,
+      description:   document.getElementById('field-event-description').value.trim(),
+      significance:  document.getElementById('field-event-significance').value.trim()
     };
   }
 
@@ -872,14 +879,15 @@ class AdminManager {
               };
             } else {
               doc = {
-                eventName: row.eventName || '',
-                eventDate: row.eventDate || '',
-                eventEndDate: row.eventEndDate || '',
-                description: row.description || '',
-                category: row.category || '',
-                region: row.region || '',
-                significance: row.significance || '',
-                createdOn: new Date().toISOString().slice(0, 10)
+                eventName:     row.eventName || '',
+                eventDate:     row.eventDate || '',
+                eventEndDate:  row.eventEndDate || '',
+                eventCategory: row.eventCategory || '',
+                description:   row.description || '',
+                category:      row.category || '',
+                region:        row.region || '',
+                significance:  row.significance || '',
+                createdOn:     new Date().toISOString().slice(0, 10)
               };
             }
 
