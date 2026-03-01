@@ -156,7 +156,7 @@ class AdminManager {
       filtered = filtered.filter(item => {
         const searchable = this.activeTab === 'figures'
           ? `${item.name} ${item.nationality} ${item.description} ${item.region}`
-          : `${item.eventName} ${item.description} ${item.category} ${item.region}`;
+          : `${item.eventName} ${item.description} ${item.eventCategory || item.category} ${item.region}`;
         return searchable.toLowerCase().includes(this.searchTerm);
       });
     }
@@ -315,8 +315,9 @@ class AdminManager {
         } else if (col.key === 'region') {
           bodyHtml += `<td><span class="admin-badge admin-badge-region">${escapeHtml(item.region || '')}</span></td>`;
         } else if (col.key === 'category' && this.activeTab === 'events') {
-          const color = this.getCategoryColor(item.category);
-          bodyHtml += `<td><span class="admin-badge admin-badge-category" style="background:${color}">${escapeHtml(item.category || '')}</span></td>`;
+          const cat = item.eventCategory || item.category || '';
+          const color = this.getCategoryColor(cat);
+          bodyHtml += `<td><span class="admin-badge admin-badge-category" style="background:${color}">${escapeHtml(cat)}</span></td>`;
         } else {
           bodyHtml += `<td>${escapeHtml(item[col.key] || '')}</td>`;
         }
@@ -755,11 +756,13 @@ class AdminManager {
   }
 
   collectEventFormData() {
+    const category = document.getElementById('field-event-category').value;
     return {
       eventName:     document.getElementById('field-event-name').value.trim(),
       eventDate:     document.getElementById('field-event-date').value,
       eventEndDate:  document.getElementById('field-event-end').value,
-      eventCategory: document.getElementById('field-event-category').value,
+      category,
+      eventCategory: category,
       region:        document.getElementById('field-event-region').value,
       description:   document.getElementById('field-event-description').value.trim(),
       significance:  document.getElementById('field-event-significance').value.trim()
@@ -990,5 +993,5 @@ class AdminManager {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-  new AdminManager();
+  window.adminManager = new AdminManager();
 });
