@@ -17,12 +17,14 @@ const CATEGORY_CONFIG = [
 ];
 
 const EVENT_CATEGORY_CONFIG = {
-  'War':        { color: '#EF4444', label: 'War & Conflict' },
-  'Political':  { color: '#F97316', label: 'Political'      },
-  'Scientific': { color: '#3B82F6', label: 'Scientific'     },
-  'Cultural':   { color: '#14B8A6', label: 'Cultural'       },
-  'Economic':   { color: '#10B981', label: 'Economic'       },
-  'default':    { color: '#F59E0B', label: 'General'        },
+  'War & Conflict':     { color: '#EF4444', label: 'War & Conflict'     },
+  'Politics & Society': { color: '#F97316', label: 'Politics & Society'  },
+  'Science & Invention':{ color: '#3B82F6', label: 'Science & Invention' },
+  'Economy & Trade':    { color: '#10B981', label: 'Economy & Trade'     },
+  'Arts & Culture':     { color: '#EC4899', label: 'Arts & Culture'      },
+  'Exploration':        { color: '#14B8A6', label: 'Exploration'         },
+  'Disaster & Pandemic':{ color: '#8B5CF6', label: 'Disaster & Pandemic' },
+  'default':            { color: '#F59E0B', label: 'General'             },
 };
 
 window.getEventColor = function(eventCategory) {

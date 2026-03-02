@@ -39,7 +39,15 @@ class AdminManager {
       'philosophy': '#8B5CF6',
       'religion': '#F59E0B',
       'exploration & discovery': '#14B8A6',
-      'sport & athletics': '#06B6D4'
+      'sport & athletics': '#06B6D4',
+      // Event category color map
+      'war & conflict':      '#EF4444',
+      'politics & society':  '#F97316',
+      'science & invention': '#3B82F6',
+      'economy & trade':     '#10B981',
+      'arts & culture':      '#EC4899',
+      'exploration':         '#14B8A6',
+      'disaster & pandemic': '#8B5CF6',
     };
 
     this.categories = [
@@ -511,11 +519,13 @@ class AdminManager {
 
     const currentEventCat = event ? (event.eventCategory || event.category || '') : '';
     const eventCategoryOptions = [
-      { value: 'War',        label: 'War & Conflict' },
-      { value: 'Political',  label: 'Political'      },
-      { value: 'Scientific', label: 'Scientific'     },
-      { value: 'Cultural',   label: 'Cultural'       },
-      { value: 'Economic',   label: 'Economic'       },
+      { value: 'War & Conflict',      label: 'War & Conflict'      },
+      { value: 'Politics & Society',  label: 'Politics & Society'  },
+      { value: 'Science & Invention', label: 'Science & Invention' },
+      { value: 'Economy & Trade',     label: 'Economy & Trade'     },
+      { value: 'Arts & Culture',      label: 'Arts & Culture'      },
+      { value: 'Exploration',         label: 'Exploration'         },
+      { value: 'Disaster & Pandemic', label: 'Disaster & Pandemic' },
     ].map(({ value, label }) => {
       const selected = currentEventCat === value ? 'selected' : '';
       return `<option value="${value}" ${selected}>${label}</option>`;
