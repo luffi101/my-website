@@ -289,8 +289,9 @@ body {
 }
 
 .timeline-years-bottom {
+  background: #1a1a2e;
   border-bottom: none;
-  border-top: 1px solid var(--color-border);
+  border-top: 3px solid rgba(255, 255, 255, 0.15);
 }
 
 .viewport-range-text {
@@ -306,8 +307,9 @@ body {
   flex-direction: column;
   position: relative;
   margin-bottom: 6px;
-  background: linear-gradient(to bottom, #faf9f6, #f5f5f0);
-  border-bottom: 1px solid var(--color-border);
+  min-height: 86px;
+  background: #1a1a2e;
+  border-bottom: 3px solid rgba(255, 255, 255, 0.15);
   margin-left: 8rem;
   overflow: visible;
 }
@@ -318,46 +320,46 @@ body {
   min-height: 4px;
   width: 100%;
   padding: 4px 0 3px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 .axis-zone-pins {
   position: relative;
   height: 32px;
   width: 100%;
-  border-top: 1px solid rgba(0,0,0,0.05);
+  border-top: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   overflow: visible;
 }
 .axis-zone-ticks {
   position: relative;
-  height: 22px;
+  height: 30px;
   width: 100%;
-  border-top: 1px solid var(--color-border);
+  border-top: none;
 }
 
 .year-marker {
   position: absolute;
-  top: 0;
-  height: 22px;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
+  padding-bottom: 4px;
   transform: translateX(-50%);
 }
 
 .year-tick {
   width: 1px;
-  height: 0.75rem;
-  background: var(--color-border);
+  height: 6px;
+  background: rgba(255, 255, 255, 0.35);
+  margin-bottom: 3px;
 }
 
 .year-label {
-  position: absolute;
-  top: 0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.75rem;
+  font-size: 11px;
   font-weight: 500;
-  color: var(--color-text-secondary);
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.65);
   white-space: nowrap;
 }
 
